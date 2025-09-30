@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>頸部測量工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 10px;
+            font-weight: 600;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        .instructions {
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 15px;
+            text-align: center;
+            width: 100%;
+        }
+        
+        .neck-container-wrapper {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            border: 2px dashed #7f8c8d;
+            border-radius: 10px;
+            overflow: hidden;
+            background-color: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        #neck-container {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background-color: rgba(236, 240, 241, 0.7);
+            border: 2px solid #3498db;
+            border-radius: 50%;
+            top: 50px;
+            left: 50px;
+            cursor: move;
+            touch-action: none;
+            user-select: none;
+        }
+        
+        .point {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #3DA5FF;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            cursor: pointer;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .point.draggable {
+            animation: pulse 1.5s infinite;
+            box-shadow: 0 0 10px #3DA5FF;
+        }
+        
+        .point.draggable:hover {
+            transform: translate(-50%, -50%) scale(1.5);
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            width: 100%;
+            margin-top: 20px;
+        }
+        
+        button {
+            padding: 12px 25px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .current-point {
+            font-weight: 600;
+            color: #3498db;
+            font-size: 18px;
+        }
+        
+        .status {
+            margin-top: 15px;
+            font-size: 18px;
+            text-align: center;
+            min-height: 30px;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .neck-container-wrapper {
+                height: 350px;
+            }
+            
+            #neck-container {
+                width: 250px;
+                height: 250px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            button {
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .neck-container-wrapper {
+                height: 300px;
+            }
+            
+            #neck-container {
+                width: 200px;
+                height: 200px;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            button {
+                width: 80%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>頸部測量工具</h1>
+        
+        <div class="instructions">
+            <p>拖動和縮放頸部容器，然後按順序拖動五個點到正確位置</p>
+            <p>當前需要拖動的點：<span class="current-point" id="current-point">1</span></p>
+        </div>
+        
+        <div class="neck-container-wrapper">
+            <div id="neck-container">
+                <!-- 五个点将通过JS动态添加 -->
+            </div>
+        </div>
+        
+        <div class="status" id="status">請拖動第一個點</div>
+        
+        <div class="controls">
+            <button id="prev-btn">上一個點</button>
+            <button id="next-btn">下一個點</button>
+            <button id="reset-btn">重置</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const neckContainer = document.getElementById('neck-container');
+            const currentPointElement = document.getElementById('current-point');
+            const statusElement = document.getElementById('status');
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            const resetBtn = document.getElementById('reset-btn');
+            
+            // 五个点的初始位置（相对于容器的比例位置）
+            const pointPositions = [
+                { x: 0.5, y: 0.2 },  // 顶部
+                { x: 0.3, y: 0.5 },  // 左侧
+                { x: 0.7, y: 0.5 },  // 右侧
+                { x: 0.4, y: 0.8 },  // 左下
+                { x: 0.6, y: 0.8 }   // 右下
+            ];
+            
+            let points = [];
+            let currentPointIndex = 0;
+            let isDragging = false;
+            let startX, startY;
+            let initialPoints = [];
+            
+            // 初始化点
+            function initPoints() {
+                neckContainer.innerHTML = '';
+                points = [];
+                
+                pointPositions.forEach((pos, index) => {
+                    const point = document.createElement('div');
+                    point.className = 'point';
+                    point.id = `point-${index}`;
+                    
+                    // 根据容器大小计算点的位置
+                    point.style.left = `${pos.x * 100}%`;
+                    point.style.top = `${pos.y * 100}%`;
+                    
+                    neckContainer.appendChild(point);
+                    points.push(point);
+                    
+                    // 保存初始位置
+                    initialPoints.push({
+                        x: pos.x * neckContainer.offsetWidth,
+                        y: pos.y * neckContainer.offsetHeight
+                    });
+                    
+                    // 添加拖拽事件
+                    point.addEventListener('mousedown', startDrag);
+                    point.addEventListener('touchstart', startDrag, { passive: false });
+                });
+                
+                // 设置第一个点为可拖拽状态
+                setDraggablePoint(0);
+            }
+            
+            // 设置当前可拖拽的点
+            function setDraggablePoint(index) {
+                points.forEach((point, i) => {
+                    if (i === index) {
+                        point.classList.add('draggable');
+                    } else {
+                        point.classList.remove('draggable');
+                    }
+                });
+                
+                currentPointIndex = index;
+                currentPointElement.textContent = index + 1;
+                
+                if (index === 0) {
+                    prevBtn.disabled = true;
+                } else {
+                    prevBtn.disabled = false;
+                }
+                
+                if (index === points.length - 1) {
+                    nextBtn.textContent = '完成';
+                } else {
+                    nextBtn.textContent = '下一個點';
+                }
+                
+                statusElement.textContent = `請拖動第 ${index + 1} 個點`;
+            }
+            
+            // 开始拖拽点
+            function startDrag(e) {
+                const point = e.target;
+                if (!point.classList.contains('draggable')) return;
+                
+                e.preventDefault();
+                isDragging = true;
+                
+                // 鼠标事件和触摸事件处理
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                
+                startX = clientX - point.offsetLeft;
+                startY = clientY - point.offsetTop;
+                
+                document.addEventListener('mousemove', drag);
+                document.addEventListener('touchmove', drag, { passive: false });
+                document.addEventListener('mouseup', stopDrag);
+                document.addEventListener('touchend', stopDrag);
+            }
+            
+            // 拖拽点
+            function drag(e) {
+                if (!isDragging) return;
+                
+                e.preventDefault();
+                const point = points[currentPointIndex];
+                
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                
+                // 计算新位置（限制在容器内）
+                let newX = clientX - startX;
+                let newY = clientY - startY;
+                
+                // 限制点在容器范围内
+                newX = Math.max(0, Math.min(neckContainer.offsetWidth - 10, newX));
+                newY = Math.max(0, Math.min(neckContainer.offsetHeight - 10, newY));
+                
+                point.style.left = `${newX}px`;
+                point.style.top = `${newY}px`;
+            }
+            
+            // 停止拖拽
+            function stopDrag() {
+                isDragging = false;
+                document.removeEventListener('mousemove', drag);
+                document.removeEventListener('touchmove', drag);
+                document.removeEventListener('mouseup', stopDrag);
+                document.removeEventListener('touchend', stopDrag);
+            }
+            
+            // 下一个点
+            nextBtn.addEventListener('click', function() {
+                if (currentPointIndex < points.length - 1) {
+                    setDraggablePoint(currentPointIndex + 1);
+                } else {
+                    // 完成所有点的拖拽
+                    alert("點選完成");
+                    statusElement.textContent = "所有點已完成拖動！";
+                    nextBtn.disabled = true;
+                }
+            });
+            
+            // 上一个点
+            prevBtn.addEventListener('click', function() {
+                if (currentPointIndex > 0) {
+                    setDraggablePoint(currentPointIndex - 1);
+                    nextBtn.disabled = false;
+                }
+            });
+            
+            // 重置
+            resetBtn.addEventListener('click', function() {
+                initPoints();
+                setDraggablePoint(0);
+                nextBtn.disabled = false;
+                statusElement.textContent = "已重置，請拖動第一個點";
+            });
+            
+            // 初始化
+            initPoints();
+            
+            // 添加容器拖拽功能
+            let containerDragging = false;
+            let containerStartX, containerStartY;
+            let initialContainerLeft, initialContainerTop;
+            
+            neckContainer.addEventListener('mousedown', startContainerDrag);
+            neckContainer.addEventListener('touchstart', startContainerDrag, { passive: false });
+            
+            function startContainerDrag(e) {
+                // 如果点击的是点，则不拖拽容器
+                if (e.target.classList.contains('point')) return;
+                
+                containerDragging = true;
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                
+                containerStartX = clientX;
+                containerStartY = clientY;
+                
+                initialContainerLeft = parseInt(window.getComputedStyle(neckContainer).left);
+                initialContainerTop = parseInt(window.getComputedStyle(neckContainer).top);
+                
+                document.addEventListener('mousemove', containerDrag);
+                document.addEventListener('touchmove', containerDrag, { passive: false });
+                document.addEventListener('mouseup', stopContainerDrag);
+                document.addEventListener('touchend', stopContainerDrag);
+            }
+            
+            function containerDrag(e) {
+                if (!containerDragging) return;
+                
+                e.preventDefault();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                
+                const deltaX = clientX - containerStartX;
+                const deltaY = clientY - containerStartY;
+                
+                neckContainer.style.left = `${initialContainerLeft + deltaX}px`;
+                neckContainer.style.top = `${initialContainerTop + deltaY}px`;
+            }
+            
+            function stopContainerDrag() {
+                containerDragging = false;
+                document.removeEventListener('mousemove', containerDrag);
+                document.removeEventListener('touchmove', containerDrag);
+                document.removeEventListener('mouseup', stopContainerDrag);
+                document.removeEventListener('touchend', stopContainerDrag);
+            }
+            
+            // 添加容器缩放功能（通过鼠标滚轮）
+            neckContainer.addEventListener('wheel', function(e) {
+                e.preventDefault();
+                
+                const rect = neckContainer.getBoundingClientRect();
+                const scaleFactor = 1.1;
+                
+                // 计算鼠标相对于容器中心的位置
+                const mouseX = e.clientX - rect.left;
+                const mouseY = e.clientY - rect.top;
+                
+                // 计算缩放前后的比例
+                const scale = e.deltaY < 0 ? scaleFactor : 1 / scaleFactor;
+                
+                // 应用缩放
+                const currentWidth = neckContainer.offsetWidth;
+                const currentHeight = neckContainer.offsetHeight;
+                
+                const newWidth = currentWidth * scale;
+                const newHeight = currentHeight * scale;
+                
+                // 限制最小和最大尺寸
+                if (newWidth < 150 || newWidth > 500) return;
+                
+                neckContainer.style.width = `${newWidth}px`;
+                neckContainer.style.height = `${newHeight}px`;
+                
+                // 调整位置，使缩放以鼠标位置为中心
+                const deltaX = (mouseX - currentWidth / 2) * (1 - scale);
+                const deltaY = (mouseY - currentHeight / 2) * (1 - scale);
+                
+                neckContainer.style.left = `${parseInt(neckContainer.style.left || 0) - deltaX}px`;
+                neckContainer.style.top = `${parseInt(neckContainer.style.top || 0) - deltaY}px`;
+            });
+        });
+    </script>
+</body>
+</html>

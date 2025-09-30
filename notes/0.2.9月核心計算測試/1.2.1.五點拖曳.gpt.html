@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>頸部計算容器</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f3f3f3;
+    }
+    .container {
+      width: 300px;
+      height: 300px;
+      background: #fff;
+      border: 2px solid #ccc;
+      position: relative;
+      touch-action: none;
+      resize: both;
+      overflow: hidden;
+    }
+    .point {
+      position: absolute;
+      background: #3DA5FF;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      cursor: pointer;
+    }
+    .active {
+      animation: blink 0.6s infinite alternate;
+    }
+    @keyframes blink {
+      from { opacity: 1; }
+      to { opacity: 0.3; }
+    }
+    button {
+      margin-top: 16px;
+      padding: 8px 12px;
+    }
+  </style>
+</head>
+<body>
+
+<h3>頸部計算容器</h3>
+<div class="container" id="neckContainer">
+  <div class="point" style="top:20%; left:20%;"></div>
+  <div class="point" style="top:20%; left:80%;"></div>
+  <div class="point" style="top:50%; left:50%;"></div>
+  <div class="point" style="top:80%; left:20%;"></div>
+  <div class="point" style="top:80%; left:80%;"></div>
+</div>
+
+<button id="nextBtn">選擇下一個點</button>
+
+<script>
+const container = document.getElementById('neckContainer');
+const points = Array.from(container.querySelectorAll('.point'));
+const btn = document.getElementById('nextBtn');
+
+let activeIndex = 0;
+let dragging = false;
+let offset = {x:0, y:0};
+
+// 初始讓第一個點可拖曳
+points[activeIndex].classList.add('active');
+
+function setDragHandlers(point){
+  point.addEventListener('pointerdown', e=>{
+    if(points[activeIndex] !== point) return;
+    dragging = true;
+    offset.x = e.offsetX;
+    offset.y = e.offsetY;
+    point.setPointerCapture(e.pointerId);
+  });
+
+  point.addEventListener('pointermove', e=>{
+    if(dragging && points[activeIndex] === point){
+      const rect = container.getBoundingClientRect();
+      let x = ((e.clientX - rect.left) / rect.width) * 100;
+      let y = ((e.clientY - rect.top) / rect.height) * 100;
+      x = Math.min(100, Math.max(0, x));
+      y = Math.min(100, Math.max(0, y));
+      point.style.left = x + '%';
+      point.style.top = y + '%';
+    }
+  });
+
+  point.addEventListener('pointerup', ()=>{
+    dragging = false;
+  });
+}
+
+points.forEach(setDragHandlers);
+
+btn.addEventListener('click', ()=>{
+  points[activeIndex].classList.remove('active');
+  activeIndex++;
+  if(activeIndex < points.length){
+    points[activeIndex].classList.add('active');
+  } else {
+    alert("點選完成");
+    btn.disabled = true;
+  }
+});
+
+// 容器拖曳功能
+let isMove = false, startX=0, startY=0;
+container.addEventListener('pointerdown', e=>{
+  if(e.target.classList.contains('point')) return;
+  isMove = true;
+  startX = e.clientX - container.offsetLeft;
+  startY = e.clientY - container.offsetTop;
+});
+window.addEventListener('pointermove', e=>{
+  if(isMove){
+    container.style.left = e.clientX - startX + "px";
+    container.style.top = e.clientY - startY + "px";
+    container.style.position = "absolute";
+  }
+});
+window.addEventListener('pointerup', ()=> isMove=false);
+</script>
+
+</body>
+</html>

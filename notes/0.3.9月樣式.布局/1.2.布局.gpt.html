@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>固定布局 + RWD 漢堡選單</title>
+<style>
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  body {
+    font-family: Arial, sans-serif;
+    background: #f5f5f5;
+  }
+
+  /* --- 公共樣式 --- */
+  .menu-top, .menu-bottom, .menu-left {
+    background: #3DA5FF;
+    color: #fff;
+    border-radius: 10px;
+    padding: 15px;
+  }
+
+  /* --- 固定位置 --- */
+  .menu-top {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .menu-bottom {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 50px;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .menu-left {
+    position: fixed;
+    top: 70px; /* 預留 top 高度 */
+    bottom: 60px; /* 預留 bottom 高度 */
+    left: 0;
+    width: 30%;
+    max-width: 290px;
+    padding: 20px;
+    z-index: 900;
+    transition: transform 0.3s ease;
+  }
+
+  /* --- content --- */
+  .content {
+    margin-top: 70px;
+    margin-bottom: 60px;
+    margin-left: 30%;
+    padding: 20px;
+    background: #fff;
+    min-height: 100vh;
+    transition: margin-left 0.3s ease;
+  }
+
+  /* --- 漢堡按鈕 --- */
+  .hamburger {
+    display: none;
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    width: 35px;
+    height: 28px;
+    flex-direction: column;
+    justify-content: space-between;
+    cursor: pointer;
+    z-index: 1100;
+  }
+  .hamburger span {
+    display: block;
+    height: 4px;
+    background: #fff;
+    border-radius: 2px;
+  }
+
+  /* --- RWD < 800px --- */
+  @media (max-width: 800px) {
+    .menu-left {
+      width: 290px;
+      transform: translateX(-100%);
+    }
+    .menu-left.open {
+      transform: translateX(0);
+    }
+    .content {
+      margin-left: 0;
+    }
+    .hamburger {
+      display: flex;
+    }
+  }
+</style>
+</head>
+<body>
+
+  <div class="menu-top">🔝 Top Menu</div>
+  <div class="menu-bottom">🔻 Bottom Menu</div>
+  <div class="menu-left" id="menuLeft">
+    <h3>📋 左側選單</h3>
+    <ul>
+      <li>選單項目 1</li>
+      <li>選單項目 2</li>
+      <li>選單項目 3</li>
+    </ul>
+  </div>
+
+  <!-- 漢堡按鈕 -->
+  <div class="hamburger" id="hamburger">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+
+  <div class="content">
+    <h2>內容區域</h2>
+    <p>
+      這裡是主要內容。當螢幕寬度大於 800px，左側選單與內容會並排顯示 (30%/70%)。<br><br>
+      當螢幕寬度小於 800px，左側選單會縮成一個「漢堡 icon」，點擊後選單會滑出並覆蓋在內容上。
+    </p>
+    <p>請捲動頁面測試 Top / Bottom 固定效果。</p>
+    <div style="height: 1200px; background: #eee; margin-top:20px;">
+      模擬長內容區域...
+    </div>
+  </div>
+
+<script>
+  const hamburger = document.getElementById('hamburger');
+  const menuLeft = document.getElementById('menuLeft');
+
+  hamburger.addEventListener('click', () => {
+    menuLeft.classList.toggle('open');
+  });
+</script>
+
+</body>
+</html>
