@@ -1,0 +1,130 @@
+/*
+ *  伺服器入口, 處理路由, swagger
+ */
+
+// 引入套件
+const express = require('express');
+const cors = require('cors');
+const swaggerJsDoc = require('swagger-jsdoc');
+const swaggerUi = require('swagger-ui-express');
+const functions = require('firebase-functions');
+
+// 引入自訂的 logger
+require('./utils/logger');  // 當應用啟動時，logger 就會生效
+
+// api, 控制器 引入
+const backupApiController = require('./controllers/manager/backup.api.controller');
+const authApiController = require('./controllers/auth.api.controller');
+const accountApiController = require('./controllers/account.api.controller');
+const productApiController = require('./controllers/manager/product.api.controller');
+const productCategoryApiController = require('./controllers/manager/productCategory.api.controller');
+//const productImgApiController = require('./controllers/manager/productImg.api.controller')
+const shopApiController = require('./controllers/shop/shop.api.controller');
+const shopPayLogisticsApiController = require('./controllers/shop/shopPayLogistics.api.controller')
+const ecpayApiController = require('./controllers/pay/ecpay.api.controller');
+//const upload = require('./utils/upload');
+const upload = require('./utils/uploadFireStorage');
+const productImgApiController = require('./controllers/manager/productImgFireStorage.api.controller');
+
+
+// 設定 express app 相關設定
+const app = express();
+const PORT = 8081;
+app.use(cors());
+
+// 設定 Express 支援 JSON 和 URL Encoded 資料
+app.use(express.json());
+app.use(express.urlencoded({ extended: true })); // 文件上傳
+
+
+
+// Swagger 設定
+const swaggerOptions = {
+    swaggerDefinition: {
+        info: {
+            title: 'NewShop API',
+            description: 'NewShop API Information',
+            contact: {
+                name: 'Amazing Developer'
+            },
+            servers: ['http://localhost:8081']
+        }
+    },
+    apis: ['./controllers/*.js']
+}
+const swaggerDocs = swaggerJsDoc(swaggerOptions);
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+
+
+/* 路由設定 */
+// [系統管理] 備份功能, 匯出備份資料
+app.get('/api/manager/backup/export/user', backupApiController.getUserExportList);
+app.get('/api/manager/backup/export/product', backupApiController.getProductExportList);
+app.get('/api/manager/backup/export/product/category', backupApiController.getProductCategoryExportList);
+app.post('/api/manager/backup/import/all/db', backupApiController.postAllDBTable);
+// [註冊登入] 驗證 api
+app.get('/api/auth/user/exits/:email', authApiController.findUserByEmail);
+app.post('/api/auth/login', authApiController.login);
+app.post('/api/auth/logout', authApiController.logout);
+app.post('/api/auth/verify/jwt', authApiController.verifyJwt);
+app.post('/api/auth/verify/role', authApiController.verifyRole);
+app.post('/api/auth/verify/payment/lastest', authApiController.verifyPayment);
+app.post('/api/auth/regist/mail', authApiController.registMail);
+app.post('/api/auth/regist/user/add', authApiController.registAddUser);
+app.post('/api/auth/regist/user/info', authApiController.registUserUpdateInfot);
+app.post('/api/auth/regist/user/password', authApiController.registUserUpdatePassword);
+app.post('/api/auth/regist/verify/code', authApiController.registVerityCode);
+// [註冊] 後 帳號 升級, 付款
+app.get('/api/account/owner/:email', accountApiController.getOwnerByEmail);
+app.post('/api/account/owner/add', accountApiController.postUserToOwner);
+app.post('/api/account/role/add', accountApiController.postUserToRole);
+app.get('/api/account/role/:userId', accountApiController.getUserRoleByUserId);
+app.get('/api/account/payment/userId/:userId', accountApiController.getUserPaymentByUserId);
+app.get('/api/account/payment/paymentId/:paymentId', accountApiController.getPaymentByPaymentid);
+app.post('/api/account/payment/search', accountApiController.searchPayment);
+app.get('/api/account/payment/ecpay/select/:paymentId', accountApiController.getPaySelectPageHtml);
+// 後台管理 商品 api
+app.post('/api/manager/product/list', productApiController.getProductList);
+app.get('/api/manager/product/:id', productApiController.getProduct);
+app.post('/api/manager/product/add', productApiController.postProduct);
+app.patch('/api/manager/product/edit', productApiController.updateProduct);
+app.delete('/api/manager/product/delete/:id', productApiController.deleteProduct);
+app.post('/api/manager/product/search', productApiController.searchProduct);
+app.post('/api/manager/product/import', productApiController.importProduct);
+// 後台商品圖片
+app.post('/api/manager/product/img/upload/:id', upload.uploadMiddleware, productImgApiController.uploadFile);
+app.get('/api/manager/product/img/list/:id', productImgApiController.getProductImgList);
+app.delete('/api/manager/product/img/delete/all', productImgApiController.deleteProductImgAll);
+app.delete('/api/manager/product/img/delete/:productId/:storedName', productImgApiController.deleteProductImg);
+// 提供靜態圖片服務 (讓前端可以透過 URL 訪問圖片)
+//app.use('/api/manager/product/img/', express.static(upload.getProductImgBasePath()));
+// 後台管理 商品分類 api
+app.get('/api/manager/product/category/list', productCategoryApiController.getProductCategoryList);
+app.get('/api/manager/product/category/:id', productCategoryApiController.getProductCategory);
+app.post('/api/manager/product/category/add', productCategoryApiController.addProductCategory);
+app.patch('/api/manager/product/category/edit', productCategoryApiController.updateProductCategory);
+app.delete('/api/manager/product/category/delete/:id', productCategoryApiController.deleteProductCategory);
+app.post('/api/manager/product/category/search', productCategoryApiController.searchProductCategory);
+// 購物 api
+app.post('/api/shop/product/list', shopApiController.searchProductList);
+app.get('/api/shop/product/category/list', shopApiController.searchProductCategory);
+app.get('/api/shop/product/promotion/list', shopApiController.searchPromotion);
+app.get('/api/shop/test', shopPayLogisticsApiController.test);
+app.get('/api/shop/select/logistics/page', shopPayLogisticsApiController.selectLogisticsPage);
+
+// 金流物流 api
+app.post('/api/pay/ecpay/pay/result/server', ecpayApiController.postResultServer);
+app.get('/api/pay/ecpay/pay/result/client', ecpayApiController.getResultClientPageHtml);
+
+
+// 處理找無路由
+app.use((req, res) => {
+    res.status(404).send("404 Not Found, 找無此路由 :( ");
+});
+
+// 啟動伺服器
+app.listen(PORT, () => {
+    console.log(`新商城伺服器啟動 http://localhost:${PORT}`);
+})
+
+exports.api = functions.https.onRequest(app);
