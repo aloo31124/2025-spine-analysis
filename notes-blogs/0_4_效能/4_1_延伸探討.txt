@@ -1,0 +1,130 @@
+
+2025/03/08
+====================================================================================
+----------------------------
+
+====================================================================================
+----------------------------
+
+如下, useEffect 會因為 set State 刷新 handleUpload函式，
+handleUpload函式 又會重新觸發 useEffect, 
+造成 useEffect 被無限觸發, 最終造成 無限渲染 (Infinite Rendering)
+
+function ProductAddPage() {
+    // 新增商品資訊
+    const [productParam, setProductParam] = useState({});
+    const handleUpload = async () => {};  // 空函數
+    // 刷新圖片
+    useEffect(() => {
+            console.log(" fetchEditProduct useEffect ")
+            setProductParam({});
+    },[handleUpload]);
+
+    return (
+        <div className='pageContianer'>
+            ...
+        </div>
+    );
+}
+export default ProductAddPage;
+
+
+
+
+====================================================================================
+----------------------------
+
+
+這種情況在資訊領域中通常被稱為「無限迴圈」（Infinite Loop）或「無限渲染」（Infinite Rendering）。
+
+**中文名稱：**
+
+* 無限迴圈
+* 無限渲染
+
+**英文名稱：**
+
+* Infinite Loop
+* Infinite Rendering
+
+**詳細說明：**
+
+在您提供的程式碼中，問題的根源在於 `useEffect` 的依賴項 `[handleUpload]`。由於以下原因，這會導致無限迴圈：
+
+1.  **`useEffect` 的依賴項：**
+    * `useEffect` 會監聽 `handleUpload` 的變化。
+    * 每次元件重新渲染時，`handleUpload` 函式（即使是空函式）都會被重新建立，因此它的引用（reference）會發生變化。
+2.  **`setState` 觸發重新渲染：**
+    * 在 `useEffect` 內部，`setProductParam({})` 會觸發元件的重新渲染。
+    * 重新渲染又會導致 `handleUpload` 被重新建立。
+    * handleUpload的改變，又導致useEffect重新運行。
+3.  **無限循環：**
+    * 因此，`useEffect` 會不斷地因為 `handleUpload` 的變化而被觸發，並不斷地觸發重新渲染，形成無限循環。
+
+...
+
+通過這些修正，您可以避免 `useEffect` 被無限觸發，從而解決無限迴圈的問題。
+
+
+====================================================================================
+----------------------------
+
+====================================================================================
+----------------------------
+
+这种现象在信息技术（IT）领域中被称为 **「无限循环调用」**（Infinite Loop Invocation）或 **「状态更新导致的副作用循环」**（State Update-Induced Effect Loop）。  
+
+### **📌 具体解释**
+1. `useEffect` 依赖 `handleUpload`，但 `handleUpload` 是一个 **新建的匿名函数**，每次组件渲染时都会创建一个新的引用（函数地址变了）。
+2. 由于 `handleUpload` 在 `useEffect` 的依赖列表中，每次 `ProductAddPage` 重新渲染时，`handleUpload` 变了，`useEffect` 被触发。
+3. `useEffect` 内部调用了 `setProductParam({})`，导致组件重新渲染。
+4. 组件重新渲染后，`handleUpload` 重新创建，`useEffect` 又会触发，形成 **无限循环**（Infinite Loop）。
+
+---
+
+### **🛠 解决方案**
+🔹 **使用 `useCallback` 让 `handleUpload` 只在 `tempId` 变化时更新**
+```jsx
+const handleUpload = useCallback(async () => {
+    // 上传逻辑
+}, [tempId]); 
+```
+这样 `handleUpload` 只有在 `tempId` 变化时才会被重新创建，避免 `useEffect` 无限触发。
+
+🔹 **改用 `useState` 触发重新获取图片**
+```jsx
+const [uploadTrigger, setUploadTrigger] = useState(0);
+
+const handleUpload = useCallback(async () => {
+    // 上传逻辑
+    setUploadTrigger(prev => prev + 1); // 触发重新获取图片
+}, []);
+
+useEffect(() => {
+    console.log(" fetchEditProduct useEffect ");
+    setProductParam({});
+}, [uploadTrigger]); // 依赖 uploadTrigger，而不是 handleUpload
+```
+这样 `useEffect` 只会在 `handleUpload` **执行后手动触发**，不会因函数重新创建而无限循环。
+
+---
+
+### **🔹 结论**
+此问题的根本原因是：
+- `useEffect` 依赖了一个 **每次渲染都会变化的值（handleUpload）**，导致 **副作用循环**。
+- 这种情况在 React 中称为：
+  - **无限重渲染循环**（Infinite Render Loop）
+  - **副作用循环**（Effect Loop）
+  - **状态更新引发的副作用链**（State Update-Induced Effect Chain）  
+
+在 React 应用中，正确管理 `useEffect` 的依赖项，结合 `useCallback` 和 `useState` 控制副作用，是避免此类问题的关键！ 🎯🚀
+
+
+====================================================================================
+----------------------------
+
+====================================================================================
+----------------------------
+
+
+

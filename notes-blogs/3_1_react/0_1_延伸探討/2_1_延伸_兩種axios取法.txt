@@ -1,0 +1,125 @@
+
+2025/01/17
+
+===============================================================================
+
+如下為取得後端資料兩種寫法,
+請分析這兩種寫法的優缺點與使用情境:
+
+    newshop-client\src\components\productListPage.jsx
+
+        // 寫法1, 使用 then 取 async axios
+        useEffect(() => {
+            getProductList().then((response) => {
+                setProductList(response.data.productList);
+            }).catch((error) => {
+                console.log('取得商品列表發生錯誤', error);
+            });
+        }, []);
+        
+        // 寫法2, 包一層 async 函式 , await 取 async axios
+        useEffect(() => {
+            const fetchProductList = async () => {
+                try {
+                    const response = await getProductList();
+                    console.log(" response.data.products: ", response.data.products)
+                    setProductList(response.data.products);
+                } catch (error) {
+                    console.error('商品資料取得失敗:', error);
+                }
+            };
+            fetchProductList();
+        }, []);
+
+    newshop-client\src\api\product.js
+        export const getProductList = async () => {
+            return axios.get(`${BASE_URL}/list`);
+        }
+
+===============================================================================
+
+### 寫法分析與比較
+
+---
+
+### **寫法1: 使用 `.then()` 取 `async axios`**
+#### **範例**
+```javascript
+useEffect(() => {
+    getProductList().then((response) => {
+        setProductList(response.data.productList);
+    }).catch((error) => {
+        console.log('取得商品列表發生錯誤', error);
+    });
+}, []);
+```
+
+#### **優點**
+1. **語法簡單直觀**：直接處理 `Promise`，對於簡單邏輯可以快速實現。
+2. **傳統 `Promise` 鏈式處理**：適合多層 `.then()` 處理異步任務。
+3. **兼容性高**：即使在不支持 `async/await` 的環境中也能使用。
+
+#### **缺點**
+1. **可讀性低**：當有多層 `.then()` 時，代碼容易變得混亂（回調地獄）。
+2. **錯誤處理分散**：異步邏輯較複雜時，可能需要額外處理錯誤情境，代碼重複性高。
+
+#### **使用情境**
+- 簡單的異步操作，如單次 API 請求且對代碼清晰度要求不高時。
+- 需要處理多個鏈式的 `.then()` 時，可以保持邏輯流程的線性。
+
+---
+
+### **寫法2: 包裹 `async` 函式，使用 `await`**
+#### **範例**
+```javascript
+useEffect(() => {
+    const fetchProductList = async () => {
+        try {
+            const response = await getProductList();
+            setProductList(response.data.products);
+        } catch (error) {
+            console.error('商品資料取得失敗:', error);
+        }
+    };
+    fetchProductList();
+}, []);
+```
+
+#### **優點**
+1. **代碼可讀性高**：`async/await` 提供同步風格的異步代碼，結構清晰易理解。
+2. **錯誤處理集中**：`try/catch` 可以更直觀地處理異常。
+3. **可擴展性強**：當需要進一步處理異步數據（如對數據進行加工）時，代碼易於維護。
+
+#### **缺點**
+1. **多層嵌套**：需要將邏輯封裝在函數內，可能會增加一層嵌套。
+2. **初學者理解成本**：對不熟悉 `async/await` 的開發者，可能需要一定學習成本。
+
+#### **使用情境**
+- 當邏輯復雜，包含多個異步操作或需要額外數據處理時。
+- 開發者習慣 `async/await` 並希望提高代碼的可讀性。
+
+---
+
+### **綜合對比**
+| 特性                  | 寫法1 (`.then()`)                          | 寫法2 (`async/await`)                |
+|-----------------------|------------------------------------------|-------------------------------------|
+| **可讀性**            | 低，可產生回調地獄                        | 高，邏輯更接近同步代碼                |
+| **適用場景**          | 簡單單次請求                              | 複雜邏輯、多步驟操作                   |
+| **錯誤處理**          | 分散處理                                 | 集中處理，方便維護                     |
+| **代碼結構**          | 線性鏈式                                  | 封裝為函數後，結構更清晰                |
+| **學習曲線**          | 較低，適合新手                            | 需要理解 `async/await` 概念          |
+
+---
+
+### **建議選擇**
+- **簡單 API 請求：** 寫法1 (`.then()`)，適用於邏輯簡單、回調層次較少的情境。
+- **複雜業務邏輯：** 寫法2 (`async/await`)，在代碼可讀性、維護性上表現更佳，適合日常業務開發。
+
+===============================================================================
+
+
+===============================================================================
+
+
+===============================================================================
+

@@ -1,0 +1,123 @@
+
+
+請舉出 useEffect 依賴陣列 所有例子,
+並條列式舉出程式與使用情境。
+
+==========================================================================
+
+好的，讓我為您列出 useEffect 依賴陣列的所有使用情況：
+
+1. 空依賴陣列 `[]` - 只執行一次
+```jsx
+useEffect(() => {
+    // 獲取初始資料
+    fetchData();
+    // 設定 WebSocket 連接
+    const ws = new WebSocket('ws://...');
+    return () => ws.close();
+}, []);
+```
+
+2. 有依賴值 `[dep1, dep2]` - 當依賴值改變時執行
+```jsx
+useEffect(() => {
+    // 當搜尋關鍵字或分類改變時重新搜尋
+    searchProducts(keyword, category);
+}, [keyword, category]);
+
+useEffect(() => {
+    // 當使用者ID改變時重新獲取資料
+    fetchUserProfile(userId);
+}, [userId]);
+```
+
+3. 無依賴陣列 - 每次渲染都執行
+```jsx
+useEffect(() => {
+    // 每次資料更新就儲存到 localStorage
+    localStorage.setItem('data', JSON.stringify(data));
+});
+```
+
+4. 多個依賴值搭配物件或陣列
+```jsx
+useEffect(() => {
+    // 當購物車內容改變時更新總金額
+    calculateTotal(cart.items);
+}, [cart.items]);
+
+useEffect(() => {
+    // 當篩選條件改變時更新列表
+    filterList(filters.price, filters.category, filters.sort);
+}, [filters.price, filters.category, filters.sort]);
+```
+
+5. 依賴值含函數
+```jsx
+useEffect(() => {
+    // 當驗證函數改變時重新驗證
+    validateForm(formData);
+}, [validateForm, formData]);
+```
+
+6. 條件式執行
+```jsx
+useEffect(() => {
+    // 只在已登入且有訂單ID時執行
+    if (isLoggedIn && orderId) {
+        fetchOrderDetails(orderId);
+    }
+}, [isLoggedIn, orderId]);
+```
+
+7. 清理函數（Cleanup）搭配依賴值
+```jsx
+useEffect(() => {
+    const subscription = subscribeToChat(channelId);
+    
+    // 當 channelId 改變或元件卸載時執行清理
+    return () => subscription.unsubscribe();
+}, [channelId]);
+```
+
+8. 多層依賴處理
+```jsx
+useEffect(() => {
+    // 當選擇的城市改變時，重新獲取該城市的區域列表
+    if (selectedCity) {
+        fetchDistricts(selectedCity);
+    }
+    // 重置區域選擇
+    setSelectedDistrict(null);
+}, [selectedCity]);
+```
+
+9. 防抖/節流處理
+```jsx
+useEffect(() => {
+    const timer = setTimeout(() => {
+        // 延遲 500ms 後執行搜尋
+        searchApi(searchText);
+    }, 500);
+    
+    return () => clearTimeout(timer);
+}, [searchText]);
+```
+
+每種情況的使用時機：
+- `[]`: 初始化、一次性設定、API 首次載入
+- `[dep]`: 響應特定值變化、資料同步、狀態更新
+- 無依賴: 每次更新都需要執行的操作
+- 多依賴: 複雜條件監控、多條件篩選
+- 清理函數: 資源釋放、訂閱取消、計時器清理
+- 條件式: 特定條件下才需執行的操作
+- 防抖/節流: 效能優化、API 呼叫控制
+
+您想了解哪個特定案例的更多細節嗎？
+
+
+
+==========================================================================
+
+==========================================================================
+

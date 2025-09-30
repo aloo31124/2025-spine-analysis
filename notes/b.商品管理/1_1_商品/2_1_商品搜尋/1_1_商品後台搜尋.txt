@@ -1,0 +1,145 @@
+
+2025/02/04
+=============================================================================
+
+feat [新商城-web開發] [b.購物車管理] 商品搜尋 + postman 測試
+    * 後台 api + postman 測試
+    * 小g 提供兩種寫法
+
+=============================================================================
+
+如下為 node.js 程式, 搜尋商品功能, 
+如下搜尋 firestore Product 表 搜尋 name, type 欄位, 並且都須符合才將資料撈出 return。
+searchParam 搜尋物件中, 有 name, type 欄位 的值。
+
+    src\controllers\manager\product.api.controller.js
+        const { searchProduct} = require('../../services/product.service');
+        exports.searchProduct = async (req, res) => {
+            res.status(200).json({searchResult: await searchProduct(req.body.searchParam)})
+        }
+    src\services\product.service.js
+        const db = require('../firestore');
+        exports.searchProduct = async (searchParam) => {
+            // 如下搜尋 firestore Product 表 搜尋 name, type 欄位, 並且都須符合
+        }
+
+
+
+
+=============================================================================
+
+網頁小g的回覆:
+
+### **Firestore 搜尋 `Product` 表，需同時符合 `name` 和 `type`**
+**優化點**
+1. **複合查詢 (AND 條件)**：Firestore 允許 `where()` 連接多個條件，因此可使用：
+   ```js
+   query.where("name", "==", searchParam.name).where("type", "==", searchParam.type);
+   ```
+2. **錯誤處理**：確保如果 `name` 或 `type` 缺失，回傳適當的錯誤資訊。
+
+---
+
+### **完整程式**
+#### **📌 `src/services/product.service.js`**
+```javascript
+    const db = require('../firestore');
+
+    /* 搜尋符合 name 與 type 的商品 */
+    exports.searchProduct = async (searchParam) => {
+        try {
+            if (!searchParam?.name || !searchParam?.type) {
+                throw new Error("搜尋條件 name 和 type 皆不可為空");
+            }
+
+            const collectionRef = db.collection("Product");
+            const querySnapshot = await collectionRef
+                .where("name", "==", searchParam.name)
+                .where("type", "==", searchParam.type)
+                .get();
+
+            // 如果沒找到結果，回傳空陣列
+            if (querySnapshot.empty) {
+                return [];
+            }
+
+            // 格式化 Firestore 查詢結果
+            return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        } catch (error) {
+            console.error("搜尋商品失敗:", error);
+            return { error: error.message };
+        }
+    };
+```
+
+---
+
+#### **📌 `src/controllers/manager/product.api.controller.js`**
+```javascript
+const { searchProduct } = require('../../services/product.service');
+
+exports.searchProduct = async (req, res) => {
+    try {
+        const searchResult = await searchProduct(req.body.searchParam);
+        res.status(200).json({ searchResult });
+    } catch (error) {
+        res.status(500).json({ error: "搜尋商品失敗", details: error.message });
+    }
+};
+```
+
+---
+
+### **Firestore 查詢的運作方式**
+1. **傳入 `name` 和 `type`，查詢 `Product` 表符合條件的商品**：
+   ```json
+   { 
+      "searchParam": { 
+          "name": "Apple iPhone 15", 
+          "type": "手機"
+      }
+   }
+   ```
+2. **Firestore 會使用 `AND` 條件**：
+   ```js
+   where("name", "==", "Apple iPhone 15").where("type", "==", "手機")
+   ```
+3. **回傳搜尋結果**：
+   ```json
+   {
+       "searchResult": [
+           {
+               "id": "abcd1234",
+               "name": "Apple iPhone 15",
+               "type": "手機",
+               "price": 29999,
+               "stock": 50
+           }
+       ]
+   }
+   ```
+
+---
+
+### **優化點**
+✅ **確保 `name` 和 `type` 皆有值，避免 Firestore 錯誤**  
+✅ **`where("==")` 進行 AND 條件查詢**  
+✅ **處理 Firestore 無結果的情況，避免回傳 `undefined`**  
+✅ **提供適當的錯誤處理，提升 API 穩定性**  
+
+🚀 這樣可以高效、安全地從 Firestore 搜尋商品 🎯
+
+
+=============================================================================
+
+
+=============================================================================
+
+
+=============================================================================
+
+
+=============================================================================
+
+

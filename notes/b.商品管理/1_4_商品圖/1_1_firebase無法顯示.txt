@@ -1,0 +1,57 @@
+
+2025/05/19
+====================================================================================
+----------------------------------------
+
+地端可正常顯示:
+    http://localhost:8081/api/manager/product/img/list/03AgFeG09PqwANwH6Sy2
+
+
+    https://api-po4a4d6mca-uc.a.run.app/api/manager/product/img/list/03AgFeG09PqwANwH6Sy2
+
+
+
+
+====================================================================================
+----------------------------------------
+
+
+src\index.js
+    app.get('/api/manager/product/img/list/:id', productImgApiController.getProductImgList);
+
+
+    /* 取得所有商品圖片 URL */
+    exports.getProductImgList = async (req, res) => {
+        console.log("[getProductImgList] start : productId =", req.params.id);
+        try {
+            const imageList = await productImgService.getProductImgList(req.params.id);
+            console.log(`[getProductImgList] imageList : ${imageList}`);
+            res.status(200).json({ result: '200', imageList });
+        } catch (error) {
+            console.error("[getProductImgList] error :", error);
+            res.status(500).json({ result: '500', error: error.message });
+        }
+    };
+
+
+
+
+
+====================================================================================
+----------------------------------------
+
+====================================================================================
+----------------------------------------
+
+====================================================================================
+----------------------------------------
+
+====================================================================================
+----------------------------------------
+
+
+
+
+
+
+

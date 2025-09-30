@@ -1,0 +1,95 @@
+
+2025/07/18
+====================================================================================
+----------------------------------
+
+====================================================================================
+----------------------------------
+
+如下為 node.js exppress, 建立 server api,  
+請依照 MVC 與 常見的 node.js 架構,
+條列式精要提出 優化建議,
+並提供 github 參考連結 或文章。
+
+newshop-server\src\index.js
+    app.post('/api/shop/product/list', shopApiController.searchProductList);
+
+newshop-server\src\controllers\shop\shop.api.controller.js
+    /* 取得商品列表 */
+    exports.searchProductList = async (req, res) => {
+        try {
+            console.log("[getProductList] start : ");
+            const {searchParam, pagingParam} = req.body;
+            const result = await productService.searchProductJoinCategoryPromotion(searchParam, pagingParam);
+            res.status(200).json({ result });
+        } catch (error) {
+            console.error("[getProductList] error :", error);
+            res.status(500).json({ error: error.message });
+        }
+    };
+
+
+newshop-server\src\services\product.service.js
+    /* 搜尋商品, 合併 商品分類, 促銷, 價錢範圍 */
+    exports.searchProductJoinCategoryPromotion = async (searchParam, pagingParam) => {
+        try {
+            console.log("[searchProductJoinCategoryPromotion] start :");
+            // 取得所有商品, 篩選價格, 關鍵字
+            const {keyword, priceRange} = searchParam;
+            const productList = (await Product.getAllProductList()).filter(product => 
+                (keyword ? product.name.includes(keyword) : true) 
+                && (priceRange?.min ? product.price >= priceRange.min : true) 
+                && (priceRange?.max ? product.price <= priceRange.max : true) 
+            ); 
+
+            // 篩選, join 商品分類
+            let categoryList = (searchParam?.categoryList?.every(c => !c.isSelected)) ? null : searchParam?.categoryList;
+            if(!categoryList) {
+                categoryList = (await productCategoryService.searchProductCategory({}, {})).map(c => ({...c, isSelected: true}));
+            }
+            const productListJoinCategory = productList
+                        .map(p => ({ ...p, categoryName: (categoryList.find(c => c.id === p.categoryId && c.isSelected))?.name || '' }))
+                        .filter(p => p?.categoryName?.length > 0);
+
+            // 商品 串組圖片
+            const result = await Promise.all(productListJoinCategory.map(async product => {
+                // 需串組圖片完整資料, storeName
+                const imgList = (await productImgFireStorage.getProductImgList(product.id))//.map(obj => obj.imgUrl);
+                return {...product, imgList};
+            }));
+
+            console.log("[searchProductJoinCategoryPromotion] end , result :", result);
+            return result;
+        } catch (error){
+            console.error("[searchProductJoinCategoryPromotion] error :", error);
+        }
+    }
+
+
+newshop-server\src\models\product.model.js
+    /* 取得 商品資訊 列表 */
+    static async getAllProductList() {
+        const snapshot = await db.collection(COLLECTION_NAME).get();
+        const productList = [];
+        snapshot.forEach(doc => {
+            productList.push({id:doc.id, ...doc.data()});
+        });
+        return productList;
+    }
+
+
+====================================================================================
+----------------------------------
+
+====================================================================================
+----------------------------------
+
+====================================================================================
+----------------------------------
+
+====================================================================================
+----------------------------------
+
+
+
+

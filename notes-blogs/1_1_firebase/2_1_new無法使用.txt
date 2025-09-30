@@ -1,0 +1,186 @@
+
+2025-01-18
+
+===================================================================================================================
+
+
+
+===================================================================================================================
+
+如下 new User 的寫法無法在 firebase 中使用, 原因為何？
+
+class User {
+    constructor({ account, mail, state, phone, role, pay, password, createdAt }) {
+        this.account = account || "";        // 使用者帳號
+        ... 略
+    }
+}
+
+module.exports = User;
+
+/* 信箱, 建立新的帳號 */
+exports.addAccount = async (mail) => {
+    const userData = new User({
+        account: "",.... // 略
+    });
+    return await addUser(userData);
+}
+
+
+
+/* 新增使用者 */
+exports.addUser = async (user) => {
+    const docRef = await db.collection('User').add(user);
+    const docSnapshot = await docRef.get();
+    return ({id: docRef.id, ...docSnapshot.data()});
+}
+
+
+
+Process exited with code 1
+Uncaught Error Error: Value for argument "data" is not a valid Firestore document. Couldn't serialize object of type "User". Firestore doesn't support JavaScript objects with custom prototypes (i.e. objects that were created via the "new" operator).
+    at validateDocumentData (/Users/loulou/Desktop/2025-newshop/newshop-server/node_modules/@google-cloud/firestore/build/src/write-batch.js:607:15)
+    at <anonymous> (/Users/loulou/Desktop/2025-newshop/newshop-server/node_modules/@google-cloud/firestore/build/src/reference/collection-reference.js:218:52)
+
+===================================================================================================================
+
+### **問題的根本原因**
+
+Firebase Firestore 無法直接存儲具有自定義原型（例如通過 `new` 操作符創建的類實例）的對象。因為 Firestore 只能序列化**純 JavaScript 對象**（POJO: Plain Old JavaScript Objects），但像 `new User({...})` 創建的對象具有自定義的原型（`User.prototype`），導致 Firestore 的序列化過程失敗。
+
+---
+
+### **解決方法**
+
+#### **方法 1：存儲純 JavaScript 對象**
+在存入 Firestore 前，將 `User` 類實例轉換為純對象。例如，在 `addAccount` 方法中：
+
+```javascript
+exports.addAccount = async (mail) => {
+    const userData = new User({
+        account: "",
+        mail,
+        state: "驗證碼通過",
+        phone: "",
+        role: "買家",
+        pay: "無",
+        password: "",
+        createdAt: new Date(),
+    });
+
+    // 將類實例轉為純對象
+    const plainObject = { ...userData }; 
+
+    return await addUser(plainObject);
+};
+```
+
+---
+
+#### **方法 2：修改 `addUser` 方法**
+直接在 `addUser` 中轉換類實例為純對象：
+
+```javascript
+exports.addUser = async (user) => {
+    const plainObject = { ...user }; // 將類實例轉換為純對象
+    const docRef = await db.collection('User').add(plainObject);
+    const docSnapshot = await docRef.get();
+    return { id: docRef.id, ...docSnapshot.data() };
+};
+```
+
+---
+
+#### **方法 3：為 `User` 類添加 `toPlainObject` 方法**
+在 `User` 類中添加一個方法來轉換為純對象：
+
+```javascript
+class User {
+    constructor({ account, mail, state, phone, role, pay, password, createdAt }) {
+        this.account = account || "";
+        this.mail = mail || "";
+        this.state = state || "未設定";
+        this.phone = phone || "";
+        this.role = role || "未知";
+        this.pay = pay || "無";
+        this.password = password || "";
+        this.createdAt = createdAt || new Date();
+    }
+
+    // 將 User 類實例轉為純對象
+    toPlainObject() {
+        return { ...this };
+    }
+}
+
+module.exports = User;
+```
+
+在調用時，使用 `toPlainObject()` 將類實例轉換為純對象：
+
+```javascript
+exports.addAccount = async (mail) => {
+    const userData = new User({
+        account: "",
+        mail,
+        state: "驗證碼通過",
+        phone: "",
+        role: "買家",
+        pay: "無",
+        password: "",
+        createdAt: new Date(),
+    });
+
+    return await addUser(userData.toPlainObject());
+};
+```
+
+---
+
+#### **方法 4：直接使用純對象**
+如果 `User` 類並非必要，可以直接構建純對象來替代類實例：
+
+```javascript
+exports.addAccount = async (mail) => {
+    const userData = {
+        account: mail.split('@')[0],
+        mail,
+        state: "驗證碼通過",
+        phone: "",
+        role: "買家",
+        pay: "無",
+        password: "",
+        createdAt: new Date(),
+    };
+
+    return await addUser(userData);
+};
+```
+
+---
+
+### **建議的最佳做法**
+**方法 3**（在 `User` 類中添加 `toPlainObject` 方法）是較好的選擇，因為它保留了面向對象的設計，同時兼容 Firebase 的存儲限制。
+
+---
+
+### **測試流程**
+1. 確保 Firestore 中已配置好 `User` 集合。
+2. 使用上述任何解決方案修復代碼。
+3. 調用 `addAccount`，檢查是否能成功存入數據。
+4. 在 Firestore 控制台中確認數據結構是否正確。
+
+---
+
+### **結論**
+Firestore 僅支持存儲純對象，不能序列化自定義原型對象。通過轉換為純對象或直接使用純對象，可以解決此問題。
+
+
+===================================================================================================================
+
+===================================================================================================================
+
+===================================================================================================================
+
+===================================================================================================================
+

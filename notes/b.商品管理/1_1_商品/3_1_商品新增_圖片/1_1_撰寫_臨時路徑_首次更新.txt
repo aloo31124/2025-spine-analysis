@@ -1,0 +1,104 @@
+
+2025/03/05
+====================================================================================
+----------------------------
+
+1_1_撰寫_臨時路徑_首次更新
+
+
+feat [新商城-web開發][b. 購物車管理] 商品新增 暫存圖片 50%
+
+====================================================================================
+----------------------------
+
+如下, 刷新圖片 的 useEffect 請在第一次渲染時不執行,
+執行 handleUpload, handleDeleteImage 再觸發就好
+
+
+/* 商品新增 */
+function ProductAddPage() {
+    ...
+
+    // 初始暫存 商品id
+    useEffect(() => {
+        const _tempId = "TEMP_ID_" + (new Date().getTime());
+        setTempId(_tempId);
+    }, [])
+    
+    // 新增商品上傳檔案, 已有商品id
+    const handleUpload = async (formData) => {
+        uploadImg(formData, tempId);
+    };
+
+    // 新增圖片, 已有商品id
+    const handleDeleteImage = async (storedName) => {
+        try {
+            await deleteProductImg(tempId, storedName);
+            alert("圖片刪除成功");
+        } catch (error) {
+            alert("圖片刪除失敗");
+        }
+    };
+
+    // 刷新圖片
+    useEffect(() => {
+            // 取得 商品編輯資訊
+            const fetchEditProduct = async () => {
+                try {
+                    const imgListResult = await getProductImgList(tempId);
+                    const imgList = imgListResult.data.imageList;
+                    setProductParam({
+                        imgList
+                    });
+                } catch (error) {
+                    alert("取得商品圖片失敗");
+                }
+            }
+            fetchEditProduct();
+    },[handleUpload, handleDeleteImage]);
+
+    /* post 新增商品 */
+    const handleAddProduct = async (product) => {...}
+
+    return (
+        <div className='pageContianer'>
+            <CreateEditProduct 
+                productParam={productParam}
+                handleAddProduct={handleAddProduct}
+                handleUpload={handleUpload}
+                handleDeleteImage={handleDeleteImage}
+                typePage='CREATE'
+            />
+        </div>
+    );
+
+}
+export default ProductAddPage;
+
+
+
+
+
+====================================================================================
+----------------------------
+
+====================================================================================
+----------------------------
+
+====================================================================================
+----------------------------
+
+====================================================================================
+----------------------------
+
+====================================================================================
+----------------------------
+
+====================================================================================
+----------------------------
+
+====================================================================================
+----------------------------
+
+
+

@@ -1,0 +1,139 @@
+
+
+2025/02/05
+
+====================================================================================
+
+法1:
+    query = query.orderBy('name').startAt(name).endAt(name + '\uf8ff'); // 小g提供無法使用 ="=
+
+
+法2: 
+    query = query.where('name', '==', new RegExp(name, 'i')); // gemini 方法 可使用
+
+
+法3:
+
+    const snapshot = await query.get();
+    const searchResult = [];
+    snapshot.forEach(doc => {
+        const data = doc.data();
+        if (!name || data.name.includes(name)) {
+            searchResult.push({ id: doc.id, ...data });
+        }
+    });
+
+    return searchResult;
+
+
+====================================================================================
+2/5
+
+如下 name 中文字 搜尋 Product表 name 欄位,
+文字包含在 Product表 name 欄位內即可搜尋出:
+
+src\services\product.service.js
+    const db = require('../firestore');
+    exports.searchProduct = async (searchParam) => {
+        const { name, state, createDate, type, priceMin, priceMax } = searchParam;
+        let query = db.collection('Product');
+
+        if (name) {
+            query = query.where('name', '==', name);
+        }
+        if (state) {
+            query = query.where('state', '==', state);
+        }
+        if (createDate) {
+            query = query.where('createDate', '==', createDate);
+        }
+        if (type) {
+            query = query.where('type', '==', type);
+        }
+        if (priceMin) {
+            query = query.where('price', '>=', Number.parseInt(priceMin));
+        }
+        if (priceMax) {
+            query = query.where('price', '<=', Number.parseInt(priceMax));
+        }
+
+        const snapshot = await query.get();
+        const searchResult = [];
+        snapshot.forEach(doc => {
+            searchResult.push({ id: doc.id, ...doc.data() });
+        });
+
+        return searchResult;
+    }
+
+
+====================================================================================
+2/5
+
+```javascript
+const db = require('../firestore');
+
+exports.searchProduct = async (searchParam) => {
+    const { name, state, createDate, type, priceMin, priceMax } = searchParam;
+    let query = db.collection('Product');
+
+    if (name) {
+        // 使用 includes 進行模糊搜尋
+        query = query.where('name', '==', new RegExp(name, 'i')); 
+    }
+
+    // 其他篩選條件 (state, createDate, type, priceMin, priceMax) 維持不變
+
+    if (state) {
+        query = query.where('state', '==', state);
+    }
+    if (createDate) {
+        query = query.where('createDate', '==', createDate);
+    }
+    if (type) {
+        query = query.where('type', '==', type);
+    }
+    if (priceMin) {
+        query = query.where('price', '>=', Number.parseInt(priceMin));
+    }
+    if (priceMax) {
+        query = query.where('price', '<=', Number.parseInt(priceMax));
+    }
+
+    const snapshot = await query.get();
+    const searchResult = [];
+    snapshot.forEach(doc => {
+        searchResult.push({ id: doc.id, ...doc.data() });
+    });
+
+    return searchResult;
+};
+```
+
+**解釋:**
+
+* **關鍵修改:** 
+    - 在 `if (name)` 條件中，將 `where('name', '==', name)` 替換為 `where('name', '==', new RegExp(name, 'i'))`。
+        - `new RegExp(name, 'i')` 創建了一個正則表達式，其中 `name` 是要搜尋的字串，`'i'` 選項表示不區分大小寫。
+        - `where('name', '==', new RegExp(name, 'i'))` 查詢條件會匹配 `name` 欄位中包含 `searchParam.name` 的所有文件。
+
+* **其他條件:** 
+    - 其他篩選條件 (state, createDate, type, priceMin, priceMax) 維持不變，因為它們不需要模糊搜尋。
+
+**優點:**
+
+- 允許在 `name` 欄位中進行部分匹配搜尋，例如搜尋 "蘋果" 可以匹配到 "蘋果手機"、"新鮮蘋果" 等。
+- 不區分大小寫搜尋，提高了搜尋的靈活性。
+
+**注意事項:**
+
+- 使用正則表達式進行搜尋可能會影響查詢性能，尤其是在資料量較大的情況下。
+- 如果需要更複雜的搜尋條件，可以進一步調整正則表達式。
+
+希望這個修改能夠幫助您實現中文名稱的模糊搜尋！
+
+
+====================================================================================
+
+====================================================================================
+

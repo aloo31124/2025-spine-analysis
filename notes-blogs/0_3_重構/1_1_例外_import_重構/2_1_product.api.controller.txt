@@ -1,0 +1,209 @@
+
+
+2025/03/04
+====================================================================================
+----------------------------
+
+====================================================================================
+----------------------------
+
+請優化如下項目:
+    1. 例外事件 try catch 整理, 所有函式都須包覆
+    2. 例外事件 try catch 整理, 印出錯誤訊息需一致, 需印出錯誤堆疊: 
+        - console.error("[該函式名稱] error : ", error);
+    3. 進入該函式一開始須 console.log("[該函式名稱] start : ", [所有參數名稱與值])
+        - 如: request 印出所有值
+    4. import 將所有 Destructuring Assignment (解構賦值) 改為 Namespace Import (命名空間導入)
+    5. 整理註解, 讓其一致。
+    6. 最終將上述所有大原則為程式碼更為簡潔, 專業, 易讀, 並且一致。
+
+待優化程式碼:
+newshop-server\src\controllers\manager\product.api.controller.js
+
+----------------------------
+
+
+/*
+ * [控制層] 商品處理
+ *  - 商品列表搜尋分頁
+ *  - 商品詳細資訊
+ *  - 商品新增、更新、刪除
+ *  - 圖片上傳、刪除
+ */
+
+const productService = require('../../services/product.service');
+const authService = require('../../services/auth.service');
+
+const ERROR_HEADER = "[product.api.controller.js]";
+
+/* 取得商品列表 */
+exports.getProductList = async (req, res) => {
+    console.log("[getProductList] start : request =", req.query);
+    try {
+        const productList = await productService.getProductList();
+        res.status(200).json({ result: '200', productList });
+    } catch (error) {
+        console.error("[getProductList] error :", error);
+        res.status(500).json({ result: '500', error: error.message });
+    }
+};
+
+/* 新增商品 */
+exports.postProduct = async (req, res) => {
+    console.log("[postProduct] start : request =", req.body);
+    try {
+        const payload = authService.verifyJwt(req);
+        const newProduct = await productService.addProduct({ userId: payload.userId, ...req.body.newProduct });
+        res.status(200).json({ result: '200', newProduct });
+    } catch (error) {
+        console.error("[postProduct] error :", error);
+        res.status(500).json({ result: '500', error: error.message });
+    }
+};
+
+/* 取得商品 */
+exports.getProduct = async (req, res) => {
+    console.log("[getProduct] start : productId =", req.params.id);
+    try {
+        const product = await productService.getProduct(req.params.id);
+        res.status(200).json({ result: '200', product });
+    } catch (error) {
+        console.error("[getProduct] error :", error);
+        res.status(500).json({ result: '500', error: error.message });
+    }
+};
+
+/* 更新商品 */
+exports.updateProduct = async (req, res) => {
+    console.log("[updateProduct] start : updateData =", req.body.updateProduct);
+    try {
+        const updatedProduct = await productService.updateProduct(req.body.updateProduct);
+        res.status(200).json({ result: '200', updatedProduct });
+    } catch (error) {
+        console.error("[updateProduct] error :", error);
+        res.status(500).json({ result: '500', error: error.message });
+    }
+};
+
+/* 刪除商品 */
+exports.deleteProduct = async (req, res) => {
+    console.log("[deleteProduct] start : productId =", req.params.id);
+    try {
+        await productService.deleteProduct(req.params.id);
+        res.status(200).json({ result: '200', message: '商品刪除成功' });
+    } catch (error) {
+        console.error("[deleteProduct] error :", error);
+        res.status(500).json({ result: '500', error: error.message });
+    }
+};
+
+/* 搜尋商品 */
+exports.searchProduct = async (req, res) => {
+    console.log("[searchProduct] start : searchParam =", req.body.searchParam, "pagingParam =", req.body.pagingParam);
+    try {
+        const searchResult = await productService.searchProduct(req.body.searchParam, req.body.pagingParam);
+        res.status(200).json({ result: '200', searchResult });
+    } catch (error) {
+        console.error("[searchProduct] error :", error);
+        res.status(500).json({ result: '500', error: error.message });
+    }
+};
+
+/* 匯入商品 */
+exports.importProduct = async (req, res) => {
+    console.log("[importProduct] start : productList =", req.body.productList);
+    try {
+        const importResult = await productService.importProduct(req.body.productList);
+        res.status(200).json({ result: '200', importResult });
+    } catch (error) {
+        console.error("[importProduct] error :", error);
+        res.status(500).json({ result: '500', error: error.message });
+    }
+};
+
+/* 批次上傳商品圖片 */
+exports.uploadFile = async (req, res) => {
+    console.log("[uploadFile] start : productId =", req.params.id, "files =", req.files);
+    try {
+        const result = await productService.uploadFile(req, req.params.id);
+        res.status(200).json({ result: '200', files: result });
+    } catch (error) {
+        console.error("[uploadFile] error :", error);
+        res.status(500).json({ result: '500', error: error.message });
+    }
+};
+
+/* 取得所有商品圖片 URL */
+exports.getProductImgList = async (req, res) => {
+    console.log("[getProductImgList] start : productId =", req.params.id);
+    try {
+        const productId = req.params.id;
+        if (!productId) {
+            return res.status(400).json({ result: '400', error: '缺少 productId' });
+        }
+        const imageList = await productService.getProductImgList(productId);
+        res.status(200).json({ result: '200', imageList });
+    } catch (error) {
+        console.error("[getProductImgList] error :", error);
+        res.status(500).json({ result: '500', error: error.message });
+    }
+};
+
+/* 刪除所有商品圖片 */
+exports.deleteProductImgAll = async (req, res) => {
+    console.log("[deleteProductImgAll] start");
+    try {
+        await productService.deleteProductImgAll();
+        res.status(200).json({ result: '200', message: '所有商品圖片已刪除' });
+    } catch (error) {
+        console.error("[deleteProductImgAll] error :", error);
+        res.status(500).json({ result: '500', error: error.message });
+    }
+};
+
+/* 刪除個別圖片 */
+exports.deleteProductImg = async (req, res) => {
+    console.log("[deleteProductImg] start : productId =", req.params.productId, "storedName =", req.params.storedName);
+    try {
+        const { productId, storedName } = req.params;
+        if (!productId || !storedName) {
+            return res.status(400).json({ result: '400', error: '缺少 productId 或 storedName' });
+        }
+        await productService.deleteProductImg(productId, storedName);
+        res.status(200).json({ result: '200', message: '圖片刪除成功' });
+    } catch (error) {
+        console.error("[deleteProductImg] error :", error);
+        res.status(500).json({ result: '500', error: error.message });
+    }
+};
+
+
+
+
+
+
+
+
+
+====================================================================================
+----------------------------
+
+====================================================================================
+----------------------------
+
+====================================================================================
+----------------------------
+
+====================================================================================
+----------------------------
+
+====================================================================================
+----------------------------
+
+====================================================================================
+----------------------------
+
+
+
+
+

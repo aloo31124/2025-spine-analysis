@@ -1,0 +1,268 @@
+
+2025/03/07
+====================================================================================
+----------------------------
+
+
+    function ProductAddPage() {
+        const [uploadTrigger, setUploadTrigger] = useState(0); // 觸發 useEffect
+
+        // 商品圖片刷新
+        useEffect(() => {
+            ...
+            setProductParam({ imgList });
+            ...
+        }, [uploadTrigger]); //  使用 trigger 觸發
+
+        // 新增商品上傳檔案
+        const handleUpload = async (formData) => {
+            try {
+                await uploadImg(formData, tempId);
+                setUploadTrigger(prev => prev + 1); // 关键：触发 useEffect 重新获取图片
+            } catch (error) {}
+        };
+
+        return (
+            <div className='pageContianer'>
+                <CreateEditProduct ...
+                    handleUpload={handleUpload}
+                    typePage='CREATE'
+                />
+            </div>
+        );
+    }
+    export default ProductAddPage;
+
+====================================================================================
+----------------------------
+
+如下 react 父子層元件, 分別為: ProductAddPage.jsx, CreateEditProduct.jsx,
+新增商品, 上傳圖片功能,
+請讓使用者於 子層按下 上傳圖片, 讓父親層 handleUpload 觸發時, 
+useEffect 內 fetchEditProduct被觸發, 
+重新執行 getProductImgList 取上傳圖片, 渲染畫面。
+
+newshop-client\src\pages\manager\ProductAddPage.jsx
+    function ProductAddPage() {
+        // 暫存 product id , 暫時儲存圖片
+        const [tempId, setTempId] = useState("");
+        // 新增商品資訊
+        const [productParam, setProductParam] = useState({});
+
+        // 初始暫存 商品id
+        useEffect(() => {
+            const _tempId = "TEMP_ID_" + (new Date().getTime());
+            setTempId(_tempId);
+        }, []);
+
+        // 新增商品上傳檔案, 已有商品id
+        const handleUpload = async (formData) => {
+            uploadImg(formData, tempId);
+        };
+
+        // 刷新圖片
+        useEffect(() => {
+                // 取得 商品編輯資訊
+                const fetchEditProduct = async () => {
+                    try {
+                        const imgListResult = await getProductImgList(tempId);
+                        const imgList = imgListResult.data.imageList;
+                        setProductParam({
+                            imgList
+                        });
+                    } catch (error) {}
+                }
+                fetchEditProduct();
+        },[]);
+
+
+        return (
+            <div className='pageContianer'>
+                <CreateEditProduct 
+                    productParam={productParam}
+                    handleUpload={handleUpload}
+                    typePage='CREATE'
+                />
+            </div>
+        );
+
+    }
+    export default ProductAddPage;
+
+newshop-client\src\components\manager\CreateEdit\CreateEditProduct.jsx
+    function CreateEditProduct({productParam,  handleUpload}) {
+        // 商品圖片上傳
+        const [showDropzone, setShowDropzone] = useState(false);
+        const [files, setFiles] = useState([]);
+        // 商品圖片呈現
+        const [imgList, setImgList] = useState([]);
+
+        /* 初始商品, 編輯商品資訊 */
+        useEffect(() => {
+            console.log("useEffect productParam");
+            const fetchEditProduct = async () => {
+                setImgList(productParam.imgList);
+            }
+            fetchEditProduct();
+        }, [productParam]);
+
+
+        // 批次圖片暫存
+        const onDrop = useCallback((acceptedFiles) => {
+            setFiles([...files, ...acceptedFiles]); 
+        }, [files]);
+
+        // 編輯商品上傳檔案, 已有商品id
+        const clickUploadImgList = async () => {
+            const formData = new FormData();
+            files.forEach(file => {
+                formData.append("files", file);
+            });
+            handleUpload(formData);
+            setShowDropzone(false);
+            setFiles([]); // 清空已選擇的檔案
+        };
+
+
+        return (
+            <div className={style.CreateEditProductContainer}>
+                <h2>商品圖庫</h2>
+                <div className={style.imgGrid}>
+                    {imgList && imgList.map(({ storedName, imgUrl }) => (
+                        <div key={storedName} className={style.imgWrapper}>
+                            <img className={style.CreateEditProductImg} src={imgUrl} alt="圖片" />
+                        </div>
+                    ))}
+                </div>
+                <button onClick={() => setShowDropzone(true)}>上傳檔案</button>
+
+                {/* 拖曳上傳視窗 */}
+                {showDropzone && (
+                    <div className={style.dropzoneOverlay}>
+                        <DropzoneDialog 
+                            onClose={() => setShowDropzone(false)}
+                            files={files}
+                            onDrop={onDrop}
+                            onUpload={clickUploadImgList}
+                        />
+                    </div>
+                )}
+
+            </div>
+        );
+    }
+    export default CreateEditProduct;
+
+
+====================================================================================
+小g 回答:
+
+----------------------------
+
+你的 `useEffect` 依赖数组是空的 (`[]`)，
+所以 `fetchEditProduct` **只会在组件挂载时执行一次**，
+**无法在 `handleUpload` 触发时重新获取图片列表**。  
+
+---
+
+## **✅ 修正方案**
+### **📌 解决方式：让 `handleUpload` 触发后 `useEffect` 重新执行**
+1. **增加 `uploadTrigger` 作为 `useEffect` 的依赖**，
+    每次 `handleUpload` 触发时更新 `uploadTrigger`，从而让 `useEffect` 重新执行。
+2. **保证 `handleUpload` 触发 `fetchEditProduct`**，在 `handleUpload` 执行完成后，
+    修改 `uploadTrigger`，进而触发 `useEffect` 执行。
+
+---
+
+### **🔹 修正 `ProductAddPage.jsx`**
+```jsx
+    function ProductAddPage() {
+        const [tempId, setTempId] = useState("");
+        const [productParam, setProductParam] = useState({});
+        const [uploadTrigger, setUploadTrigger] = useState(0); // 关键：用于触发 useEffect
+
+        // 初始暫存 商品id
+        useEffect(() => {
+            const _tempId = "TEMP_ID_" + new Date().getTime();
+            setTempId(_tempId);
+        }, []);
+
+        // 商品圖片刷新
+        useEffect(() => {
+            const fetchEditProduct = async () => {
+                try {
+                    const imgListResult = await getProductImgList(tempId);
+                    const imgList = imgListResult.data.imageList;
+                    setProductParam({ imgList });
+                } catch (error) {
+                    console.error("获取商品图片失败", error);
+                }
+            };
+            fetchEditProduct();
+        }, [uploadTrigger]); // 关键：uploadTrigger 变化时重新执行
+
+        // 新增商品上傳檔案
+        const handleUpload = async (formData) => {
+            try {
+                await uploadImg(formData, tempId);
+                setUploadTrigger(prev => prev + 1); // 关键：触发 useEffect 重新获取图片
+            } catch (error) {
+                console.error("图片上传失败", error);
+            }
+        };
+
+        return (
+            <div className='pageContianer'>
+                <CreateEditProduct 
+                    productParam={productParam}
+                    handleUpload={handleUpload}
+                    typePage='CREATE'
+                />
+            </div>
+        );
+    }
+    export default ProductAddPage;
+```
+---
+### **🔹 `CreateEditProduct.jsx` 无需更改**
+但你可以优化 `useEffect` 逻辑：
+```jsx
+useEffect(() => {
+    console.log("useEffect productParam 触发");
+    setImgList(productParam.imgList || []);
+}, [productParam]);
+```
+---
+
+## **🎯 这样做的好处**
+✅ **`useEffect` 依赖 `uploadTrigger`，让 `handleUpload` 触发后能够重新获取图片**  
+✅ **不依赖 `handleUpload` 本身，避免 `useEffect` 无限触发**  
+✅ **保证 `setProductParam` 仅在 `fetchEditProduct` 执行后更新，不会造成额外的渲染**  
+
+---
+
+## **🚀 现在实现的效果**
+1. 用户在 `CreateEditProduct` **点击上传图片**  
+2. `handleUpload` **上传图片** -> **更新 `uploadTrigger`**  
+3. `useEffect` **监听到 `uploadTrigger` 变化，执行 `fetchEditProduct` 获取最新图片列表**  
+4. `productParam` **更新后传递给 `CreateEditProduct`，图片列表自动刷新**  
+
+这样，你的 `useEffect` **不会无限触发，但每次上传图片后都会自动刷新列表** 🎯🚀
+
+
+====================================================================================
+----------------------------
+
+====================================================================================
+----------------------------
+
+====================================================================================
+----------------------------
+
+====================================================================================
+----------------------------
+
+====================================================================================
+----------------------------
+
+

@@ -1,0 +1,117 @@
+
+2025/02/16
+===============================================================================
+--------------------
+
+notes/2_1_nodejs/2_1_log日誌/1_1_匯出log.txt
+    如下 node.js express 中, 
+    請在 Utils 目錄中, 新增一個可將全域的 console.log , console.error,
+    匯入至指定目錄之 txt 檔
+
+utils/logger.js 印出時間請改為 日期 24小時制, 
+如 2025-02-16T07:42:10.221Z 改為 2025-02-16 15:58:32.534
+
+
+
+===============================================================================
+--------------------
+
+要將全域的 `console.log` 和 `console.error` 輸出，並將其匯入至指定目錄的 `.txt` 檔案，且日期格式改為 `YYYY-MM-DD HH:mm:ss.SSS`（例如：`2025-02-16 15:58:32.534`），可以按以下方式來設計：
+
+### **`utils/logger.js` 修改**
+
+```javascript
+// src/utils/logger.js
+const fs = require('fs');
+const path = require('path');
+
+// 取得當前日期並格式化成 YYYY-MM-DD HH:mm:ss.SSS
+const getCurrentDate = () => {
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // 月份需要補零
+    const day = String(date.getDate()).padStart(2, '0'); // 日期也需要補零
+    const hours = String(date.getHours()).padStart(2, '0'); // 小時補零
+    const minutes = String(date.getMinutes()).padStart(2, '0'); // 分鐘補零
+    const seconds = String(date.getSeconds()).padStart(2, '0'); // 秒補零
+    const milliseconds = String(date.getMilliseconds()).padStart(3, '0'); // 毫秒補零
+
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
+};
+
+// 設定 log 檔案的名稱，根據當前日期
+const logFilePath = path.join(__dirname, `../../logs/application-${getCurrentDate().split(' ')[0]}.log`);
+
+// 確保 logs 目錄存在
+if (!fs.existsSync(path.dirname(logFilePath))) {
+    fs.mkdirSync(path.dirname(logFilePath), { recursive: true });
+}
+
+// 創建一個寫入日誌的函式
+const logToFile = (message) => {
+    const timestamp = getCurrentDate();
+    fs.appendFileSync(logFilePath, `[${timestamp}] ${message}\n`, 'utf8');
+};
+
+// 重寫 console.log 和 console.error
+const originalLog = console.log;
+const originalError = console.error;
+
+// 重定義 console.log
+console.log = (...args) => {
+    const message = args.map(arg => (typeof arg === 'object' ? JSON.stringify(arg) : arg)).join(' ');
+    logToFile(`LOG: ${message}`);  // 寫入檔案
+    originalLog(...args);  // 保留原本的 console.log 行為
+};
+
+// 重定義 console.error
+console.error = (...args) => {
+    const message = args.map(arg => (typeof arg === 'object' ? JSON.stringify(arg) : arg)).join(' ');
+    logToFile(`ERROR: ${message}`);  // 寫入檔案
+    originalError(...args);  // 保留原本的 console.error 行為
+};
+
+// 匯出日誌功能
+module.exports = { logToFile };
+```
+
+### **修改說明：**
+1. **`getCurrentDate` 函數**：
+    - 此函數用來將當前的 `Date` 對象格式化成 `YYYY-MM-DD HH:mm:ss.SSS` 格式，這樣就可以達到所需的日期格式。
+
+2. **`logFilePath`**：
+    - 日誌檔案的名稱會根據當前的日期動態生成，檔案名稱會是 `application-YYYY-MM-DD.log`，例如：`application-2025-02-16.log`。
+
+3. **`logToFile` 函數**：
+    - 在每次記錄日誌時，都會將訊息寫入到動態生成的檔案中，並且加上時間戳。
+
+4. **重寫 `console.log` 和 `console.error`**：
+    - 每次執行 `console.log` 或 `console.error` 時，會將其訊息寫入到當日的日誌檔案中，同時保留原本的 `console.log` 和 `console.error` 行為，讓它們仍然能顯示在終端機上。
+
+### **範例日誌檔案內容**
+
+當你執行應用程式並使用 `console.log` 或 `console.error` 時，會自動將輸出寫入到相應的日誌檔案中，檔案名稱為 `application-YYYY-MM-DD.log`。
+
+**範例（`logs/application-2025-02-16.log`）**：
+```
+[2025-02-16 15:58:32.534] LOG: 伺服器正在運行在 http://localhost:3000
+[2025-02-16 15:59:45.672] ERROR: 伺服器發生錯誤: 無法連接到資料庫
+```
+
+### **總結：**
+- 這樣的設計方式將會自動根據當前的日期生成一個新的日誌檔案，並把所有 `console.log` 和 `console.error` 的輸出都寫入到該檔案中。
+- 日期格式也被調整為 `YYYY-MM-DD HH:mm:ss.SSS`，符合要求。
+
+
+===============================================================================
+--------------------
+
+
+===============================================================================
+--------------------
+
+
+===============================================================================
+--------------------
+
+

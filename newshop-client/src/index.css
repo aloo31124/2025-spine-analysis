@@ -1,0 +1,28 @@
+body {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 自訂滾動條 */
+*::-webkit-scrollbar {
+  width: 10px;               /* 設定垂直滾動條的寬度 */
+  height: 10px;              /* 設定水平滾動條的高度 */
+}
+
+*::-webkit-scrollbar-track {
+  background: #cfcfcf;   /* 滾動軌道背景設為透明 */
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #adadad;       /* 滾動條顏色 */
+  border-radius: 6px;        /* 滾動條圓角 */
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: #adadad;       /* 滑鼠移入滾動條時的顏色 */
+}

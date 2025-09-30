@@ -1,0 +1,197 @@
+
+2025/02/15
+====================================================================================
+----------------------------------------
+
+如下將 productList 轉為 csv 匯出,
+並可選擇該檔案匯出之位置
+
+function TopBtnBarProduct({productList}) {
+
+    // 匯出商品為 csv 檔
+    const clickExportProduct = () => {
+        console.log('匯出商品: ', productList);
+    }
+
+    return (
+        <div className={style.TopBtnBar}>
+            <button onClick={clickExportProduct}>匯出商品</button>
+        </div>
+    )
+}export default TopBtnBarProduct;
+
+
+====================================================================================
+
+
+以下是實作 `clickExportProduct` 匯出 CSV 且讓使用者 **選擇匯出位置**：
+
+### 📝 **說明重點**  
+1. 使用 `Blob` 產生 CSV 檔案。  
+2. 使用 `URL.createObjectURL()` 建立下載連結。  
+3. 使用 `a` 標籤觸發下載。  
+4. 可讓使用者手動選擇下載位置。  
+
+---
+
+## ✅ **1️⃣ 完整程式碼修改** (`TopBtnBarProduct.jsx`)
+```javascript
+function TopBtnBarProduct({ productList }) {
+    // 將 productList 轉為 CSV 字串
+    const convertToCSV = (data) => {
+        if (!data.length) return '';
+
+        // 取得欄位標題
+        const headers = Object.keys(data[0]).join(',') + '\n';
+
+        // 取得每行資料
+        const rows = data
+            .map(item => Object.values(item).join(','))
+            .join('\n');
+
+        return headers + rows;
+    };
+
+    // 匯出商品為 csv 檔
+    const clickExportProduct = () => {
+        if (!productList || productList.length === 0) {
+            alert('無商品可匯出');
+            return;
+        }
+
+        // 1. 轉換 CSV
+        const csvContent = convertToCSV(productList);
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+
+        // 2. 建立下載 a 標籤
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `product_list_${new Date().toISOString().slice(0, 10)}.csv`;
+
+        // 3. 將 a 標籤加入 DOM 並觸發點擊
+        document.body.appendChild(a);
+        a.click();
+
+        // 4. 移除 DOM 元素並釋放 URL
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    };
+
+    return (
+        <div className={style.TopBtnBar}>
+            <button onClick={clickExportProduct}>匯出商品</button>
+        </div>
+    );
+}
+
+export default TopBtnBarProduct;
+```
+
+---
+
+## 📂 **2️⃣ 匯出範例效果**  
+- 點擊 `匯出商品`：  
+  📥 下載檔名：`product_list_2025-02-11.csv`  
+- 使用者可選擇儲存位置。  
+- CSV 內容格式：
+```csv
+id,name,price,state
+101,商品A,100,上架
+102,商品B,200,下架
+```
+
+---
+
+## 🚀 **3️⃣ 範例測試 `productList` 資料**  
+匯出測試資料：
+```javascript
+const productList = [
+    { id: 101, name: "商品A", price: 100, state: "上架" },
+    { id: 102, name: "商品B", price: 200, state: "下架" },
+];
+```
+
+---
+
+## 🎯 **完成效果**  
+✅ 可自動建立 **CSV**  
+✅ 可讓 **使用者選擇存檔位置**  
+✅ 格式 **清晰**、 **標題對應資料**  
+✅ **檔名自動產生** (`product_list_日期.csv`)  
+
+這樣就完成囉！ 🚀✨
+
+
+
+====================================================================================
+
+
+====================================================================================
+
+CSV 檔案在 Excel 開啟出現中文亂碼，通常是因為 **編碼問題 (預設為 UTF-8 無 BOM)**。
+解決辦法是匯出時加上 **BOM (Byte Order Mark)**，讓 Excel 正確辨識中文。
+
+### ✅ **1️⃣ 解決方案：加上 BOM 編碼**
+修改 `clickExportProduct` 函式如下：
+
+```javascript
+const clickExportProduct = () => {
+    if (!productList || productList.length === 0) {
+        alert('無商品可匯出');
+        return;
+    }
+
+    // 1. 轉換 CSV
+    const csvContent = convertToCSV(productList);
+
+    // 2. 加上 BOM (防止 Excel 中文亂碼)
+    const BOM = '\uFEFF';
+    const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+
+    // 3. 建立下載 a 標籤
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `product_list_${new Date().toISOString().slice(0, 10)}.csv`;
+
+    // 4. 自動觸發下載
+    document.body.appendChild(a);
+    a.click();
+
+    // 5. 清除資源
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+};
+```
+
+---
+
+### 📝 **💡 加上 BOM 的重點**
+- `\uFEFF`：為 **UTF-8 with BOM** 編碼標記  
+- 讓 Excel 辨識 CSV 為 **UTF-8 中文檔**，避免亂碼  
+
+---
+
+### 💯 **📂 成功效果：**  
+- Excel 開啟 CSV **中文正常顯示** ✅  
+- `product_list_2025-02-11.csv` 正常 **中英文顯示** ✅  
+
+---
+
+### 🎉 解決啦！再試一次匯出就沒問題囉 🚀✨  
+
+
+====================================================================================
+
+
+====================================================================================
+
+====================================================================================
+
+====================================================================================
+
+====================================================================================
+
+
+

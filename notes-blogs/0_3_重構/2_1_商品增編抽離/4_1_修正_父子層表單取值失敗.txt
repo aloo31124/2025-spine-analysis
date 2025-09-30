@@ -1,0 +1,207 @@
+
+2025/03/07
+====================================================================================
+----------------------------
+
+因為註解掉 CreateEditProduct.jsx - fetchEditProduct 造成 gpt 沒找到原因,
+
+
+不斷吃入 productParam 把值刷掉 ... 
+
+newshop-client\src\components\manager\CreateEdit\CreateEditProduct.jsx
+    function CreateEditProduct({productParam...}) {
+        ...
+        /* 初始商品, 編輯商品資訊 */
+        useEffect(() => {
+            console.log("productParam")    // --------------------------------------------------> 此處效能爆炸...
+            const fetchEditProduct = async () => {
+                setName(name || productParam.name);
+                setState(state || productParam.state);
+                setType(type || productParam.type);
+                setPrice(price || productParam.price);
+                setImgList(productParam.imgList);
+            }
+            fetchEditProduct();
+        }, [productParam]);   // --------------------------------------------------> 此處不斷吃入 productParam 把值刷掉...
+
+====================================================================================
+----------------------------
+
+
+如下 ProductAddPage.jsx, CreateEditProduct.jsx 為父子元件之新增商品表單,
+但按下 [新增] 執行 clickAddProduct 卻無法將表單值傳遞給父層,
+請說明原因並修正。
+
+newshop-client\src\pages\manager\ProductAddPage.jsx
+    import React, { useEffect, useState, useCallback  } from 'react';
+    ...
+    import CreateEditProduct from '../../components/manager/CreateEdit/CreateEditProduct';
+
+    /* 商品新增 */
+    function ProductAddPage() {
+        // 路由
+        const navigate = useNavigate();
+        // 暫存 product id , 暫時儲存圖片
+        const [tempId, setTempId] = useState("");
+        // 新增商品資訊
+        const [productParam, setProductParam] = useState({});
+
+        // 初始暫存 商品id
+        useEffect(() => {
+            const _tempId = "TEMP_ID_" + (new Date().getTime());
+            setTempId(_tempId);
+        }, [])
+
+        // 新增商品上傳檔案, 已有商品id
+        const handleUpload = async (formData) => {
+            uploadImg(formData, tempId);
+        };
+
+        // 刷新圖片
+        useEffect(() => {...},[handleUpload, handleDeleteImage]);
+
+        /* post 新增商品 */
+        const handleAddProduct = async (product) => {
+            console.log(" handleAddProduct : ", product)
+            const res = await addProduct({tempId, ...product});
+            if(res.status === 200) {
+                alert("商品新增成功");
+                navigate('/manager/product/list');
+            } else {
+                alert("商品新增失敗");
+            }
+        }
+
+
+        return (
+            <div className='pageContianer'>
+                <CreateEditProduct 
+                    productParam={productParam}
+                    handleAddProduct={handleAddProduct}
+                    handleUpload={handleUpload}
+                    handleDeleteImage={handleDeleteImage}
+                    typePage='CREATE'
+                />
+            </div>
+        );
+
+    }
+    export default ProductAddPage;
+
+
+newshop-client\src\components\manager\CreateEdit\CreateEditProduct.jsx
+    function CreateEditProduct({typePage, productParam, 
+        handleUpdateProduct, handleAddProduct, handleUpload, handleDeleteImage}) {
+        ...
+        // 編輯商品資訊
+        const [productCategoryList, setProductCategoryList] = useState([]);
+        const [name, setName] = useState(null);
+        const [state, setState] = useState("草稿");
+        const [type, setType] = useState(null);
+        const [price, setPrice] = useState(0);
+        // 商品圖片上傳
+        ...
+
+        /* 初始商品, 商品分類 */
+        useEffect(() => {...}, []);
+
+
+        /* 初始商品, 編輯商品資訊 */
+        useEffect(() => {
+            console.log("productParam")    // --------------------------------------------------> 此處效能爆炸...
+            const fetchEditProduct = async () => {
+                setName(name || productParam.name);
+                setState(state || productParam.state);
+                setType(type || productParam.type);
+                setPrice(price || productParam.price);
+                setImgList(productParam.imgList);
+            }
+            fetchEditProduct();
+        }, [productParam]);
+
+
+        /* post 新增商品 */
+        const clickAddProduct = async () => {
+            if(typePage !== typePageList.CREATE) return;
+            console.log(" {name, state, type, price: Number(price)} : ", name, state, type, price)
+            handleAddProduct({name, type, price: Number(price)});  // 如下表單修改後, 無法取得值
+        }
+        ...
+        return (
+            <div className={style.CreateEditProduct}>
+                <div className={style.CreateEditProductTopBar}>
+                    ...
+                        <button onClick={clickAddProduct}>新增</button>
+                    ...
+                    <div className={style.CreateEditProductRow}>
+                        <input className={style.CreateEditProductTopInput}
+                            type="text" 
+                            placeholder='商品名稱'
+                            value={name}
+                            onChange={e => setName(e.target.value)}
+                        />
+                    </div>
+                </div>
+                <div className={style.CreateEditProductContainer}>
+                    <h2>商品分類</h2>
+                    <div className={style.CreateEditProductRow}>
+                        <input
+                            type="text"
+                            placeholder="選擇分類"
+                            value={type}
+                            readOnly
+                            onClick={() => setIsCategoryDialogOpen(true)} // 點擊時打開 Dialog
+                        />
+                        <button>新增分類</button>
+                    </div>
+                </div>
+                {/* Dialog 分類視窗 */}
+                <Dialog .../>
+                ...
+                <div className={style.CreateEditProductContainer}>
+                    <h2>商品價格</h2>
+                    <div className={style.CreateEditProductRow}>
+                        <input type="number" 
+                            placeholder='商品價格'
+                            value={price}
+                            onChange={e => setPrice(e.target.value)}
+                        />
+                    </div>
+                    ...
+                </div>
+                ...
+            </div>
+        );
+    }
+    export default CreateEditProduct;
+
+
+
+
+
+
+====================================================================================
+----------------------------
+
+====================================================================================
+----------------------------
+
+====================================================================================
+----------------------------
+
+====================================================================================
+----------------------------
+
+====================================================================================
+----------------------------
+
+====================================================================================
+----------------------------
+
+====================================================================================
+----------------------------
+
+====================================================================================
+----------------------------
+
+

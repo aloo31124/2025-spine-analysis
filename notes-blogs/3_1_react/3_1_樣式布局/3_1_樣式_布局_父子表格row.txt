@@ -1,0 +1,186 @@
+
+2025/01/23
+===============================================================================
+如下 ProductListPage.jsx productList.map 時,
+如何引用 TableRow.jsx ? 並對各種 js物件呈現欄位
+
+\src\pages\manager\ProductListPage.jsx
+    import React, {useEffect, useState} from 'react';
+    ...
+    import TableRow from '../../components/manager/TableRow/TableRow';
+    function ProductListPage() {
+        ......
+        return (
+            <div>
+                {
+                    productList.map((product) => {
+                        return (
+                            <div key={product.id}>
+                                <h2>{product.name}</h2>
+                                <p>{product.price}</p>
+                                <button onClick={handleEditProduct(product.id)} >編輯</button>
+                            </div>
+                        )
+                    })
+                }
+            </div>
+        );
+    }export default ProductListPage;
+
+\src\components\manager\TableRow\TableRow.jsx
+    import React, {useState} from "react";
+    import style from './TableRow.module.css'
+    function TableRow() {
+        return (
+            <div className={style.TableRow}>
+            ...
+            </div>
+        )
+    } export default TableRow;
+
+
+===============================================================================
+
+===============================================================================
+要在 `TableRow.jsx` 中实现动态渲染栏位，可以通过遍历传递的 `product` 对象的键值对 (`key-value`) 来生成内容。这种方法特别适合当每个产品可能有不同的字段或者字段需要动态调整的情况。
+
+---
+
+### **实现动态判断栏位**
+
+#### **ProductListPage.jsx**
+```jsx
+import React, { useEffect, useState } from 'react';
+import TableRow from '../../components/manager/TableRow/TableRow';
+
+function ProductListPage() {
+    const [productList, setProductList] = useState([]);
+
+    useEffect(() => {
+        // 假设从后端获取数据
+        setProductList([
+            { id: 1, name: 'Product A', price: 100, category: 'Electronics' },
+            { id: 2, name: 'Product B', price: 200, category: 'Books', stock: 10 },
+        ]);
+    }, []);
+
+    const handleEditProduct = (id) => {
+        console.log(`Edit product with id: ${id}`);
+    };
+
+    return (
+        <div>
+            <h1>商品列表</h1>
+            <div>
+                {productList.map((product) => (
+                    <TableRow 
+                        key={product.id} 
+                        product={product} 
+                        onEdit={handleEditProduct} 
+                    />
+                ))}
+            </div>
+        </div>
+    );
+}
+
+export default ProductListPage;
+```
+
+---
+
+#### **TableRow.jsx**
+```jsx
+import React from 'react';
+import style from './TableRow.module.css';
+
+function TableRow({ product, onEdit }) {
+    const renderFields = () => {
+        // 遍历 product 对象，动态生成字段
+        return Object.entries(product).map(([key, value]) => {
+            if (key === 'id') return null; // 忽略 id 字段（如果需要可以保留）
+            return (
+                <div key={key} className={style.field}>
+                    <strong>{key}:</strong> {value}
+                </div>
+            );
+        });
+    };
+
+    return (
+        <div className={style.TableRow}>
+            {renderFields()}
+            <button onClick={() => onEdit(product.id)}>編輯</button>
+        </div>
+    );
+}
+
+export default TableRow;
+```
+
+---
+
+### **说明**
+
+1. **动态渲染字段**：
+   - 使用 `Object.entries(product)` 遍历 `product` 对象，生成 `[key, value]` 的数组。
+   - 根据 `key` 进行判断，决定哪些字段需要渲染，例如忽略 `id` 字段。
+
+2. **强可扩展性**：
+   - 如果后端返回的数据字段有所变化，组件无需修改代码即可自动适配。
+
+3. **样式控制**：
+   - 为每个字段添加样式类 `style.field`，可以灵活地调整每个字段的样式。
+
+4. **编辑按钮**：
+   - 保留编辑功能，通过 `onEdit` 传递点击事件，并使用 `product.id` 标识具体产品。
+
+---
+
+### **示例效果**
+假设 `productList` 数据为：
+```json
+[
+    { "id": 1, "name": "Product A", "price": 100, "category": "Electronics" },
+    { "id": 2, "name": "Product B", "price": 200, "category": "Books", "stock": 10 }
+]
+```
+
+页面输出如下：
+```
+Product A
+name: Product A
+price: 100
+category: Electronics
+[編輯]
+
+Product B
+name: Product B
+price: 200
+category: Books
+stock: 10
+[編輯]
+```
+
+---
+
+### **扩展建议**
+1. **字段过滤与排序**：
+   - 可通过额外的 `fields` 参数指定需要显示的字段及其顺序：
+     ```jsx
+     const fields = ['name', 'price', 'category'];
+     ```
+
+2. **国际化支持**：
+   - 利用一个映射对象将字段名转换为用户友好的标签：
+     ```jsx
+     const fieldLabels = { name: '商品名稱', price: '價格', category: '類別' };
+     ```
+
+3. **表格布局**：
+   - 如果需要表格样式，可以在外层使用 `<table>`，然后将每行数据作为 `<tr>`。
+===============================================================================
+
+===============================================================================
+
+

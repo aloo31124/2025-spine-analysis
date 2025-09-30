@@ -1,0 +1,61 @@
+
+2025/03/06
+====================================================================================
+----------------------------
+
+feat [新商城-web開發][b. 購物車管理] 商品新增 暫存圖片 -> 更改路徑
+
+====================================================================================
+----------------------------
+
+如下請使用 multer, path, fs-extra 修改該圖片暫存路徑:
+newshop-server\src\controllers\manager\product.api.controller.js
+    /* 新增商品 */
+    exports.postProduct = async (req, res) => {
+        console.log("[postProduct] start : request =", req.body);
+        try {
+            const payload = authService.verifyJwt(req);
+            const itemId = req.body.newProduct.itemId;
+            const newProduct = await productService.addProduct({ userId: payload.userId, ...req.body.newProduct });
+            productImgService.changeProductImgPath(itemId, newProduct.id);
+            res.status(200).json({ result: '200', newProduct });
+        } catch (error) {
+            console.error("[postProduct] error :", error);
+            res.status(500).json({ result: '500', error: error.message });
+        }
+    };
+
+newshop-server\src\services\productImg.service.js
+    const multer = require('multer');
+    const path = require('path');
+    const fs = require('fs-extra');
+    const BASE_UPLOAD_DIR = 'C:/shopStorage/product/';
+    /* 移動圖片路徑 */
+    exports.changeProductImgPath = async (oldPath, newPath) => {
+        // 新增程式
+    }
+
+
+
+====================================================================================
+----------------------------
+
+====================================================================================
+----------------------------
+
+====================================================================================
+----------------------------
+
+====================================================================================
+----------------------------
+
+====================================================================================
+----------------------------
+
+====================================================================================
+----------------------------
+
+====================================================================================
+----------------------------
+
+

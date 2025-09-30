@@ -1,0 +1,59 @@
+
+2025/03/11
+====================================================================================
+---------------------------------------------
+
+====================================================================================
+---------------------------------------------
+
+
+如下, react 顯示商品內容的 商品櫥窗輪播圖效果,
+請優化程式, 如下顯示多張圖片, 但超出寬度隱藏, 
+左有兩端有方向icon 可拖曳, 以可使用滑鼠拖曳。
+
+newshop-client\src\components\shopping\ProductGallery\ProductGallery.jsx
+    import React, {useState} from 'react';
+    import style from './ProductGallery.module.css';
+    import shoppingBag2Img from '../../../assets/img/shoppingBag2.png';
+
+    function ProductGallery() {
+        return (
+            <div className={style.ProductCallerySlider}>
+                <img className={style.ProductCalleryImg}
+                    src={shoppingBag2Img}  
+                />
+                <img className={style.ProductCalleryImg}
+                    src={shoppingBag2Img}  
+                />
+                <img className={style.ProductCalleryImg}
+                    src={shoppingBag2Img}  
+                />
+                ... 多張圖片
+            </div>
+        );
+    }
+    export default ProductGallery;
+
+newshop-client\src\components\shopping\ProductGallery\ProductGallery.module.css
+
+
+====================================================================================
+---------------------------------------------
+
+====================================================================================
+---------------------------------------------
+
+====================================================================================
+---------------------------------------------
+
+====================================================================================
+---------------------------------------------
+
+====================================================================================
+---------------------------------------------
+
+
+
+
+
+

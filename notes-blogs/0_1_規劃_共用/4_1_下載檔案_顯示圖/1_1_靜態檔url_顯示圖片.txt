@@ -1,0 +1,141 @@
+
+2025/02/25
+====================================================================================
+----------------------------
+
+====================================================================================
+----------------------------
+
+寫法精要:
+
+    網址: http://localhost:8081/api/manager/product/img/img1.png
+
+    index.js
+        app.use('/api/manager/product/img', express.static('C:/shopStorage/product'));
+
+
+====================================================================================
+----------------------------
+
+伺服器將圖片存在 C:/shopStorage/product/{圖片名稱} 中,
+希望可使用 node.js express api 與 js 套件,
+可使用 url網址 於 瀏覽器顯示圖片。
+
+----------------------------
+
+### **📌 解決方案**
+使用 **Node.js Express** 提供靜態檔案服務，
+讓前端能夠透過 **URL 直接訪問** `C:/shopStorage/product/` 內的圖片。
+
+---
+
+## **✅ 後端 Express API 設定**
+### **🔹 1️⃣ `src/index.js`**
+    ```javascript
+    const express = require('express');
+    const path = require('path');
+
+    const app = express();
+    const PORT = 5000;
+
+    // 提供靜態圖片服務 (讓前端可以透過 URL 訪問圖片)
+    app.use('/uploads/product', express.static('C:/shopStorage/product'));
+
+    // 啟動伺服器
+    app.listen(PORT, () => {
+        console.log(`Server is running on http://localhost:${PORT}`);
+    });
+    ```
+🔹 **`express.static('C:/shopStorage/product')`** 
+讓 `/uploads/product/` 這個路徑對應到 **C:/shopStorage/product/**，  
+這樣前端就可以透過 **`http://localhost:5000/uploads/product/{圖片名稱}`** 來存取圖片。
+
+---
+
+## **✅ 測試方式**
+### **📌 假設 `C:/shopStorage/product/` 內有圖片**
+    ```
+    C:/shopStorage/product/sample1.png
+    C:/shopStorage/product/sample2.jpg
+    ```
+
+### **📌 直接開啟瀏覽器測試**
+    1️⃣ 啟動 Express 伺服器：  
+    ```bash
+    node src/index.js
+    ```
+    2️⃣ 在 **瀏覽器中輸入 URL** 測試是否能正常顯示圖片：
+    ```
+    http://localhost:5000/uploads/product/sample1.png
+    ```
+    ✅ **若成功，瀏覽器將會顯示 `sample1.png` 圖片。**
+
+---
+
+## **✅ 前端 React 顯示圖片**
+    ### **🔹 `src/components/ProductGallery.jsx`**
+        ```javascript
+        import { useState, useEffect } from 'react';
+        import axios from 'axios';
+
+        function ProductGallery() {
+            const [productImgUrls, setProductImgUrls] = useState([]);
+
+            useEffect(() => {
+                const fetchImages = async () => {
+                    try {
+                        const res = await axios.get('http://localhost:5000/api/manager/product/img/list');
+                        if (res.data.result === '200') {
+                            setProductImgUrls(res.data.imgUrls);
+                        }
+                    } catch (error) {
+                        console.error("Error fetching product images:", error);
+                    }
+                };
+                fetchImages();
+            }, []);
+
+            return (
+                <div>
+                    <h2>商品圖庫</h2>
+                    <div>
+                        {productImgUrls.map((url, index) => (
+                            <img key={index} src={url} alt={`Product ${index}`} width="150" />
+                        ))}
+                    </div>
+                </div>
+            );
+        }
+
+        export default ProductGallery;
+        ```
+
+---
+
+## **📌 總結**
+    ✅ **後端 Express**：
+    - 使用 `express.static()` 提供靜態檔案服務，讓圖片可以透過 URL 訪問。
+
+    ✅ **前端 React**：
+    - 透過 **Axios 請求 API**，獲取後端返回的圖片 URL，並顯示於 `<img>` 標籤。
+
+    這樣就能讓 **瀏覽器直接存取圖片**，前端 React 也能輕鬆載入並顯示商品圖片！ 🚀
+
+====================================================================================
+----------------------------
+
+====================================================================================
+----------------------------
+
+====================================================================================
+----------------------------
+
+
+
+====================================================================================
+----------------------------
+
+====================================================================================
+----------------------------
+
+

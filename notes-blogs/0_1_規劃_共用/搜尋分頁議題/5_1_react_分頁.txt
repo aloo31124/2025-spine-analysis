@@ -1,0 +1,65 @@
+
+2025/02/16
+====================================================================================
+------------------------
+
+
+如下為 react ProductListPage, 
+請調整優化 pagingParam 參數, 產生分頁bar,
+可按 上一頁, 下一頁, 且顯示切換頁數, 當前所在頁數反黑
+
+
+function ProductListPage() {
+    const pagingParam = { pageIndex: 1, pageSize: 3, sort: 'name', pageTotal: 10 }; // 分頁參數
+
+    // 搜尋商品結果, 重新渲染商品
+    const handleSearchResult = (searchResult) => {
+        setProductList(searchResult);
+    }
+
+    return (
+        <div>
+
+            {/* 搜尋bar */}
+            <SearchBarProduct 
+                getSearchResult={handleSearchResult}
+                pagingParam={pagingParam}
+            />
+
+
+            {/* 列表 */}
+            {
+                productList.map(({ id, name, type, price }) => {
+                    return (
+                        <TableRow 
+                            key={id} 
+                            obj={{id, name, type, price }} 
+                            onEdit={handleEditProduct} 
+                            onDelete={handleDeleteProduct}
+                        />
+                    )
+                })
+            }
+
+            {/* 產生分頁bar */}
+
+        </div>
+    );
+}
+
+export default ProductListPage;
+
+
+
+====================================================================================
+------------------------
+
+====================================================================================
+------------------------
+
+====================================================================================
+------------------------
+
+====================================================================================
+------------------------
+

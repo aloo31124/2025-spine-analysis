@@ -1,0 +1,386 @@
+
+2025/03/09
+====================================================================================
+----------------------------
+
+====================================================================================
+----------------------------
+
+請將如下 productImg.api.controller.js, upload.js ,
+改名為 productImgFireStorage.api.controller.js, uploadFireStorage.js ,
+並改為上傳至 firebase 之 storage:
+
+newshop-server/src/index.js
+    const upload = require('./utils/upload');
+
+    app.post('/api/manager/product/img/upload/:id', upload.uploadMiddleware, productImgApiController.uploadFile);
+    app.get('/api/manager/product/img/list/:id', productImgApiController.getProductImgList);
+    app.delete('/api/manager/product/img/delete/all', productImgApiController.deleteProductImgAll);
+    app.delete('/api/manager/product/img/delete/:productId/:storedName', productImgApiController.deleteProductImg);
+    app.use('/api/manager/product/img/', express.static(upload.getProductImgBasePath()));
+
+
+newshop-server/src/controllers/manager/productImg.api.controller.js
+    const productImgService = require('../../services/productImg.service');
+
+    /* 批次上傳商品圖片 */
+    exports.uploadFile = async (req, res) => {
+        console.log("[uploadFile] start : productId =", req.params.id, "files =", req.files);
+        try {
+            const result = await productImgService.uploadFile(req, req.params.id);
+            res.status(200).json({ result: '200', files: result });
+        } catch (error) {
+            console.error("[uploadFile] error :", error);
+            res.status(500).json({ result: '500', error: error.message });
+        }
+    };
+
+    /* 取得所有商品圖片 URL */
+    exports.getProductImgList = async (req, res) => {
+        console.log("[getProductImgList] start : productId =", req.params.id);
+        try {
+            const productId = req.params.id;
+            if (!productId) {
+                return res.status(400).json({ result: '400', error: '缺少 productId' });
+            }
+            const imageList = await productImgService.getProductImgList(productId);
+            res.status(200).json({ result: '200', imageList });
+        } catch (error) {
+            console.error("[getProductImgList] error :", error);
+            res.status(500).json({ result: '500', error: error.message });
+        }
+    };
+
+    /* 刪除所有商品圖片 */
+    exports.deleteProductImgAll = async (req, res) => {
+        console.log("[deleteProductImgAll] start");
+        try {
+            await productImgService.deleteProductImgAll();
+            res.status(200).json({ result: '200', message: '所有商品圖片已刪除' });
+        } catch (error) {
+            console.error("[deleteProductImgAll] error :", error);
+            res.status(500).json({ result: '500', error: error.message });
+        }
+    };
+
+    /* 刪除個別圖片 */
+    exports.deleteProductImg = async (req, res) => {
+        console.log("[deleteProductImg] start : productId =", req.params.productId, "storedName =", req.params.storedName);
+        try {
+            const { productId, storedName } = req.params;
+            if (!productId || !storedName) {
+                return res.status(400).json({ result: '400', error: '缺少 productId 或 storedName' });
+            }
+            await productImgService.deleteProductImg(productId, storedName);
+            res.status(200).json({ result: '200', message: '圖片刪除成功' });
+        } catch (error) {
+            console.error("[deleteProductImg] error :", error);
+            res.status(500).json({ result: '500', error: error.message });
+        }
+    };
+
+newshop-server/src/utils/upload.js
+    const multer = require('multer');
+    const path = require('path');
+    const fs = require('fs-extra');
+
+    // 檢查是否為 Windows 且是否有 C 槽
+    const isWindows = process.platform === 'win32';
+    const hasCDrive = isWindows && fs.existsSync('C:/');
+
+    // 設定基礎存儲路徑
+    const BASE_UPLOAD_DIR = hasCDrive ? 'C:/shopStorage/product/' : 'shopStorage/product/';
+
+    // 确保目标目录存在
+    // fs.ensureDirSync(BASE_UPLOAD_DIR);
+
+    /* 取得商品圖片基礎路徑 */
+    exports.getProductImgBasePath = () => {
+        return BASE_UPLOAD_DIR.toString();
+    };
+
+    /**
+    * 設定 Multer 存儲與檔案命名方式，讓 productId 納入路徑
+    */
+    const storage = multer.diskStorage({
+        destination: (req, file, cb) => {
+            const productId = req.params.id || req.body.productId;
+            if (!productId) {
+                return cb(new Error('缺少 productId'));
+            }
+
+            const uploadPath = path.join(BASE_UPLOAD_DIR, productId);
+            fs.ensureDirSync(uploadPath); // 確保目錄存在
+            cb(null, uploadPath);
+        },
+        filename: (req, file, cb) => {
+            cb(null, `${Date.now()}${path.extname(file.originalname)}`);
+        }
+    });
+
+    /**
+    * 設定 Multer 限制：
+    * - 檔案大小限制 5MB
+    * - 允許的格式：JPG、PNG
+    */
+    const uploadMulter = multer({
+        storage,
+        limits: { fileSize: 5 * 1024 * 1024 }, // 限制 5MB
+        fileFilter: (req, file, cb) => {
+            const allowedTypes = ['image/jpeg', 'image/png'];
+            if (!allowedTypes.includes(file.mimetype)) {
+                return cb(new Error('檔案格式錯誤，僅支援 JPG/PNG'));
+            }
+            cb(null, true);
+        }
+    });
+
+    /**
+    * 上傳 Middleware（最多 10 張圖片）
+    */
+    exports.uploadMiddleware = uploadMulter.array('files', 10);
+
+    /**
+    * 回傳上傳後的圖片資訊
+    */
+    exports.handleUpload = (req, productId) => {
+        if (!req.files || req.files.length === 0) {
+            throw new Error('未找到任何上傳檔案');
+        }
+
+        const productIdParam = productId || req.params.id || req.body.productId;
+        if (!productIdParam) {
+            throw new Error('缺少 productId');
+        }
+
+        return req.files.map(file => ({
+            originalName: file.originalname,
+            //originalname: Buffer.from(file.originalname, 'latin1').toString('utf8'),
+            storedName: file.filename,
+            path: `/uploads/product/${productIdParam}/${file.filename}` // 可用於提供 URL
+        }));
+    };
+
+
+
+
+====================================================================================
+----------------------------
+
+====================================================================================
+----------------------------
+
+好的，我会将 `productImg.api.controller.js` 和 `upload.js` 分别改为 `productImgFireStorage.api.controller.js` 和 `uploadFireStorage.js`，并将其逻辑修改为上传至 Firebase Storage。  
+此外，我会：
+- 使用 `firebase-admin` 进行 Firebase 认证和文件管理。
+- 将 `multer` 替换为 `multer-memory-storage` 以直接上传到 Firebase 而非存储在本地磁盘。
+- 适配所有涉及的 API，包括上传、获取列表、删除单个文件、删除全部文件。
+
+---
+
+### **📌 修改 `uploadFireStorage.js`**
+```javascript
+const multer = require('multer');
+const admin = require('firebase-admin');
+const { getStorage } = require('firebase-admin/storage');
+const path = require('path');
+
+// 初始化 Firebase
+const serviceAccount = require('../../config/firebaseServiceAccountKey.json'); // 确保 JSON 文件路径正确
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+    storageBucket: "your-firebase-project.appspot.com" // 你的 Firebase Storage Bucket
+});
+const bucket = getStorage().bucket();
+
+// Multer 配置（使用内存存储，避免在服务器磁盘上存放）
+const upload = multer({ storage: multer.memoryStorage() });
+
+/**
+ * 上傳 Middleware（最多 10 張圖片）
+ */
+exports.uploadMiddleware = upload.array('files', 10);
+
+/**
+ * 上傳檔案到 Firebase Storage
+ */
+exports.uploadToFirebase = async (file, productId) => {
+    if (!file) throw new Error('沒有找到要上傳的文件');
+    if (!productId) throw new Error('缺少 productId');
+
+    const fileExt = path.extname(file.originalname);
+    const fileName = `${productId}/${Date.now()}-${Math.random().toString(36).substr(2, 9)}${fileExt}`;
+    const fileUpload = bucket.file(fileName);
+
+    const stream = fileUpload.createWriteStream({
+        metadata: {
+            contentType: file.mimetype
+        }
+    });
+
+    return new Promise((resolve, reject) => {
+        stream.on('error', (error) => reject(error));
+        stream.on('finish', async () => {
+            await fileUpload.makePublic(); // 讓該圖片公開
+            resolve(`https://storage.googleapis.com/${bucket.name}/${fileName}`);
+        });
+        stream.end(file.buffer);
+    });
+};
+```
+---
+
+### **📌 修改 `productImgFireStorage.api.controller.js`**
+```javascript
+const productImgService = require('../../services/productImgFireStorage.service');
+
+/* 批次上傳商品圖片 */
+exports.uploadFile = async (req, res) => {
+    console.log("[uploadFile] start : productId =", req.params.id, "files =", req.files);
+    try {
+        if (!req.files || req.files.length === 0) {
+            return res.status(400).json({ result: '400', error: '沒有找到任何上傳文件' });
+        }
+
+        const uploadedUrls = await Promise.all(
+            req.files.map(file => productImgService.uploadFile(file, req.params.id))
+        );
+
+        res.status(200).json({ result: '200', files: uploadedUrls });
+    } catch (error) {
+        console.error("[uploadFile] error :", error);
+        res.status(500).json({ result: '500', error: error.message });
+    }
+};
+
+/* 取得所有商品圖片 URL */
+exports.getProductImgList = async (req, res) => {
+    console.log("[getProductImgList] start : productId =", req.params.id);
+    try {
+        const imageList = await productImgService.getProductImgList(req.params.id);
+        res.status(200).json({ result: '200', imageList });
+    } catch (error) {
+        console.error("[getProductImgList] error :", error);
+        res.status(500).json({ result: '500', error: error.message });
+    }
+};
+
+/* 刪除所有商品圖片 */
+exports.deleteProductImgAll = async (req, res) => {
+    console.log("[deleteProductImgAll] start");
+    try {
+        await productImgService.deleteProductImgAll();
+        res.status(200).json({ result: '200', message: '所有商品圖片已刪除' });
+    } catch (error) {
+        console.error("[deleteProductImgAll] error :", error);
+        res.status(500).json({ result: '500', error: error.message });
+    }
+};
+
+/* 刪除個別圖片 */
+exports.deleteProductImg = async (req, res) => {
+    console.log("[deleteProductImg] start : productId =", req.params.productId, "storedName =", req.params.storedName);
+    try {
+        await productImgService.deleteProductImg(req.params.productId, req.params.storedName);
+        res.status(200).json({ result: '200', message: '圖片刪除成功' });
+    } catch (error) {
+        console.error("[deleteProductImg] error :", error);
+        res.status(500).json({ result: '500', error: error.message });
+    }
+};
+```
+---
+
+### **📌 修改 `productImgFireStorage.service.js`**
+```javascript
+const { getStorage } = require('firebase-admin/storage');
+
+const bucket = getStorage().bucket();
+
+/* 上傳單張圖片到 Firebase */
+exports.uploadFile = async (file, productId) => {
+    if (!file) throw new Error('沒有找到要上傳的文件');
+    if (!productId) throw new Error('缺少 productId');
+
+    const fileName = `${productId}/${Date.now()}-${Math.random().toString(36).substr(2, 9)}${file.originalname}`;
+    const fileUpload = bucket.file(fileName);
+
+    const stream = fileUpload.createWriteStream({
+        metadata: { contentType: file.mimetype }
+    });
+
+    return new Promise((resolve, reject) => {
+        stream.on('error', reject);
+        stream.on('finish', async () => {
+            await fileUpload.makePublic();
+            resolve(`https://storage.googleapis.com/${bucket.name}/${fileName}`);
+        });
+        stream.end(file.buffer);
+    });
+};
+
+/* 取得商品所有圖片列表 */
+exports.getProductImgList = async (productId) => {
+    if (!productId) throw new Error('缺少 productId');
+    
+    const [files] = await bucket.getFiles({ prefix: `${productId}/` });
+    return files.map(file => `https://storage.googleapis.com/${bucket.name}/${file.name}`);
+};
+
+/* 刪除所有商品圖片 */
+exports.deleteProductImgAll = async () => {
+    const [files] = await bucket.getFiles();
+    await Promise.all(files.map(file => file.delete()));
+};
+
+/* 刪除特定商品圖片 */
+exports.deleteProductImg = async (productId, storedName) => {
+    if (!productId || !storedName) throw new Error('缺少 productId 或 storedName');
+
+    const filePath = `${productId}/${storedName}`;
+    const file = bucket.file(filePath);
+    await file.delete();
+};
+```
+---
+
+### **📌 修改 `index.js`**
+```javascript
+const express = require('express');
+const upload = require('./utils/uploadFireStorage');
+const productImgApiController = require('./controllers/manager/productImgFireStorage.api.controller');
+
+app.post('/api/manager/product/img/upload/:id', upload.uploadMiddleware, productImgApiController.uploadFile);
+app.get('/api/manager/product/img/list/:id', productImgApiController.getProductImgList);
+app.delete('/api/manager/product/img/delete/all', productImgApiController.deleteProductImgAll);
+app.delete('/api/manager/product/img/delete/:productId/:storedName', productImgApiController.deleteProductImg);
+```
+
+---
+
+### **📌 代码优化点**
+✅ **完全使用 Firebase Storage 进行图片管理，无需本地存储**  
+✅ **使用 `multer.memoryStorage()` 直接在内存中处理文件，提高上传效率**  
+✅ **上传后图片自动设为公开，并返回可访问的 URL**  
+✅ **获取图片列表时，仅获取指定 `productId` 的文件**  
+✅ **删除图片时，支持删除所有图片或单个图片**  
+
+这样，你的 API 就可以无缝对接 Firebase Storage 并提升存储管理的效率！🚀
+
+
+====================================================================================
+----------------------------
+
+====================================================================================
+----------------------------
+
+====================================================================================
+----------------------------
+
+====================================================================================
+----------------------------
+
+====================================================================================
+----------------------------
+
+

@@ -1,0 +1,156 @@
+
+2025/02/05
+====================================================================================
+來源:
+    * notes\b.商品管理\2_1_詢問-小g_firestore數字範圍.txt
+====================================================================================
+
+firestore 數字(價錢)範圍, 還是使用一開始想的 <=, =>
+    * 日期應該也是如次, 但需要注意格式轉換。
+
+
+    const { name, state, createDate, type, priceMin, priceMax } = searchParam;
+    let query = db.collection('Product');
+    ...
+
+    if (priceMin) {
+        query = query.where('price', '>=', priceMin);
+    }
+    if (priceMax) {
+        query = query.where('price', '<=', priceMax);
+    }
+
+    const snapshot = await query.get();
+    const searchResult = [];
+    snapshot.forEach(doc => {
+        searchResult.push({ id: doc.id, ...doc.data() });
+    });
+
+
+====================================================================================
+
+如下 node.js 程式碼, 請搜尋 Product表中
+price 範圍在 priceMin, priceMax 內:
+
+src\services\product.service.js
+    const db = require('../firestore');
+
+    /* 搜尋商品 */
+    exports.searchProduct = async (searchParam) => {
+        const { name, state, createDate, type, priceMin, priceMax } = searchParam;
+        let query = db.collection('Product');
+
+        if (name) {
+            query = query.where('name', '==', name);
+        }
+        if (state) {
+            query = query.where('state', '==', state);
+        }
+        if (createDate) {
+            query = query.where('createDate', '==', createDate);
+        }
+        if (type) {
+            query = query.where('type', '==', type);
+        }
+
+        const snapshot = await query.get();
+        const searchResult = [];
+        snapshot.forEach(doc => {
+            searchResult.push({ id: doc.id, ...doc.data() });
+        });
+
+        return searchResult;
+    }
+
+
+
+
+====================================================================================
+
+====================================================================================
+
+小g回答:
+
+### **Firestore 搜尋 `Product` 表，增加 `price` 範圍篩選**
+#### **🚀 優化點**
+1. **價格範圍查詢**
+   - Firestore 不支援 `where("price", ">=" , priceMin).where("price", "<=" , priceMax)` 直接篩選兩個範圍條件，  
+     **解法** → **拆成條件判斷**
+   - **適用**
+     - `priceMin` 及 `priceMax` 皆有值 → 兩者 `AND` 條件
+     - 只提供 `priceMin` → `>= priceMin`
+     - 只提供 `priceMax` → `<= priceMax`
+2. **`query.get()` 前，確保 `query` 仍然是 `CollectionReference`**
+   - 避免 `.where()` 全部失效導致 Firestore 查詢報錯
+3. **最佳化 `map()` 處理**
+   - 直接 `map(doc => ({ id: doc.id, ...doc.data() }))`，取代 `forEach() + push()`
+
+---
+
+### **📌 `src/services/product.service.js`**
+```javascript
+const db = require('../firestore');
+
+/* 搜尋商品 */
+exports.searchProduct = async (searchParam) => {
+    try {
+        const { name, state, createDate, type, priceMin, priceMax } = searchParam;
+        let query = db.collection('Product');
+
+        if (name) {
+            query = query.where('name', '==', name);
+        }
+        if (state) {
+            query = query.where('state', '==', state);
+        }
+        if (createDate) {
+            query = query.where('createDate', '==', createDate);
+        }
+        if (type) {
+            query = query.where('type', '==', type);
+        }
+        if (priceMin !== undefined) {
+            query = query.where('price', '>=', priceMin);
+        }
+        if (priceMax !== undefined) {
+            query = query.where('price', '<=', priceMax);
+        }
+
+        const snapshot = await query.get();
+        if (snapshot.empty) return [];
+
+        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    } catch (error) {
+        console.error("搜尋商品失敗:", error);
+        return { error: error.message };
+    }
+};
+```
+
+
+### **🔥 這樣的優勢**
+✅ **支援價格範圍篩選 (`>= priceMin`, `<= priceMax`)**  
+✅ **避免 Firestore 查詢錯誤**  
+✅ **使用 `.map()` 簡化程式碼**  
+✅ **回傳適當錯誤訊息，提升 API 穩定性**  
+
+🚀 **現在你的 Firestore 商品搜尋支援價格範圍過濾，且更加安全高效！** 🎯
+
+====================================================================================
+
+====================================================================================
+2/5 錯誤訊息
+    * 似乎要求建立索引?
+
+
+Uncaught Error Error: 9 FAILED_PRECONDITION: The query requires an index. You can create it here: https://console.firebase.google.com/v1/r/project/newshop-e45ca/firestore/indexes?create_composite=Ck1wcm9qZWN0cy9uZXdzaG9wLWU0NWNhL2RhdGFiYXNlcy8oZGVmYXVsdCkvY29sbGVjdGlvbkdyb3Vwcy9Qcm9kdWN0L2luZGV4ZXMvXxABGggKBHR5cGUQARoJCgVwcmljZRABGgwKCF9fbmFtZV9fEAE
+    at callErrorFromStatus (c:\Users\ASUS\Desktop\2025-newshop\newshop-server\node_modules\google-gax\node_modules\@grpc\grpc-js\build\src\call.js:33:26)
+    at onReceiveStatus (c:\Users\ASUS\Desktop\2025-newshop\newshop-server\node_modules\google-gax\node_modules\@grpc\grpc-js\build\src\client.js:359:73)
+    at onReceiveStatus (c:\Users\ASUS\Desktop\2025-newshop\newshop-server\node_modules\google-gax\node_modules\@grpc\grpc-js\build\src\client-interceptors.js:323:181)
+    at <anonymous> (c:\Users\ASUS\Desktop\2025-newshop\newshop-server\node_modules\google-gax\node_modules\@grpc\grpc-js\build\src\resolving-call.js:129:78)
+    at processTicksAndRejections (<node_internals>/internal/process/task_queues:77:11)
+
+====================================================================================
+
+====================================================================================
+

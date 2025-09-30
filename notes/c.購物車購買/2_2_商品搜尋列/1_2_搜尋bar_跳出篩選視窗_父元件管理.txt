@@ -1,0 +1,139 @@
+
+2025/07/11
+====================================================================================
+---------------------------------------------
+
+====================================================================================
+---------------------------------------------
+
+舊的寫法:
+
+newshop-client\src\pages\shopping\ShopSearchListPage.jsx
+    // 商品搜尋列表
+    function ShopSearchListPage() {
+        const [prductList, setProductList] = useState([]);
+
+        useEffect(() => {
+            getProductList().then((res) => {
+                setProductList(res.data.result);
+            }).catch(err => {
+                console.log("取得購物商品列表錯誤: ", err)
+            })
+        }, []);
+
+        return (
+            <div className={style.ShopSearchListPage}>
+                <ProductSearchBar />
+                <ProductList 
+                    prductList={prductList}
+                />
+                <PaggingBar />
+            </div>
+        )
+    }export default ShopSearchListPage;
+
+
+newshop-client\src\components\shopping\ProductSearchBar\ProductSearchBar.jsx
+    function ProductSearchBar() {
+        const [showSearchDialog, setShowSearchDialog] = useState(false);
+
+        return (
+            <div className={style.ProductSearchBar} >
+                <input type="text" 
+                    placeholder='輸入搜尋商品'
+                />
+                <div className={style.ProductSearchItemList} onClick={() => setShowSearchDialog(true)}>
+                    <img src={filterIcon} className={style.filterIcon} />
+                    ...
+                </div>
+
+                {/** 購買商品篩選條件 */}
+                {showSearchDialog && (
+                    <SopingSearchDialog 
+                        isOpen={showSearchDialog}
+                        onClose={() => setShowSearchDialog(false)}
+                    />
+                )}
+
+            </div>
+        );
+    }export default ProductSearchBar;
+
+
+newshop-client\src\components\dialog\SopingSearchDialog\SopingSearchDialog.jsx
+    function SopingSearchDialog({ isOpen, onClose }) {
+        if (!isOpen) return null; // Dialog 關閉時不渲染
+
+        const [categoryList, setCategoryList] = useState([]);
+        const [promotionList, setPromotionList] = useState([]);
+
+        useEffect(() => {
+            fetchCategory();
+            fetchPromotion();
+        }, []);
+
+        const fetchCategory = async () => {
+            const res = await getProductCategoryList();
+            if(res?.status !== 200) {
+                alert("載入商品分類異常。");
+            }
+            setCategoryList(res.data.result);
+        }
+
+        const fetchPromotion = async () => {
+            const res = await getPromotionList();
+            if(res?.status !== 200) {
+                alert("載入促銷優惠異常。");
+            }
+            setPromotionList(res.data.result);
+        }
+
+        return (
+            <div className={dialogStyle.mask} onClick={onClose}>
+                <div className={dialogStyle.dialog} onClick={(e) => e.stopPropagation()} >
+                    <h2>篩選條件</h2>
+                    <h3>商品分類</h3>
+                    <div className={dialogStyle.dialogRow}>
+                        <div className='tabItemClicked'>不限</div>
+                        {categoryList.map(category => 
+                            <div className='tabItem' key={category.id}>{category.name}</div>
+                        )}
+                    </div>
+                    <h3>商品價位</h3>
+                    <RangeSlider/>
+                    <h3>方案優惠</h3>
+                    <div className={dialogStyle.dialogRow}>
+                        <div className='tabItemClicked'>不限</div>
+                        {promotionList.map(promotion => 
+                            <div className='tabItem' key={promotion.id}>{promotion.name}</div>
+                        )}
+                    </div>
+                    <div className={dialogStyle.dialogFoot}>
+                        <button>搜尋</button>
+                    </div>
+                </div>
+            </div>
+        );    
+    }
+    export default SopingSearchDialog;
+
+
+
+====================================================================================
+---------------------------------------------
+
+====================================================================================
+---------------------------------------------
+
+====================================================================================
+---------------------------------------------
+
+====================================================================================
+---------------------------------------------
+
+====================================================================================
+---------------------------------------------
+
+
+
+

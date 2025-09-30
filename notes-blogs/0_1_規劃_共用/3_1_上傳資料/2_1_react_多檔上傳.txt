@@ -1,0 +1,273 @@
+
+2025/02/20
+
+npm i react-dropzone
+
+====================================================================================
+----------------------------
+
+如下 react 新增商品頁面, 
+按下 上傳檔案 按鈕, 使用 react-dropzone 產生一個拖曳上傳的視窗,
+可 批次上傳多個 圖檔影音(.png, mp4...) 或 文件(.doc, pdf, csv...),
+該上傳視窗按下送出, axios 透過 FormData 上傳至後端
+
+function CreateEditProduct({typePage}) {
+                ...
+    return (
+        <div className={style.CreateEditProduct}>
+                ...
+            <div className={style.CreateEditProductContainer}>
+                <h2>商品圖庫</h2>
+                <button>上傳檔案</button>
+            </div>
+        </div>
+    );
+}
+export default CreateEditProduct;
+
+====================================================================================
+----------------------------
+
+====================================================================================
+----------------------------
+
+你可以使用 `react-dropzone` 來建立拖曳上傳的視窗，並使用 `axios` 搭配 `FormData` 來處理檔案上傳。  
+
+---
+
+## **步驟**
+1. **新增 `react-dropzone`**  
+   你需要先安裝 `react-dropzone`：
+   ```sh
+   npm install react-dropzone axios
+   ```
+2. **修改 `CreateEditProduct.jsx`**  
+   - 點擊「上傳檔案」按鈕，開啟 `DropzoneDialog`。
+   - 在 `DropzoneDialog` 拖曳或選擇檔案，按下「送出」上傳。
+   - 透過 `axios` + `FormData` 上傳至後端 API。
+
+---
+
+## **修改後的 `CreateEditProduct.jsx`**
+```jsx
+import React, { useState, useCallback } from "react";
+import { useDropzone } from "react-dropzone";
+import axios from "axios";
+import style from "./CreateEditProduct.module.css";
+
+function CreateEditProduct({ typePage }) {
+    const [showDropzone, setShowDropzone] = useState(false);
+    const [files, setFiles] = useState([]);
+
+    // 處理檔案選擇
+    const onDrop = useCallback((acceptedFiles) => {
+        setFiles([...files, ...acceptedFiles]); // 批次新增檔案
+    }, [files]);
+
+    // 上傳檔案
+    const handleUpload = async () => {
+        const formData = new FormData();
+        files.forEach(file => {
+            formData.append("files", file);
+        });
+
+        try {
+            const res = await axios.post("/api/upload", formData, {
+                headers: { "Content-Type": "multipart/form-data" },
+            });
+            alert("上傳成功！");
+            setShowDropzone(false);
+            setFiles([]); // 清空已選擇的檔案
+        } catch (error) {
+            alert("上傳失敗！");
+            console.error("Upload Error:", error);
+        }
+    };
+
+    return (
+        <div className={style.CreateEditProduct}>
+            <div className={style.CreateEditProductContainer}>
+                <h2>商品圖庫</h2>
+                <button onClick={() => setShowDropzone(true)}>上傳檔案</button>
+
+                {/* 拖曳上傳視窗 */}
+                {showDropzone && (
+                    <div className={style.dropzoneOverlay}>
+                        <DropzoneDialog 
+                            onClose={() => setShowDropzone(false)}
+                            files={files}
+                            onDrop={onDrop}
+                            onUpload={handleUpload}
+                        />
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}
+
+export default CreateEditProduct;
+```
+
+---
+
+## **新增 `DropzoneDialog.jsx`**
+```jsx
+import React from "react";
+import { useDropzone } from "react-dropzone";
+import style from "./DropzoneDialog.module.css";
+
+function DropzoneDialog({ onClose, files, onDrop, onUpload }) {
+    const { getRootProps, getInputProps } = useDropzone({
+        onDrop,
+        accept: "image/*,video/*,.doc,.docx,.pdf,.csv",
+        multiple: true
+    });
+
+    return (
+        <div className={style.dialog}>
+            {/* 遮罩層，點擊關閉 */}
+            <div className={style.overlay} onClick={onClose}></div>
+
+            <div className={style.dialogContent}>
+                <h3>拖曳檔案至此，或點擊選擇檔案</h3>
+                <div {...getRootProps()} className={style.dropzone}>
+                    <input {...getInputProps()} />
+                    <p>拖曳檔案到這裡，或點擊選擇檔案</p>
+                </div>
+
+                {/* 顯示選擇的檔案 */}
+                <ul className={style.fileList}>
+                    {files.map((file, index) => (
+                        <li key={index}>{file.name}</li>
+                    ))}
+                </ul>
+
+                <div className={style.dialogFooter}>
+                    <button onClick={onClose}>取消</button>
+                    <button onClick={onUpload} disabled={files.length === 0}>送出</button>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+export default DropzoneDialog;
+```
+
+---
+
+## **新增 CSS 樣式**
+#### **DropzoneDialog.module.css**
+```css
+.dialog {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.overlay {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.dialogContent {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    z-index: 1001;
+    width: 400px;
+}
+
+.dropzone {
+    border: 2px dashed #ccc;
+    padding: 20px;
+    margin-top: 10px;
+    cursor: pointer;
+}
+
+.fileList {
+    list-style: none;
+    padding: 0;
+}
+
+.fileList li {
+    margin: 5px 0;
+}
+
+.dialogFooter {
+    margin-top: 10px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.dialogFooter button {
+    padding: 8px 16px;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.dialogFooter button:first-child {
+    background: #ccc;
+}
+
+.dialogFooter button:last-child {
+    background: #007bff;
+    color: white;
+}
+```
+
+---
+
+## **API (後端)**
+如果你的後端是 `Node.js + Express`，可以這樣處理上傳：
+```javascript
+const express = require("express");
+const multer = require("multer");
+const path = require("path");
+
+const app = express();
+const upload = multer({ dest: "uploads/" });
+
+app.post("/api/upload", upload.array("files"), (req, res) => {
+    if (!req.files) {
+        return res.status(400).json({ message: "沒有檔案被上傳" });
+    }
+    res.status(200).json({ message: "檔案上傳成功", files: req.files });
+});
+
+app.listen(5000, () => console.log("Server running on port 5000"));
+```
+
+---
+
+## **最終效果**
+✅ **點擊「上傳檔案」後，彈出 `DropzoneDialog`**  
+✅ **拖曳或選擇多個檔案 (.png, .mp4, .doc, .pdf, .csv...)**  
+✅ **按下「送出」，`axios` 透過 `FormData` 批次上傳到後端**  
+✅ **上傳成功後關閉視窗，清空選擇的檔案**  
+✅ **點擊遮罩 (`mask`) 可關閉視窗**  
+
+這樣你的 React 上傳檔案功能就完成了！🚀
+
+
+====================================================================================
+----------------------------
+
+====================================================================================
+----------------------------
+
+====================================================================================
+----------------------------
+
+

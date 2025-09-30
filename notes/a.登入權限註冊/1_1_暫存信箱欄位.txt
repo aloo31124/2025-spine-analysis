@@ -1,0 +1,229 @@
+
+2025/06/18
+=============================================================================
+----------------------------------
+deepseek
+精要寫法:
+
+newshop-client\src\pages\auth\LoginPage.jsx
+    function LoginPage() {...
+        useEffect(() => {
+            getTempEMail();
+        }, []);
+
+        /** 從 localStorage 讀取 暫存信箱 */
+        const getTempEMail = () => {
+            const savedEmail = localStorage.getItem('savedEmail');
+            const savedTime = localStorage.getItem('savedEmailTime');
+            // 檢查是否在5天有效期內
+            if(!savedEmail || !savedTime) return;
+            const currentTime = new Date().getTime();
+            const savedTimeValue = parseInt(savedTime, 10);
+            const fiveDaysInMs = 5 * 24 * 60 * 60 * 1000; // 5天的毫秒數
+            if (currentTime - savedTimeValue <= fiveDaysInMs) {
+                inputEMailRef.current.value = savedEmail;
+            } else {
+                // 超過5天則清除
+                localStorage.removeItem('savedEmail');
+                localStorage.removeItem('savedEmailTime');
+            }
+        }
+
+        /* 登入 */
+        const clickLogin = async () => {
+            ...
+            alert('登入成功');
+
+            // 儲存 暫存信箱 到 localStorage (包含當前時間戳記)
+            if (email) {
+                localStorage.setItem('savedEmail', email);
+                localStorage.setItem('savedEmailTime', new Date().getTime().toString());
+            }
+
+            navigate('/manager/home')
+        }
+
+
+=============================================================================
+----------------------------------
+
+如下 react 專案登入頁page,
+信箱input欄位, 若使用者輸入信箱後,
+可暫存在該瀏覽器5天。
+
+newshop-client\src\pages\auth\LoginPage.jsx
+    import React, {useRef} from 'react';
+    import { login } from '../../api/auth';
+    import { useNavigate } from 'react-router-dom';
+    function LoginPage() {
+        const navigate = useNavigate();
+        const inputEMailRef = useRef('');
+        const inputPasswordRef = useRef('');
+        /* 登入 */
+        const clickLogin = async () => {
+            ...
+        }
+        /* 註冊 */
+        const clickRegist = () => {
+            navigate('/auth/regist/flow');
+        }
+        /* 忘記密法 */
+        const clickForgetPassword = () => {
+            navigate('/auth/password/forget');
+        }
+        return (
+            <div className='Form'>
+                <h1>登入頁</h1>
+                <input type="text" 
+                    placeholder='信箱'
+                    ref={inputEMailRef} 
+                />
+                <input type="text" 
+                    placeholder='密碼'
+                    ref={inputPasswordRef} 
+                />
+                <div className='btnBar'>
+                    <button onClick={clickLogin}>登入</button>
+                    <button onClick={clickForgetPassword}>忘記密碼</button>
+                </div>
+                <button onClick={clickRegist}>註冊</button>
+            </div>
+        );
+    }export default LoginPage;
+
+
+
+=============================================================================
+----------------------------------
+
+=============================================================================
+deepseek 完整寫法:
+----------------------------------
+
+# 在 React 登入頁面實現信箱暫存功能
+
+要在登入頁面中實現信箱暫存功能（使用瀏覽器的 localStorage 保存 5 天），以下是修改後的 `LoginPage.jsx` 程式碼：
+
+## 修改後的程式碼
+    ```jsx
+    import React, { useRef, useEffect } from 'react';
+    import { login } from '../../api/auth';
+    import { useNavigate } from 'react-router-dom';
+
+    function LoginPage() {
+        const navigate = useNavigate();
+        const inputEMailRef = useRef(null);
+        const inputPasswordRef = useRef(null);
+
+        // 從 localStorage 讀取暫存的信箱
+        useEffect(() => {
+            const savedEmail = localStorage.getItem('savedEmail');
+            const savedTime = localStorage.getItem('savedEmailTime');
+            
+            // 檢查是否在5天有效期內
+            if (savedEmail && savedTime) {
+                const currentTime = new Date().getTime();
+                const savedTimeValue = parseInt(savedTime, 10);
+                const fiveDaysInMs = 5 * 24 * 60 * 60 * 1000; // 5天的毫秒數
+                
+                if (currentTime - savedTimeValue <= fiveDaysInMs) {
+                    inputEMailRef.current.value = savedEmail;
+                } else {
+                    // 超過5天則清除
+                    localStorage.removeItem('savedEmail');
+                    localStorage.removeItem('savedEmailTime');
+                }
+            }
+        }, []);
+
+        /* 登入 */
+        const clickLogin = async () => {
+            const email = inputEMailRef.current.value;
+            const password = inputPasswordRef.current.value;
+            
+            // 儲存信箱到 localStorage (包含當前時間戳記)
+            if (email) {
+                localStorage.setItem('savedEmail', email);
+                localStorage.setItem('savedEmailTime', new Date().getTime().toString());
+            }
+            
+            // 原有登入邏輯
+            try {
+                await login(email, password);
+                navigate('/');
+            } catch (error) {
+                console.error('登入失敗:', error);
+                alert('登入失敗，請檢查帳號密碼');
+            }
+        };
+
+        /* 註冊 */
+        const clickRegist = () => {
+            navigate('/auth/regist/flow');
+        };
+
+        /* 忘記密碼 */
+        const clickForgetPassword = () => {
+            navigate('/auth/password/forget');
+        };
+
+        return (
+            <div className='Form'>
+                <h1>登入頁</h1>
+                <input 
+                    type="email" 
+                    placeholder='信箱'
+                    ref={inputEMailRef}
+                />
+                <input 
+                    type="password"  // 修改為 password 類型更安全
+                    placeholder='密碼'
+                    ref={inputPasswordRef}
+                />
+                <div className='btnBar'>
+                    <button onClick={clickLogin}>登入</button>
+                    <button onClick={clickForgetPassword}>忘記密碼</button>
+                </div>
+                <button onClick={clickRegist}>註冊</button>
+            </div>
+        );
+    }
+
+    export default LoginPage;
+    ```
+
+## 功能說明
+
+1. **儲存信箱**：
+   - 當用戶點擊登入按鈕時，會將輸入的信箱儲存到 `localStorage`
+   - 同時儲存當前時間戳記，用於計算5天有效期
+
+2. **自動填充**：
+   - 組件載入時 (`useEffect`)，會檢查是否有暫存的信箱
+   - 如果信箱在5天有效期內，則自動填充到輸入欄位
+   - 超過5天則自動清除暫存資料
+
+3. **安全性改進**：
+   - 將密碼輸入欄位類型改為 `password`，避免明文顯示
+   - 只儲存信箱，不儲存密碼以確保安全性
+
+## 注意事項
+
+1. `localStorage` 是基於瀏覽器的儲存，不同瀏覽器或隱私模式可能有限制
+2. 儲存時間是基於用戶設備的本地時間
+3. 如果需要在多個子域名間共享，需改用 `cookie` 並設置適當的 domain
+4. 敏感資訊不應儲存在 `localStorage` 中（此處只儲存信箱，不儲存密碼）
+
+這個實現方式簡單有效，可以滿足基本的使用者體驗需求，讓使用者下次訪問時無需重新輸入信箱。
+
+
+=============================================================================
+----------------------------------
+
+=============================================================================
+----------------------------------
+
+
+
+
+

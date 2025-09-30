@@ -1,0 +1,39 @@
+
+
+
+notes\c.購物車購買\2_1_商品內容頁\1_1_商品列表_串組圖片列.txt
+    分類: js > 非同步_async.await
+
+    標籤: 非同步, 主從資料合併, js, async.await
+
+
+    請一句話精要, 此屬於何種議題:
+        此屬於 **「非同步資料流處理」** 的前端議題，具體為「多層 Promise 並行處理與聚合」的常見情境。  
+        （核心問題：`map` + `async/await` 未正確使用 `Promise.all` 導致回傳未解析的 Promise 陣列）
+
+    請一句話精要, 此議題業務情境:
+        "商品列表與圖片的多層次關聯資料聚合" 
+        (因需先取得商品主資訊，再串接各自對應的圖片資源，屬於典型的 **主從資料合併** 業務場景)
+
+
+    請精要列出 問題程式碼(註解問題), 與解決程式碼(註解解決原理) : 
+        const result = productList.map(async product => {
+            // 1. `map` 內使用 `async/await` 會直接返回 `Promise` 陣列，而非解析後的結果
+            const imgList = await productImgFireStorage.getProductImgList(product.id);
+            return {...product, imgList};
+        });
+
+        解決:
+        const result = await Promise.all( // 使用 Promise.all 等待所有 Promise 解析
+            productList.map(async product => {...})
+        );
+
+
+    延伸問題: 
+        - firestore 無法 join 才造成此種寫法。
+        - map 中 逐個 id 請求這樣寫法好嗎? ="=
+        - 將 getProductImgList 整筆圖片取出, js 將 兩陣列 join 是否比較好?
+
+
+
+

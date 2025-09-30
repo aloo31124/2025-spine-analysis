@@ -1,0 +1,10 @@
+
+.TopBtnBar {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 20px;
+    gap: 20px;
+    border-bottom: #cfcfcf solid 2px;
+}

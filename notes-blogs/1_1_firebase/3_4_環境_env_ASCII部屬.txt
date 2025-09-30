@@ -1,0 +1,33 @@
+
+============================================================
+
+2025/01/24
+   deploy fix .evn 內欄位名稱 需 uppercase ASCII letters --> 子母全大寫!!!
+    
+
+============================================================
+
+node.js 根目錄有 .env 檔案, 且內容無法修改,
+但 firebase deploy 至 functions 出現如下錯誤, 請修正
+
+\.env
+    Email_User=aloo31124@gmail.com
+    Email_Password=vtwa hdpo ...
+
+錯誤訊息:
+    i  extensions: ensuring required API firebaseextensions.googleapis.com is enabled...
+    +  extensions: required API firebaseextensions.googleapis.com is enabled
+    Error: Failed to load environment variables from .env.:
+    - Error Key Email_User must start with an uppercase ASCII letter or underscore, and then consist of uppercase ASCII letters, digits, and underscores.
+    - Error Key Email_Password must start with an uppercase ASCII letter or underscore, and then consist of uppercase ASCII letters, digits, and underscores.
+
+
+============================================================
+
+firebase deploy --only functions --env Email_User=aloo31124@gmail.com --env Email_Password=vtwa hdpo rlyr hckm
+
+============================================================
+
+============================================================
+
+

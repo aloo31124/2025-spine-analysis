@@ -1,0 +1,171 @@
+
+2025/02/20
+====================================================================================
+----------------------------
+
+====================================================================================
+----------------------------
+
+如下 node.js express 之 product.service.js 上傳檔案之程式碼,
+希望讓 product.service.js 可專注於 商品相關的處理,
+將上傳檔案的相關邏輯抽離至 upload.js
+
+src\services\product.service.js
+    const multer = require('multer');
+    const path = require('path');
+    const fs = require('fs-extra');
+    const UPLOAD_DIR = 'C:/shopStorage/product/';
+
+    // 確保目錄存在
+    fs.ensureDirSync(UPLOAD_DIR);
+
+    // 設定 Multer 存儲, 並於此上傳圖片
+    const storage = multer.diskStorage({
+        destination: (req, file, cb) => cb(null, UPLOAD_DIR),
+        filename: (req, file, cb) => cb(null, `${Date.now()}${path.extname(file.originalname)}`)
+    });
+    const uploadMulter = multer({ storage });
+    exports.uploadMiddleware = uploadMulter.array('files', 10); // 最多 10 張圖片
+
+    // 回傳上傳圖片後資訊
+    exports.uploadFile = async (req) => {
+        if (!req.files || req.files.length === 0) {
+            throw new Error('未找到任何上傳檔案');
+        }
+
+        return req.files.map(file => ({
+            originalName: file.originalname,
+            storedName: file.filename,
+            path: file.path
+        }));
+    };
+
+
+src\utils\upload.js
+    // 將上傳檔案的相關邏輯抽離至 upload.js
+
+
+
+====================================================================================
+----------------------------
+
+====================================================================================
+----------------------------
+
+下面是將上傳檔案的相關邏輯抽離至 `utils/upload.js`，
+讓 `product.service.js` 只需關注商品相關的處理：  
+
+---
+
+### **📂 修改後的檔案結構**
+    ```
+    src/
+    │── controllers/
+    │   └── manager/
+    │       └── product.api.controller.js
+    │── services/
+    │   ├── product.service.js
+    │── utils/
+    │   ├── upload.js
+    │── index.js
+    ```
+
+---
+
+### **🔹 `src/utils/upload.js`**
+    ```javascript
+    const multer = require('multer');
+    const path = require('path');
+    const fs = require('fs-extra');
+
+    const UPLOAD_DIR = 'C:/shopStorage/product/';
+
+    // 確保目錄存在
+    fs.ensureDirSync(UPLOAD_DIR);
+
+    // 設定 Multer 存儲與檔案命名方式
+    const storage = multer.diskStorage({
+        destination: (req, file, cb) => cb(null, UPLOAD_DIR),
+        filename: (req, file, cb) => cb(null, `${Date.now()}${path.extname(file.originalname)}`)
+    });
+
+    // 設定 Multer 限制檔案大小、格式等
+    const uploadMulter = multer({
+        storage,
+        limits: { fileSize: 5 * 1024 * 1024 }, // 限制 5MB
+        fileFilter: (req, file, cb) => {
+            const allowedTypes = ['image/jpeg', 'image/png'];
+            if (!allowedTypes.includes(file.mimetype)) {
+                return cb(new Error('檔案格式錯誤，僅支援 JPG/PNG'));
+            }
+            cb(null, true);
+        }
+    });
+
+    // 上傳 Middleware（最多 10 張）
+    exports.uploadMiddleware = uploadMulter.array('files', 10);
+
+    // 回傳上傳後的圖片資訊
+    exports.handleUpload = (req) => {
+        if (!req.files || req.files.length === 0) {
+            throw new Error('未找到任何上傳檔案');
+        }
+
+        return req.files.map(file => ({
+            originalName: file.originalname,
+            storedName: file.filename,
+            path: file.path
+        }));
+    };
+    ```
+
+---
+
+### **🔹 `src/services/product.service.js`**
+    ```javascript
+    const { handleUpload } = require('../utils/upload');
+
+    exports.uploadFile = async (req) => {
+        return handleUpload(req);
+    };
+    ```
+
+---
+
+### **🔹 `src/index.js`**
+    ```javascript
+    const { uploadMiddleware } = require('./utils/upload');
+
+    app.post('/api/manager/product/upload', uploadMiddleware, productApiController.uploadFile);
+    ```
+
+---
+
+### **📌 重構優勢**
+    1. **職責分離**：  
+    - `upload.js` 負責檔案上傳的所有邏輯（`Multer` 設定、檔案過濾、錯誤處理）。  
+    - `product.service.js` 只需專注於商品處理，不必管理檔案存儲細節。  
+
+    2. **可維護性提升**：  
+    - 若未來需要更改上傳檔案的儲存路徑、大小限制、格式要求，只需修改 `upload.js`
+        ，無需影響 `product.service.js`。  
+
+    3. **可重複使用**：  
+    - `upload.js` 可在其他 `Service`（例如 `user.service.js`）重複使用
+        ，避免重複撰寫相同上傳邏輯。  
+
+    這樣 `product.service.js` 就能專注於商品相關的業務邏輯，
+    而檔案上傳的細節則獨立管理在 `utils/upload.js` 中 🎯。
+
+
+====================================================================================
+----------------------------
+
+====================================================================================
+----------------------------
+
+====================================================================================
+----------------------------
+
+
+

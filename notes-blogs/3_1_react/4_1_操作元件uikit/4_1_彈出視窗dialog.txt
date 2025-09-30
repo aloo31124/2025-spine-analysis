@@ -1,0 +1,68 @@
+
+2025/07/09
+================================================================================
+----------------------------------------
+
+探討議題:
+
+7/10
+onClose : 父元件, 可將 函式, useState 傳入 [子元件] (prop)
+    - 子元件 被 操作(onClick) 可觸發 父元件 動作。
+    - useState 本就是 函式
+
+e.stopPropagation: js 阻止 該 html dom 繼續進行泡泡捕捉。
+    - onClick={(e) => e.stopPropagation()}
+
+
+
+================================================================================
+----------------------------------------
+回顧寫法,
+後台, 商品管理, 跳出 商品櫥窗預覽
+
+
+newshop-client\src\components\manager\CreateEdit\CreateEditProduct.jsx
+
+    const [showProductGallery, setShowProductGallery] = useState(false);
+
+                {/* 預覽商品櫥窗 */}
+                {showProductGallery && (
+                    <ProductGalleryDialog
+                        isOpen={showProductGallery}
+                        onClose={() => setShowProductGallery(false)}
+                    />
+                )}
+
+
+newshop-client\src\components\dialog\ProductGalleryDialog\ProductGalleryDialog.jsx
+    function ProductGalleryDialog({ isOpen, onClose }) {
+        if (!isOpen) return null; // Dialog 關閉時不渲染
+
+        return (
+            <div className={style.mask} onClick={onClose}>
+                <div className={style.dialog} onClick={(e) => e.stopPropagation()}>
+                    ...略
+                </div>
+            </div>
+        );
+    }export default ProductGalleryDialog;
+
+
+
+
+
+
+================================================================================
+----------------------------------------
+
+================================================================================
+----------------------------------------
+
+================================================================================
+----------------------------------------
+
+================================================================================
+----------------------------------------
+
+
+

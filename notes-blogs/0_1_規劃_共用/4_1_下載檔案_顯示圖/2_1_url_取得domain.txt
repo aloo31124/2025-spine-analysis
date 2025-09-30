@@ -1,0 +1,110 @@
+
+2025/02/26
+====================================================================================
+----------------------------
+
+http://localhost:8081/api/manager/product/img/list/
+
+====================================================================================
+----------------------------
+
+如下為 node.js express server api 框架,
+請取得該站台 domain
+
+exports.getProductImgUrlList = async () => {
+    const domain = "http://localhost:8081/";
+    const context = "api/manager/product/img/";
+    return [
+        {imgName: "img1.png", prductImg: domain + context + "img1.png"},
+        {imgName: "img2.png", prductImg: domain + context + "img2.png"}
+    ];
+}
+
+
+====================================================================================
+----------------------------
+
+====================================================================================
+----------------------------
+
+在 **Node.js Express** 伺服器中，可以動態取得網站的 **domain** (網域) 而不是硬編碼 `http://localhost:8081/`。有幾種方法可以做到這一點：
+
+---
+
+### **✅ 方法 1: 從 `req` 取得 `host` (建議)**
+如果這個函數是在 API 處理請求時被呼叫的，你可以透過 `req` 取得 domain：
+
+```javascript
+exports.getProductImgUrlList = async (req) => {
+    const domain = `${req.protocol}://${req.get('host')}/`; // 動態取得 domain
+    const context = "api/manager/product/img/";
+    
+    return [
+        { imgName: "img1.png", productImg: domain + context + "img1.png" },
+        { imgName: "img2.png", productImg: domain + context + "img2.png" }
+    ];
+};
+```
+
+---
+
+### **✅ 方法 2: 讀取 `process.env` 設定 (適合部署)**
+如果你的 `domain` 是固定的，可以將它儲存在 `.env` 環境變數中：
+
+1️⃣ **先建立 `.env` 檔案**
+```
+DOMAIN=http://localhost:8081/
+```
+
+2️⃣ **在 `server.js` 或 `index.js` 中載入 `.env`**
+```javascript
+require('dotenv').config();
+```
+
+3️⃣ **修改函數，從 `process.env` 讀取**
+```javascript
+exports.getProductImgUrlList = async () => {
+    const domain = process.env.DOMAIN || "http://localhost:8081/";
+    const context = "api/manager/product/img/";
+    
+    return [
+        { imgName: "img1.png", productImg: domain + context + "img1.png" },
+        { imgName: "img2.png", productImg: domain + context + "img2.png" }
+    ];
+};
+```
+🔹 **優勢**：這樣可以根據環境（本機測試或正式環境）自動切換 domain！
+
+---
+
+### **✅ 方法 3: 使用 `req.headers.host` (替代方案)**
+如果你的 `req` 物件來自 Express，但沒有 `req.protocol`，你可以使用 `req.headers.host`：
+
+```javascript
+exports.getProductImgUrlList = async (req) => {
+    const domain = `http://${req.headers.host}/`; // 或 "https://" 若支援 SSL
+    const context = "api/manager/product/img/";
+    
+    return [
+        { imgName: "img1.png", productImg: domain + context + "img1.png" },
+        { imgName: "img2.png", productImg: domain + context + "img2.png" }
+    ];
+};
+```
+🔹 **適用於** 部署到 **雲端** (AWS, Heroku) 時，由反向代理提供 `host` 資訊。
+
+---
+
+### **🎯 最佳做法**
+✅ **在 API 內部取得 domain** → `req.protocol + "://" + req.get('host')`
+✅ **可配置的 domain** → 使用 `process.env.DOMAIN`
+✅ **確保相容性** → `req.headers.host` 作為備選方案
+
+這樣，你的 API **無論本機開發或上線部署**，都能正確取得 domain！ 🚀
+
+====================================================================================
+----------------------------
+
+====================================================================================
+----------------------------
+

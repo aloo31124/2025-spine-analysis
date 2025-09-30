@@ -1,0 +1,67 @@
+
+2025/02/20
+====================================================================================
+----------------------------
+
+
+如上程式碼, 將圖片上傳至路徑 C:/shopStorage/product/
+請新增程式碼, 從後端 node.js express api 取得上述路徑之所有圖片 url,
+並於 前端 react 呈現所有圖片
+
+後端 node.js express api:
+    src\index.js
+        app.get('/api/manager/product/img/list/', productApiController.getProductImgUrlList);
+
+    src\controllers\manager\product.api.controller.js
+        /* 取得所有商品圖片url */
+        exports.getProductImgUrlList = async (req, res) => { ...}
+
+    src\services\product.service.js
+        exports.getProductImgUrlList = async () => {}
+
+
+newshop-client\src\components\manager\CreateEdit\CreateEditProduct.jsx
+    前端 react 呈現所有圖片: prductImgUrl1, prductImgUrl2
+    function CreateEditProduct({typePage}) {
+        return (
+            <div className={style.CreateEditProduct}>
+                <div className={style.CreateEditProductContainer}>
+                    <h2>商品圖庫</h2>
+                    <button>上傳檔案</button>
+                    <img 
+                        src={prductImgUrl1}  
+                    />
+                    <img 
+                        src={prductImgUrl2}  
+                    />
+
+                </div>
+            </div>
+        );
+    }
+    export default CreateEditProduct;
+
+
+
+
+
+
+
+
+
+====================================================================================
+----------------------------
+
+====================================================================================
+----------------------------
+
+====================================================================================
+----------------------------
+
+====================================================================================
+----------------------------
+
+====================================================================================
+----------------------------
+
+

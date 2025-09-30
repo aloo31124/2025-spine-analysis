@@ -1,0 +1,73 @@
+
+
+
+2025/02/19
+====================================================================================
+---------------------------------------
+
+====================================================================================
+---------------------------------------
+
+新增下拉式設定, 更新 一整頁資料數 pageSize: 3, 10, 50, 100
+
+newshop-client\src\pages\manager\ProductListPage.jsx
+    function ProductListPage() {
+        const [pagingParam, setPagingParam] = useState({ pageIndex: 1, pageSize: 3, sort: 'name', pageTotal:8, dataTotal:87 });
+        ...
+        // 分頁切換處理
+        const handlePageChange = async (pageIndex) => {
+            const res = await searchProduct(searchParam, {...pagingParam, pageIndex});
+            setProductList(res.data.searchResult.productList);
+            setPagingParam({...pagingParam, pageIndex});
+        };
+        ...
+        return (
+            <div>
+                ...
+                <PaginationBar 
+                    pagingParam={pagingParam}
+                    clickPageChange={handlePageChange}
+                />
+
+            </div>
+        );
+    }
+    export default ProductListPage;
+
+
+newshop-client\src\components\tools\PaginationBar\PaginationBar.jsx
+    function PaginationBar({pagingParam, clickPageChange}) {
+        // 檢查 pagingParam 參數符合如下格式 type
+        // { pageIndex: 1, pageSize: 3, sort: 'name', pageTotal:8, dataTotal:87 }
+
+        const handlePageChange = async (pageIndex) => {
+            clickPageChange(pageIndex);
+        }
+
+        return (
+            <div className="pagination">
+                <button onClick={() => handlePageChange(pagingParam.pageIndex - 1)} disabled={pagingParam.pageIndex === 1}>
+                    上一頁
+                </button>
+                {Array.from({ length: pagingParam.pageTotal }, (_, i) => (
+                    <button 
+                        key={i + 1} 
+                        onClick={() => handlePageChange(i + 1)}
+                        style={{ fontWeight: pagingParam.pageIndex === i + 1 ? 'bold' : 'normal' }}
+                    >
+                        {i + 1}
+                    </button>
+                ))}
+                <button onClick={() => handlePageChange(pagingParam.pageIndex + 1)} disabled={pagingParam.pageIndex === pagingParam.pageTotal}>
+                    下一頁
+                </button>
+                <div>
+                    // 新增下拉式設定 一整頁資料數 pageSize
+                    共 {pagingParam.dataTotal} 筆資料
+                </div>
+            </div>
+        );
+    }
+    export default PaginationBar;
+
+

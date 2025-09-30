@@ -1,0 +1,124 @@
+
+2025/02/20
+====================================================================================
+----------------------------
+
+====================================================================================
+----------------------------
+
+如下為 node.js express 上傳檔案程式,
+問題1: app.post 使用 uploadMiddleware 多個參數的寫法用意為何?
+問題2: product.service.js 中何處可檢查 檔案大小 與 格式?
+問題3: product.service.js - uploadFile 何處引用 multer 上傳檔案? 原理為何?
+如上三問題, 請在 150字以內精要條列式回答, 該引用那些技術與觀念? 並提供官方文章。
+
+src\index.js
+    // 設定 express app 相關設定
+    const app = express();
+    // 設定 Express 支援 JSON 和 URL Encoded 資料
+    app.use(express.json());
+    app.use(express.urlencoded({ extended: true })); // 文件上傳
+
+    const { uploadMiddleware } = require('./services/product.service');
+    // API: 上傳商品圖片
+    app.post('/api/manager/product/upload', uploadMiddleware, productApiController.uploadFile);
+
+
+src\controllers\manager\product.api.controller.js
+    exports.uploadFile = async (req, res) => {
+        try {
+            const result = await uploadFile(req);
+            res.status(200).json({ result: '200', files: result });
+        } catch (error) {
+            console.error(`[Upload Error] ${error.message}`);
+            res.status(500).json({ result: '500', error: error.message });
+        }
+    };
+
+
+src\services\product.service.js
+    const multer = require('multer');
+    const path = require('path');
+    const fs = require('fs-extra');
+    const UPLOAD_DIR = 'C:/shopStorage/product/';
+
+    // 確保目錄存在
+    fs.ensureDirSync(UPLOAD_DIR);
+
+    // 設定 Multer 存儲, 並於此上傳圖片
+    const storage = multer.diskStorage({
+        destination: (req, file, cb) => cb(null, UPLOAD_DIR),
+        filename: (req, file, cb) => cb(null, `${Date.now()}${path.extname(file.originalname)}`)
+    });
+    const uploadMulter = multer({ storage });
+    exports.uploadMiddleware = uploadMulter.array('files', 10); // 最多 10 張圖片
+
+    // 回傳上傳圖片後資訊
+    exports.uploadFile = async (req) => {
+        if (!req.files || req.files.length === 0) {
+            throw new Error('未找到任何上傳檔案');
+        }
+
+        return req.files.map(file => ({
+            originalName: file.originalname,
+            storedName: file.filename,
+            path: file.path
+        }));
+    };
+
+
+
+====================================================================================
+----------------------------
+
+====================================================================================
+----------------------------
+
+### **🔹 問題 1：`app.post` 使用 `uploadMiddleware` 多個參數的寫法用意為何？**
+    - **用意**：`uploadMiddleware` 是 Multer 的 middleware，用於處理 `multipart/form-data`，
+    在進入 `uploadFile` 控制器前解析上傳檔案並存儲到指定位置。
+    - **技術概念**：
+    - **Express Middleware**（[官方文件](https://expressjs.com/en/guide/using-middleware.html)）
+    - **Multer Middleware**（[官方文件](https://github.com/expressjs/multer#usage)）
+
+---
+
+### **🔹 問題 2：`product.service.js` 何處可檢查檔案大小與格式？**
+    - **可在 `multer` 設定 `limits` 與 `fileFilter`**：
+    ```javascript
+    const uploadMulter = multer({
+        storage,
+        limits: { fileSize: 5 * 1024 * 1024 }, // 限制 5MB
+        fileFilter: (req, file, cb) => {
+            const allowedTypes = ['image/jpeg', 'image/png'];
+            if (!allowedTypes.includes(file.mimetype)) {
+                return cb(new Error('檔案格式錯誤，僅支援 JPG/PNG'));
+            }
+            cb(null, true);
+        }
+    });
+    ```
+    - **技術概念**：
+    - Multer 限制（[官方文件](https://github.com/expressjs/multer#limits)）
+
+---
+
+### **🔹 問題 3：`uploadFile` 何處引用 `multer` 上傳檔案？原理為何？**
+    - **引用方式**：
+    - `uploadMiddleware` 在 `app.post` 被 Express 呼叫時，Multer 解析 `req` 並填充 `req.files`。
+    - `uploadFile(req)` 內部讀取 `req.files` 並回傳檔案資訊。
+    - **技術原理**：
+    - **Multer Middleware 解析 multipart/form-data，將檔案存到磁碟，並將結果存入 `req.files`**。
+    - Multer 運作流程（[官方文件](https://github.com/expressjs/multer#how-it-works)）。
+
+====================================================================================
+----------------------------
+
+====================================================================================
+----------------------------
+
+====================================================================================
+----------------------------
+
+
+

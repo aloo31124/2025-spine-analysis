@@ -1,0 +1,93 @@
+
+
+=============================================================================
+2025/01/28
+
+產生 token 時, 存入 userId,
+
+    newshop-server/src/services/auth.service.js
+        /* 產生 jwt token */
+        exports.createJwtToken = async (req) => {
+            const {account} = req.body;
+            const user = await getUserByAccount(account);
+            const userAgent = req.headers['user-agent'];
+            return createToken({userId: user.id, account, userAgent}, '5m'); // -----> userId 等相關資訊存入 payload
+        }
+
+
+
+=============================================================================
+
+newshop-server/src/controllers/auth.api.controller.js
+    /* 登入 */
+    exports.login = async (req, res) => {
+        const {account, password} = req.body;
+        const isSuccess = await login(account, password);
+        if(!isSuccess) {
+            console.log("登入失敗, 帳密錯誤 帳號: " ,account);
+            res.status(200).json({isSuccess, message: "登入失敗, 帳密錯誤"});
+            return;
+        }
+        res.status(200).json({isSuccess, message: "帳密登入成功", token: await createJwtToken(req)});
+    }
+    /* 驗證 jwt */
+    exports.verifyJwt = async (req, res) => {
+        const payload = verifyJwt(req);
+        console.log(payload);
+        if(!payload) { 
+            res.status(200).json({payload, error: '無效或過期之 token'});
+            return;
+        }
+        res.status(200).json({payload, message: "成功訪問資源"});
+    }
+
+newshop-server/src/services/auth.service.js
+    /* 產生 jwt token */
+    exports.createJwtToken = async (req) => {
+        const {account} = req.body;
+        const user = await getUserByAccount(account);
+        const userAgent = req.headers['user-agent'];
+        return createToken({userId: user.id, account, userAgent}, '5m');
+    }
+
+    /* 驗證 jwt token */
+    exports.verifyJwt = (req) => {
+        const authHeader = req.headers.authorization;
+        if(!authHeader || !authHeader.startsWith('Bearer ')) {
+            return null;
+        }
+        const token = authHeader.split(' ')[1];
+        return verifyToken(token);
+    }
+
+
+newshop-server/src/utils/jwt.js
+    const jwt = require('jsonwebtoken');
+    const SECRET_KEY = 'SECRET_KEY';
+
+    /* 產生 jwt token */
+    exports.createToken = (payload, expiresIn = '5m') => {
+        return jwt.sign(payload, SECRET_KEY, {expiresIn});
+    }
+    
+    /* 驗證 jwt token */
+    exports.verifyToken = (token) => {
+        if(!token) return;
+        try {
+            return jwt.verify(token, SECRET_KEY);
+        } catch (err) {
+            console.log("驗證 jwt token err : ", err);
+            return null
+        }
+    }
+
+
+
+=============================================================================
+
+
+=============================================================================
+
+
+=============================================================================
+

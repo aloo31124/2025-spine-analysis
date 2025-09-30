@@ -1,0 +1,178 @@
+
+
+
+====================================================================================
+2/6
+----------------------------------------
+如下為 react 前端專案的 搜尋bar SearchBar.jsx , 使用者點選 input createDate 後,
+該 input 下方會跳出 行事曆小視窗 CalendarPicker.jsx,
+CalendarPicker.jsx 會固定在 input 下方, 並對其 input 右側。
+點選 CalendarPicker.jsx 以外的地方, CalendarPicker.jsx 會消失,
+若點選 CalendarPicker.jsx 本身, 則 CalendarPicker.jsx保留,
+且有點選到 CalendarPicker.jsx 的日期, selectDate 的值會傳給 父元件 SearchBar.jsx,
+並顯示在 input createDate value 上。
+為節省運算資源, CalendarPicker.jsx內程式碼請省略, 主要專注在 SearchBar.jsx 設計。
+
+newshop-client\src\components\manager\SearchBar\SearchBar.jsx
+    import React, {useState} from "react";...
+    function SearchBar({...}) {
+        ...
+        return (
+            <div className={style.SearchBar}>
+                ...
+                <div className={style.SearchBarRow}>
+                    並且
+                    <input type="text" 
+                        placeholder="狀態不限"
+                        value={state}
+                        onChange={e => setState(e.target.value)}
+                    />
+                    並且
+                    <input type="text" 
+                        placeholder="建立日期不限"
+                        value={createDate}
+                        onChange={e => setCreateDate(e.target.value)}
+                    />
+                    ...
+                </div>
+                <button onClick={clickSearchProduct}>搜尋</button>
+            </div>
+        )
+    }
+    export default SearchBar;
+
+newshop-client\src\components\tools\CalendarPicker\CalendarPicker.jsx
+    import React, {useState} from "react";
+    import style from './CalendarPicker.module.css'
+    function CalendarPicker() {
+        const [selectDate, setSelectDate] = useState(null);
+        return (
+            <div>
+            // 為節省運算資源, CalendarPicker.jsx內程式碼請省略, 主要專注在 SearchBar.jsx 設計。
+            </div>
+        );
+    }
+    export default CalendarPicker;
+
+
+
+====================================================================================
+
+====================================================================================
+
+这里是 **`SearchBar.jsx`** 主要逻辑：
+✅ **点击 `createDate` 输入框时，CalendarPicker.jsx 显示**  
+✅ **日历固定在 `input` 下方，并对齐右侧**  
+✅ **点击 `CalendarPicker.jsx` 外部，日历隐藏**  
+✅ **选中日期后，更新 `createDate` 值，并隐藏日历**  
+
+---
+
+### **📌 `SearchBar.jsx`**
+```jsx
+import React, { useState, useRef, useEffect } from "react";
+import CalendarPicker from "../../tools/CalendarPicker/CalendarPicker";
+import style from "./SearchBar.module.css";
+
+function SearchBar({ ... }) {
+    const [state, setState] = useState("");
+    const [createDate, setCreateDate] = useState("");
+    const [showCalendar, setShowCalendar] = useState(false);
+    const calendarRef = useRef(null);
+    const inputRef = useRef(null);
+
+    // 监听点击外部，隐藏 CalendarPicker
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (
+                calendarRef.current &&
+                !calendarRef.current.contains(event.target) &&
+                inputRef.current !== event.target
+            ) {
+                setShowCalendar(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
+    return (
+        <div className={style.SearchBar}>
+            <div className={style.SearchBarRow}>
+                並且
+                <input
+                    type="text"
+                    placeholder="狀態不限"
+                    value={state}
+                    onChange={(e) => setState(e.target.value)}
+                />
+                並且
+                <input
+                    ref={inputRef}
+                    type="text"
+                    placeholder="建立日期不限"
+                    value={createDate}
+                    readOnly
+                    onClick={() => setShowCalendar(true)}
+                />
+                {/* 日历组件 */}
+                {showCalendar && (
+                    <div ref={calendarRef} className={style.calendarWrapper}>
+                        <CalendarPicker 
+                            onSelectDate={(date) => {
+                                setCreateDate(date);
+                                setShowCalendar(false);
+                            }} 
+                        />
+                    </div>
+                )}
+            </div>
+            <button onClick={() => console.log("搜尋")}>搜尋</button>
+        </div>
+    );
+}
+
+export default SearchBar;
+```
+
+---
+
+### **📌 `SearchBar.module.css`**
+```css
+.SearchBar {
+    position: relative;
+    padding: 10px;
+}
+
+.SearchBarRow {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.calendarWrapper {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    z-index: 10;
+    background: white;
+    border: 1px solid #ccc;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+}
+```
+
+---
+
+### **✨ 主要功能**
+✔ **点击 `createDate`，日历固定在输入框下方，右对齐**  
+✔ **选中日期后，赋值给 `createDate`，并隐藏日历**  
+✔ **点击外部，隐藏 `CalendarPicker.jsx`**  
+✔ **使用 `useRef` & `useEffect` 监听点击事件**  
+
+这样 `SearchBar` 就能完美配合 `CalendarPicker` 了 🚀
+
+====================================================================================
+
+====================================================================================
+
+

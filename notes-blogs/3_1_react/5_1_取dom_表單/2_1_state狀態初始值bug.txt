@@ -1,0 +1,192 @@
+
+
+2025/06/20
+==========================================================================================
+----------------------------------------------
+
+==========================================================================================
+----------------------------------------------
+
+如下 react 專案, 
+state 狀態中 verifyMail, code, newPassword, newPasswordCheck,
+上述四個值若初始使用 null, 
+下列流程(StepList)切換時, input type="text" value 的初始值會錯誤的帶入上一個流程。
+但四個初始值切換為字串: '', 就可正常, 原因為何? 
+
+import React, {useState} from "react";
+import { useNavigate } from 'react-router-dom';
+import { postMail, verifyCode, updatePassword } from "../../api/auth";
+
+function FogetPasswordPage() {
+    const navigate = useNavigate();
+    // 忘記密碼流程 StepList
+    const StepList = Object.freeze({
+        SetMail: "setMail",
+        VerifyCode: "verifyCode",
+        UpdatePassword: "updatePassword"
+    });
+    // 流程步驟
+    const [step, setStep] = useState(StepList.SetMail);
+
+    // 驗證信箱, 驗證碼, 新密碼, 新密碼檢查 參數如下
+    const [verifyMail, setVerifyMail] = useState(null);
+    const [code, setCode] = useState(null);
+    const [newPassword, setNewPassword] = useState(null);
+    const [newPasswordCheck, setNewPasswordCheck] = useState(null);
+
+    // 輸入驗證信箱, 輸入驗證碼, 更新密碼 相關操作 
+    const clickSendMail = async () => {
+        const res = await postMail(verifyMail);
+        if(res.status === 200) {
+            alert("信件成功寄送");
+            setStep(StepList.VerifyCode);
+        } else {
+            alert("信件寄送失敗");
+        }
+    }
+    const clickSendCode = async () => {
+        const res = await verifyCode({mail: verifyMail, code});
+        if(res.data.verifyResult) {
+            alert("驗證成功");
+            setStep(StepList.UpdatePassword);
+        } else {
+            alert("驗證碼錯誤!");
+        }
+    }
+    const clickSendNewPassword = async () => {
+        if(!newPassword || !newPasswordCheck) {
+            alert("密碼與密碼檢查不可空白");
+            return;
+        }
+        if(newPassword !== newPasswordCheck) {
+            alert("請確認密碼與密碼檢查需一致");
+            return;
+        }
+        const res = await updatePassword({mail: verifyMail, password: newPassword});
+        if(res.status === 200) {
+            alert("密碼更新成功");
+            navigate('/');
+        } else {
+            alert("密碼更新失敗, 請稍後再試");
+        }
+    }
+    // 依照 忘記密碼流程 StepList, 切換頁面, UI Flow
+    if(step === StepList.SetMail) {
+        return (
+            <div className='Form'>
+                <h1>驗證信箱</h1>
+                <p>請輸入註冊時該帳號信箱</p>
+                <input type="text" 
+                    placeholder="輸入驗證信箱"
+                    value={verifyMail}
+                    onChange={e => setVerifyMail(e.target.value)}
+                />
+                <button onClick={clickSendMail}>送出</button>
+            </div>
+        );
+    } else if(step === StepList.VerifyCode) {
+        return (
+            <div className='Form'>
+                <h1>輸入驗證碼</h1>
+                <p>稍等信箱取得驗證碼後, 輸入驗證碼</p>
+                <input type="text" 
+                    placeholder="輸入驗證碼"
+                    value={code}
+                    onChange={e => setCode(e.target.value)}
+                />
+                <button onClick={clickSendCode}>送出</button>
+            </div>
+        );
+    } else if(step === StepList.UpdatePassword) {
+        return (
+            <div className='Form'>
+                <h1>更新密碼</h1>
+                <p>請輸入新密碼</p>
+                <input type="text" 
+                    placeholder="輸入新密碼"
+                    value={newPassword}
+                    onChange={e => {setNewPassword(e.target.value)}}
+                />
+                <input type="text" 
+                    placeholder="輸入新密碼"
+                    value={newPasswordCheck}
+                    onChange={e => {setNewPasswordCheck(e.target.value)}}
+                />
+                <button onClick={clickSendNewPassword}>送出</button>
+            </div>
+        );
+    } else {
+        return (
+            <div className='Form'>
+                <h1>狀態錯誤, 請重整頁面</h1>
+            </div>
+        );
+    }
+}export default FogetPasswordPage;
+
+
+
+==========================================================================================
+chatgpt
+----------------------------------------------
+
+你遇到的問題主要是因為：
+
+> **React 的 `<input value={state}>` 在綁定的 `state` 值為 `null` 時，
+會導致 input 的值變為 `''`（空字串），但在一些切換或 re-render 的情境中，React 會警告或出現異常行為。**
+
+---
+
+### 🔧 **問題詳解**
+
+當你這樣寫：
+
+```js
+const [verifyMail, setVerifyMail] = useState(null);
+```
+
+React 會將 `<input value={verifyMail}>` 解釋為「受控元件」，但 `value=null` 對於 `<input>` 是 **不合法的受控值**。
+
+React 文件中提到：
+
+> ❗`<input>` 的 `value` 只能是 `string`、`number` 或 `undefined`，不能是 `null`。
+> 如果設為 `null`，會造成 React 不知道是受控還是非受控元件，可能引發錯誤或不一致行為。
+
+---
+
+### ✅ **解法：預設設為空字串即可**
+
+```js
+const [verifyMail, setVerifyMail] = useState('');
+const [code, setCode] = useState('');
+const [newPassword, setNewPassword] = useState('');
+const [newPasswordCheck, setNewPasswordCheck] = useState('');
+```
+
+這樣 `input value={state}` 就永遠是合法的字串，不會有異常，也不會殘留上一步輸入的內容。
+
+---
+
+### 💡 額外建議
+
+若你未來要使用非受控元件（`ref`）也可避免這類問題，不過建議表單流程還是維持 **受控元件設計 + 預設為字串** 的作法最穩定。
+
+---
+
+需要我幫你加入輸入檢查或顯示錯誤訊息 UI（例如紅字提示）也可以告訴我。
+
+
+==========================================================================================
+----------------------------------------------
+
+==========================================================================================
+----------------------------------------------
+
+==========================================================================================
+----------------------------------------------
+
+==========================================================================================
+----------------------------------------------
+
+
+

@@ -1,0 +1,58 @@
+
+2025/02/08
+
+====================================================================================
+
+如下請使用 pagingParam 帶入分頁參數規劃, 一頁10筆, 依照 name 排序, 呈現第1頁
+
+exports.searchProduct = async (searchParam, pagingParam) => {
+    const { name, state, createDate, type, priceMin, priceMax } = searchParam;
+    // const {index, ... } = pagingParam
+    let query = db.collection('Product');
+
+    if (state) {
+        query = query.where('state', '==', state);
+    }
+    if (createDate) {
+        query = query.where('createDate', '==', createDate);
+    }
+    if (type) {
+        query = query.where('type', '==', type);
+    }
+    if (priceMin) {
+        query = query.where('price', '>=', Number.parseInt(priceMin));
+    }
+    if (priceMax) {
+        query = query.where('price', '<=', Number.parseInt(priceMax));
+    }
+
+    const snapshot = await query.get();
+    const products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+    // 若無 name 搜尋條件，直接返回 Firestore 查詢結果
+    if (!name) return products;
+
+    // 使用 Fuse.js 進行模糊搜尋
+    const fuse = new Fuse(products, {
+        keys: ['name'],
+        threshold: 0.3, // 設定匹配度（0 完全匹配，1 模糊匹配）
+        includeScore: false,
+    });
+
+    return fuse.search(name).map(result => result.item);
+}
+
+
+====================================================================================
+
+
+====================================================================================
+
+
+====================================================================================
+
+
+====================================================================================
+
+
+

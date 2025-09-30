@@ -1,0 +1,89 @@
+
+2025/02/27
+====================================================================================
+----------------------------
+
+db 名稱
+ProductImg
+
+StoreProdcutImg
+
+====================================================================================
+----------------------------
+
+如下, node.js express, 
+將 上傳檔案名存入 ProductImg表name欄位
+
+src\services\product.service.js
+    exports.uploadFile = async (req) => {
+        return handleUpload(req);
+    };
+
+src\utils\upload.js
+    // 回傳上傳後的圖片資訊
+    exports.handleUpload = (req) => {
+        if (!req.files || req.files.length === 0) {
+            throw new Error('未找到任何上傳檔案');
+        }
+
+        return req.files.map(file => ({
+            originalName: file.originalname,
+            storedName: file.filename,
+            path: file.path
+        }));
+    };
+
+--------------------------------------------------------
+改寫如下:
+
+    exports.uploadFile = async (req) => {
+        // 取得上傳後的圖片資訊
+        const uploadedFiles = handleUpload(req);
+
+        // 將檔案名稱存入 Firestore (ProductImg 表)
+        const savedFiles = await Promise.all(
+            uploadedFiles.map(async (file) => {
+                return await this.saveProductImage(file.storedName);
+            })
+        );
+
+        return { success: true, uploadedFiles: savedFiles };
+    };
+
+    // 儲存圖片名稱到 Firestore
+    exports.saveProductImage = async (imageName) => {
+        const docRef = db.collection('ProductImg').doc();
+        await docRef.set({ name: imageName });
+
+        return { id: docRef.id, name: imageName };
+    };
+
+
+====================================================================================
+----------------------------
+
+承上, 從 ProductImg表name欄位 取得圖片名稱
+    exports.getProductImgUrlList = async () => {
+        const domain = "http://localhost:8081/";
+        const context = "api/manager/product/img/";
+        return [
+            {imgName: "img1.png", imgUrl: domain + context + "img1.png"},
+            {imgName: "img2.png", imgUrl: domain + context + "img2.png"}
+        ];
+    }
+
+--------------------------------------------------------
+
+
+====================================================================================
+----------------------------
+
+====================================================================================
+----------------------------
+
+====================================================================================
+----------------------------
+
+====================================================================================
+----------------------------
+

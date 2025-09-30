@@ -1,0 +1,228 @@
+
+2025/03/02
+====================================================================================
+----------------------------
+
+前端送 productId -> ok
+
+
+originalName 中文會亂碼, 請調整
+
+
+
+====================================================================================
+----------------------------
+
+
+如下為 node.js express 上傳圖片之 upload.js 程式,
+請優化, 將 productId 帶入儲存路徑, 如:
+C:/shopStorage/product/${productId}
+讓圖片可儲存上述路徑,
+參考程式如下:
+
+src/controllers/manager/product.api.controller.js
+    exports.uploadFile = async (req, res) => {
+        try {
+            const result = await uploadFile(req, req.params.id);
+            res.status(200).json({ result: '200', files: result });
+        } catch (error) {
+            console.error(`[Upload Error] ${error.message}`);
+            res.status(500).json({ result: '500', error: error.message });
+        }
+    };
+
+
+src/services/product.service.js
+    exports.uploadFile = async (req, productId) => {
+        try {
+            // 取得上傳後的圖片資訊
+            const uploadedFiles = handleUpload(req, productId);
+
+            // 將檔案名稱存入 Firestore (ProductImg 表)
+            const savedFiles = await Promise.all(
+                uploadedFiles.map(async (file) => {
+                    return await this.saveProductImage(req.body.productId, file.originalName);
+                    //return await this.saveProductImage(file.storedName);
+                })
+            );
+
+            return { success: true, uploadedFiles: savedFiles };
+        } catch (error) {
+            throw new Error(`檔案上傳失敗: ${error.message}`);
+        }
+    };
+
+
+src/utils/upload.js
+    const multer = require('multer');
+    const path = require('path');
+    const fs = require('fs-extra');
+
+    const UPLOAD_DIR = 'C:/shopStorage/product/';
+
+    // 確保目錄存在
+    fs.ensureDirSync(UPLOAD_DIR);
+
+    // 設定 Multer 存儲與檔案命名方式
+    const storage = multer.diskStorage({
+        destination: (req, file, cb) => cb(null, UPLOAD_DIR),
+        filename: (req, file, cb) => cb(null, `${Date.now()}${path.extname(file.originalname)}`)
+    });
+
+    // 設定 Multer 限制檔案大小、格式等
+    const uploadMulter = multer({
+        storage,
+        limits: { fileSize: 5 * 1024 * 1024 }, // 限制 5MB
+        fileFilter: (req, file, cb) => {
+            const allowedTypes = ['image/jpeg', 'image/png'];
+            if (!allowedTypes.includes(file.mimetype)) {
+                return cb(new Error('檔案格式錯誤，僅支援 JPG/PNG'));
+            }
+            cb(null, true);
+        }
+    });
+
+    // 上傳 Middleware（最多 10 張）
+    exports.uploadMiddleware = uploadMulter.array('files', 10);
+
+    // 回傳上傳後的圖片資訊
+    exports.handleUpload = (req, productId) => {
+        if (!req.files || req.files.length === 0) {
+            throw new Error('未找到任何上傳檔案');
+        }
+
+        return req.files.map(file => ({
+            originalName: file.originalname,
+            storedName: file.filename,
+            path: file.path
+        }));
+    };
+
+
+
+
+====================================================================================
+----------------------------
+
+
+====================================================================================
+----------------------------
+
+
+已優化 `upload.js`，**將 `productId` 帶入儲存路徑**，確保每個商品的圖片存放在對應的 `productId` 目錄下，例如：  
+📁 `C:/shopStorage/product/{productId}/{fileName}`  
+
+---
+
+## **📌 優化點**
+1. **將 `productId` 納入 `destination` 路徑**：
+   - **確保每個商品的圖片存放在 `productId` 目錄下**
+2. **自動建立 `productId` 目錄**：
+   - **使用 `fs.ensureDirSync(uploadPath)`** 確保目錄存在
+3. **確保 `productId` 來自 `req.params.id` 或 `req.body.productId`**
+4. **優化 `handleUpload` 返回完整的圖片資訊**
+
+---
+
+## **📌 優化後的 `src/utils/upload.js`**
+```javascript
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs-extra');
+
+const BASE_UPLOAD_DIR = 'C:/shopStorage/product/';
+
+/**
+ * 設定 Multer 存儲與檔案命名方式，讓 productId 納入路徑
+ */
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        const productId = req.params.id || req.body.productId;
+        if (!productId) {
+            return cb(new Error('缺少 productId'));
+        }
+
+        const uploadPath = path.join(BASE_UPLOAD_DIR, productId);
+        fs.ensureDirSync(uploadPath); // 確保目錄存在
+        cb(null, uploadPath);
+    },
+    filename: (req, file, cb) => {
+        cb(null, `${Date.now()}${path.extname(file.originalname)}`);
+    }
+});
+
+/**
+ * 設定 Multer 限制：
+ * - 檔案大小限制 5MB
+ * - 允許的格式：JPG、PNG
+ */
+const uploadMulter = multer({
+    storage,
+    limits: { fileSize: 5 * 1024 * 1024 }, // 限制 5MB
+    fileFilter: (req, file, cb) => {
+        const allowedTypes = ['image/jpeg', 'image/png'];
+        if (!allowedTypes.includes(file.mimetype)) {
+            return cb(new Error('檔案格式錯誤，僅支援 JPG/PNG'));
+        }
+        cb(null, true);
+    }
+});
+
+/**
+ * 上傳 Middleware（最多 10 張圖片）
+ */
+exports.uploadMiddleware = uploadMulter.array('files', 10);
+
+/**
+ * 回傳上傳後的圖片資訊
+ */
+exports.handleUpload = (req, productId) => {
+    if (!req.files || req.files.length === 0) {
+        throw new Error('未找到任何上傳檔案');
+    }
+
+    const productIdParam = productId || req.params.id || req.body.productId;
+    if (!productIdParam) {
+        throw new Error('缺少 productId');
+    }
+
+    return req.files.map(file => ({
+        originalName: file.originalname,
+        storedName: file.filename,
+        path: `/uploads/product/${productIdParam}/${file.filename}` // 可用於提供 URL
+    }));
+};
+```
+
+---
+
+## **📌 這樣的結果**
+1. **每個商品的圖片會存放在對應的 `productId` 目錄**
+   ```
+   C:/shopStorage/product/12345/image1.png
+   C:/shopStorage/product/12345/image2.png
+   C:/shopStorage/product/67890/image1.png
+   ```
+2. **返回的 `path` 可直接用於前端訪問圖片**
+   ```json
+   {
+       "originalName": "image1.png",
+       "storedName": "1708392381291.png",
+       "path": "/uploads/product/12345/1708392381291.png"
+   }
+   ```
+3. **確保 `productId` 必填，否則報錯**
+4. **優化目錄創建，避免錯誤**
+
+🚀 **這樣 `upload.js` 會更靈活，也能確保每個商品的圖片獨立管理！**
+
+====================================================================================
+----------------------------
+
+
+====================================================================================
+----------------------------
+
+====================================================================================
+----------------------------
+

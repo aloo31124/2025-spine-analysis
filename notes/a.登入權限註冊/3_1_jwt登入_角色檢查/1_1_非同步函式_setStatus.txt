@@ -1,0 +1,97 @@
+
+2025/06/21
+=============================================================================
+摘要
+----------------------------------
+
+react useEffect 中, 執行多個 非同步函式, 
+該 非同步函式A setStatus A參數, 非同步函式B 不可使用...。
+
+解法精要,
+react useEffect 中, 執行多個 非同步函式, 
+, 要將 非同步函式 的運算結果 return至 useEffect中。
+
+
+=============================================================================
+----------------------------------
+
+如下 react 專案中, 
+verifyToken 使用 setUserInfo 存入 userInfo,
+但 verifyUserRole 中 userInfo 仍為空值,
+原因為何? 該如何修正?
+
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { verifyJwt, verifyRole } from './api/auth';
+import Loading from './components/Loading';
+
+/* 驗證路由 */
+const VerifyRoute = ({ element: Component }) => {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [userInfo, setUserInfo] = useState({});
+
+  // 檢查 jwt 和角色
+  useEffect(() => {
+    const verifyAuth = async () => {
+      try {
+        // 1. 先驗證 token
+        const tokenVerified = await verifyToken();
+        
+        // 2. 只有當 token 驗證成功後才驗證角色
+        if (tokenVerified) {
+          await verifyUserRole();
+        }
+      } catch (error) {
+        console.error('驗證過程出錯:', error);
+        navigate('/auth/login');
+      } finally {
+        setLoading(false);
+      }
+    };
+    verifyAuth();
+  }, [navigate]);
+
+  // 檢查登入
+  const verifyToken = async () => {
+    try {
+      const req = await verifyJwt(); // 若非 200, 會進入例外
+      const payload = req?.data?.payload;
+      ...
+      setUserInfo({ userId: payload.userId, email: payload.email });
+      return true; // 驗證成功
+    } catch (error) {...}
+  };
+
+  // 檢查角色(賣家)是否存在
+  const verifyUserRole = async () => {
+    try {
+      const req = await verifyRole(userInfo);
+      ...
+    } catch (error) {
+      console.error('角色驗證錯誤:', error);
+      navigate('/auth/login');
+    }
+  };
+
+  if (loading) {
+    return <Loading />;
+  }
+  
+  return <Component />;
+};
+
+
+
+
+=============================================================================
+----------------------------------
+
+=============================================================================
+----------------------------------
+
+=============================================================================
+----------------------------------
+
+
+

@@ -1,0 +1,39 @@
+
+2025/02/06
+====================================================================================
+
+
+====================================================================================
+2/6
+----------------------------------------
+如下為 react 專案, 請在 RangeSlider.jsx 刻畫出一個 範圍滑動bar,
+寬度 width:200px, 高度height視內含元件自行伸縮。
+有兩個 input 可直接輸入 最小, 最大值。
+下方有個 滑動bar可設定 最小, 最大值。
+
+newshop-client\src\components\tools\RangeSlider\RangeSlider.jsx
+    import React, {useState} from "react";
+    import style from "./RangeSlider.module.css"
+
+    function RangeSlider() {
+        const [min, setMin] = useState(0);
+        const [max, setMax] = useState(0);
+        const [range, setRange] = useState([min, max]);
+
+        return (
+            <div>
+
+            </div>
+        );
+    }
+    export default RangeSlider;
+
+
+====================================================================================
+
+
+====================================================================================
+
+
+====================================================================================
+

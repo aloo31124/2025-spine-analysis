@@ -1,0 +1,194 @@
+
+2025/07/08
+=============================================================================
+----------------------------------
+
+=============================================================================
+----------------------------------
+
+如下 react.js 專案, 
+若導向 SelectPaymentPage,
+AccountLayout 不顯示 MenuLeftAccount
+
+newshop-client\src\App.js
+    // 路由切換器
+    const AppRouter = () => (
+        <Routes>
+            <Route path="/account/*" element={<AppRouterVerify element={AccountLayout} node={"buyer"} />}>
+            <Route path="payment/select" element={<SelectPaymentPage/>}/>
+                ... 略
+            </Route>
+                ... 略
+        </Routes>
+    );
+    function App() {
+        return (
+            <BrowserRouter>
+            <div className="App">
+                <Header />
+                <AppRouter />
+            </div>
+            </BrowserRouter>
+        );
+    }
+
+
+newshop-client\src\layout\AccountLayout.jsx
+    function AccountLayout() {
+        return (
+            <div className={style.AccountLayout}>
+                <MenuLeftAccount />
+                <main className={style.AccountMain}>
+                    <Outlet />
+                </main>
+            </div>
+        )
+    } export default AccountLayout;
+
+
+=============================================================================
+----------------------------------
+
+=============================================================================
+----------------------------------
+
+# 解決 AccountLayout 中 MenuLeftAccount 顯示問題
+
+要實現當導向 `/account/payment/select` 時不顯示 `MenuLeftAccount`，您可以採用以下幾種方案：
+
+## 方案1：使用路由配置控制（推薦）
+
+修改 `AccountLayout` 組件，根據當前路由決定是否顯示 `MenuLeftAccount`：
+
+    ```jsx
+    import { useLocation } from 'react-router-dom';
+
+    function AccountLayout() {
+        const location = useLocation();
+        const hideMenuPaths = ['/account/payment/select']; // 需要隱藏菜單的路徑
+
+        const shouldShowMenu = !hideMenuPaths.some(path => 
+            location.pathname.startsWith(path)
+        );
+
+        return (
+            <div className={style.AccountLayout}>
+                {shouldShowMenu && <MenuLeftAccount />}
+                <main className={style.AccountMain}>
+                    <Outlet />
+                </main>
+            </div>
+        );
+    }
+    ```
+
+## 方案2：使用布局嵌套
+
+創建一個不包含菜單的特殊布局組件：
+
+    ```jsx
+    // AccountLayoutWithMenu.jsx
+    function AccountLayoutWithMenu() {
+        return (
+            <div className={style.AccountLayout}>
+                <MenuLeftAccount />
+                <main className={style.AccountMain}>
+                    <Outlet />
+                </main>
+            </div>
+        );
+    }
+
+    // AccountLayoutWithoutMenu.jsx
+    function AccountLayoutWithoutMenu() {
+        return (
+            <div className={style.AccountLayout}>
+                <main className={style.AccountMain}>
+                    <Outlet />
+                </main>
+            </div>
+        );
+    }
+    ```
+
+然後修改路由配置：
+
+    ```jsx
+    const AppRouter = () => (
+        <Routes>
+            <Route path="/account/*" element={<AppRouterVerify element={AccountLayoutWithMenu} node={"buyer"} />}>
+                <Route path="payment/select" element={
+                    <AppRouterVerify element={AccountLayoutWithoutMenu} node={"buyer"}>
+                        <Route index element={<SelectPaymentPage/>}/>
+                    </AppRouterVerify>
+                }/>
+                {/* 其他路由 */}
+            </Route>
+        </Routes>
+    );
+    ```
+
+## 方案3：使用 Context 控制
+
+創建一個布局上下文：
+
+```jsx
+// LayoutContext.js
+import { createContext, useContext } from 'react';
+
+const LayoutContext = createContext({
+    showMenu: true,
+    setShowMenu: () => {}
+});
+
+export const useLayout = () => useContext(LayoutContext);
+
+export function LayoutProvider({ children }) {
+    const [showMenu, setShowMenu] = useState(true);
+    
+    return (
+        <LayoutContext.Provider value={{ showMenu, setShowMenu }}>
+            {children}
+        </LayoutContext.Provider>
+    );
+}
+```
+
+然後在 `SelectPaymentPage` 中控制顯示：
+
+```jsx
+function SelectPaymentPage() {
+    const { setShowMenu } = useLayout();
+    
+    useEffect(() => {
+        setShowMenu(false);
+        return () => setShowMenu(true); // 離開頁面時恢復
+    }, []);
+    
+    // 頁面內容...
+}
+```
+
+## 推薦方案
+
+**方案1** 是最簡單直接的解決方案，適合大多數情況。它的優點是：
+
+1. 集中管理需要隱藏菜單的路徑
+2. 不需要修改現有路由結構
+3. 邏輯簡單清晰
+4. 易於擴展（只需在數組中添加新路徑）
+
+如果未來有更多特殊頁面需要隱藏菜單，只需在 `hideMenuPaths` 數組中添加對應路徑即可。
+
+
+=============================================================================
+----------------------------------
+
+=============================================================================
+----------------------------------
+
+=============================================================================
+----------------------------------
+
+
+
