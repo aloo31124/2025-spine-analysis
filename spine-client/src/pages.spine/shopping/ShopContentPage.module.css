@@ -1,0 +1,53 @@
+
+.ShopContentPage {
+    margin: 60px;
+    gap: 60px;
+    width: 90%;
+    max-width: 1200px;
+    display: flex;
+    flex-direction: column;
+}
+
+.ShopContentInfoMain {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+.ShopContentInfoMain .ProductGallery {
+    width: 55%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    border: 2px solid red;
+}
+.ShopContentInfoMain .ProductMainInfo {
+    width: 40%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    border: 2px solid red;
+}
+.ShopContentInfoMain .ProductMainInfo h1 {
+    margin: 0;
+}
+
+.ShopContentInfoSecond {
+    width: 100%;
+}
+
+/* RWD: 當畫面寬度小於 800px 時 */
+@media (max-width: 800px) {
+    .ShopContentInfoMain .ProductGallery {
+        width: 100%;
+        margin-bottom: 20px;
+    }
+    
+    .ShopContentInfoMain .ProductMainInfo {
+        width: 100%;
+    }
+}
+

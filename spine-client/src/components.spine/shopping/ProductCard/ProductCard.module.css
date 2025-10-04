@@ -1,0 +1,50 @@
+
+.ProductCard {
+    width: 250px;
+    height: 360px;
+    border: 1px solid #cfcfcf;
+    border-radius: 50px;
+    cursor: pointer;
+}
+
+.ProductCardImgContainer {
+    width: 100%;
+    height: 50%;
+    border-radius: 50px 50px 0 0;
+    display: flex;
+    justify-content: center;
+    overflow: hidden;
+
+}
+
+.ProductCardImg {
+    width: 110%;
+    height: 110%;
+}
+
+.ProductCard:hover .ProductCardImg {
+    width: 120%;
+    height: 120%;
+    transition: 0.25s linear;
+}
+
+.ProductCardInfoContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    padding: 10px;
+    overflow: hidden;
+}
+
+.ProductCardInfoContainer h3 {
+    display:inline;
+    background: linear-gradient(#ffd85f, #ffd85f) 0 100%/0 20px no-repeat;
+    transition: background 0.5s;
+}
+
+.ProductCard:hover .ProductCardInfoContainer h3{
+    background-size: 100% 20px;
+}
+
+
