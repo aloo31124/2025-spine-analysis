@@ -1,3 +1,6 @@
+/**
+ * 
+ */
 import './App.css';
 import { useEffect, useState } from 'react';
 import {BrowserRouter, Routes, Route, useNavigate, Navigate} from 'react-router-dom';
@@ -43,7 +46,10 @@ import CategoryEditPage from './pages/manager/CategoryEditPage';
 const AppRouter = () => (
   <Routes>
     <Route path="/test/backup" element={<SystemPage />} />
-    <Route path="/" element={<Navigate to="/shopping/home" />} />
+    
+    {/* <Route path="/" element={<Navigate to="/shopping/home" />} /> 原本商城路由, 註解 */}
+    <Route path="/" element={<Navigate to="/manager/list" />} />
+
     <Route path="/auth/*" >
       <Route path="regist/flow" element={<RegisterFlow />} />
       <Route path="login" element={<LoginPage />} />
@@ -55,11 +61,13 @@ const AppRouter = () => (
       <Route path='info' element={<InfoPage/>}></Route>
       <Route path='shopping/order' element={<ShoppingOrder/>}></Route>
     </Route>
+    {/*  原本商城畫面, 註解
     <Route path='/shopping/*' element={<ShoppingLayout />} >
       <Route path='home' element={<HomePage />} />
       <Route path='product/search/list' element={<ShopSearchListPage />} />
       <Route path='product/content' element={<ShopContentPage />} />
     </Route>
+     */}
     <Route path="/manager/*" element={<AppRouterVerify element={ManagerLayout} node={"seller"} />}>
       <Route path="product/list" element={<ProductListPage />} />
       <Route path="product/add" element={<ProductAddPage />} />
