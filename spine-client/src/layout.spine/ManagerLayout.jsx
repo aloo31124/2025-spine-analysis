@@ -1,6 +1,6 @@
 import React from "react";
 import style from './ManagerLayout.module.css'
-import MenuLeft from "../components/manager/MenuLeft/MenuLeft";
+import MenuLeft from "../components.spine/manager/MenuLeft/MenuLeft";
 import { Outlet } from 'react-router-dom';
 
 function ManagerLayout() {

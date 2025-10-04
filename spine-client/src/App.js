@@ -24,12 +24,12 @@ import AppRouterVerify from './AppRouterVerify';
 
 // === 布局組件 ===
 import AccountLayout from './layout/AccountLayout';          // 帳戶布局
-import ManagerLayout from './layout/ManagerLayout';          // 管理者布局
+import ManagerLayout from './layout.spine/ManagerLayout';          // 管理者布局
 import ShoppingLayout from './layout/ShoppingLayout';        // 購物布局 (已註解)
 
 // === 共用組件 ===
 import Loading from './components/Loading';                   // 載入動畫
-import Header from './components/Header/Header';              // 頁面標頭
+import Header from './components.spine/Header/Header';              // 頁面標頭
 
 // === 系統管理頁面 ===
 import SystemPage from './pages/manager/SystemPage';         // 系統備份頁面
