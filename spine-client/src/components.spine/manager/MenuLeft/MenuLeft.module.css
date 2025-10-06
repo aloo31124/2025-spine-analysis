@@ -19,6 +19,11 @@
     box-sizing: border-box;
 }
 
+/* 大螢幕收合狀態 */
+.MenuLeft.hidden {
+    transform: translateX(-100%);
+}
+
 .MenuTitle {
     color: #fff;
     margin-bottom: 20px;
@@ -78,6 +83,15 @@
     }
     
     .MenuLeft.open {
+        transform: translateX(0);
+    }
+    
+    /* 小螢幕時忽略 hidden 狀態 */
+    .MenuLeft.hidden {
+        transform: translateX(-100%);
+    }
+    
+    .MenuLeft.open.hidden {
         transform: translateX(0);
     }
 }

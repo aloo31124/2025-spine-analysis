@@ -3,7 +3,7 @@ import style from './MenuLeft.module.css'
 import { useNavigate } from 'react-router-dom';
 
 
-function MenuLeft({ isOpen, onClose }) {
+function MenuLeft({ isOpen, isHidden, onClose }) {
     const navigate = useNavigate();
     
     // 處理點擊外部區域關閉選單
@@ -31,7 +31,7 @@ function MenuLeft({ isOpen, onClose }) {
                 onClick={onClose}
             ></div>
             
-            <div className={`${style.MenuLeft} ${isOpen ? style.open : ''}`}>
+            <div className={`${style.MenuLeft} ${isOpen ? style.open : ''} ${isHidden ? style.hidden : ''}`}>
                 <h3 className={style.MenuTitle}>📋 脊椎分析系統</h3>
                 <button className={style.MenuLeftButton}>
                     頸部分析
