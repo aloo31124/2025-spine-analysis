@@ -1,28 +1,38 @@
 
 .headerContainer {
-    width: 98%;
-    min-width: 200px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    width: 100%;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
     padding: 10px;
-    border-bottom: #cfcfcf solid 2px;
+    background: #3DA5FF;
+    color: #fff;
+    border-radius: 0 0 10px 10px;
+    z-index: 1000;
+    box-sizing: border-box;
 }
 
 .headerLogo {
-    max-width: 80px;
-    padding: 10px;
+    max-width: 60px;
+    padding: 5px;
     cursor: pointer;
+    margin-left: 50px;
 }
 
 .headerInputSearch {
-    border: #cfcfcf solid 2px;
-    border-radius: 40px;
-    padding: 10px 40px;
+    border: none;
+    border-radius: 20px;
+    padding: 8px 20px;
     width: 40%;
     min-width: 100px;
-    font-size: 25px;
+    font-size: 16px;
+    background: rgba(255, 255, 255, 0.9);
 }
 
 .headerRightSection {
@@ -39,11 +49,19 @@
 }
 
 .headerButton {
-    background: white;
+    background: transparent;
     border: none;
-    white-space:nowrap;
-    font-size: 18px;
+    white-space: nowrap;
+    font-size: 16px;
     cursor: pointer;
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.headerButton:hover {
+    background-color: rgba(255, 255, 255, 0.2);
 }
 
 .headerMenu {
@@ -55,7 +73,7 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
     padding: 10px 20px;
-    z-index: 100;
+    z-index: 1100;
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -68,17 +86,87 @@
     text-align: left;
     width: 100%;
     padding: 10px;
-    font-size: 18px;
+    font-size: 16px;
     cursor: pointer;
     color: #333;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
 }
 
 .headerMenu button:hover {
     background-color: #f0f0f0;
 }
 
+/* 漢堡選單按鈕樣式 */
+.hamburger {
+    display: flex;
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    width: 35px;
+    height: 28px;
+    flex-direction: column;
+    justify-content: space-between;
+    cursor: pointer;
+    z-index: 1100;
+}
+
+.hamburger span {
+    display: block;
+    height: 4px;
+    background: #fff;
+    border-radius: 2px;
+    transition: all 0.3s ease;
+}
+
 .headerIcon {
     padding: 10px;
     cursor: pointer;
+}
+
+/* RWD 響應式設計 */
+@media (max-width: 800px) {
+    .headerInputSearch {
+        width: 30%;
+        min-width: 80px;
+        font-size: 14px;
+        padding: 6px 15px;
+    }
+    
+    .headerRightSection {
+        font-size: 14px;
+    }
+    
+    .headerButton {
+        font-size: 14px;
+        padding: 6px 8px;
+    }
+    
+    .headerMenu {
+        min-width: 120px;
+        padding: 8px 15px;
+    }
+    
+    .headerMenu button {
+        font-size: 14px;
+        padding: 8px;
+    }
+}
+
+@media (max-width: 500px) {
+    .headerInputSearch {
+        width: 25%;
+        font-size: 12px;
+        padding: 5px 10px;
+    }
+    
+    .headerLogo {
+        max-width: 50px;
+        margin-left: 45px;
+    }
+    
+    .headerButton {
+        font-size: 12px;
+    }
 }
 

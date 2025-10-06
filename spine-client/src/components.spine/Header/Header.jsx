@@ -4,7 +4,7 @@ import logo from '../../assets.spine/logo.png';
 import { logout } from '../../api/auth';
 import {useNavigate} from 'react-router-dom';
 
-function Header() {
+function Header({ onToggleMenu }) {
     const navigate = useNavigate();
     const [hoveredMenu, setHoveredMenu] = useState(null); // 控制顯示選單
 
@@ -27,6 +27,13 @@ function Header() {
 
     return (
         <div className={style.headerContainer}>
+            {/* 漢堡選單按鈕 */}
+            <div className={style.hamburger} onClick={onToggleMenu}>
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            
             <img className={style.headerLogo} 
                 src={logo} 
             />
