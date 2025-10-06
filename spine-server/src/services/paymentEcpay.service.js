@@ -61,10 +61,7 @@ exports.getPaySelectPageHtml = async (payment, userId) => {
   //const cloud_return_url = process.env.CLOUD_RUNTIME_URL || "http:localhost:8082";
   //const cloud_return_url = `https://${process.env.FUNCTION_REGION}-${process.env.GCLOUD_PROJECT}.cloudfunctions.net/${process.env.FUNCTION_NAME}`;
   //const cloud_return_url = "http://localhost:8081";
-  // const cloud_return_url = "https://api-po4a4d6mca-uc.a.run.app"; // aloo
-  // const cloud_return_url = "https://api-7knp3cqlda-uc.a.run.app"; // newaloo copy
-  //const cloud_return_url = "https://api-xrle3iazmq-uc.a.run.app"; // newaloo backup1
-  const cloud_return_url = "https://api-62cjzalb4q-uc.a.run.app"; // newaloo backup2
+  const cloud_return_url = "https://api-e4uwxubzaa-uc.a.run.app/"; // aloo
 
   let base_param = {
       MerchantTradeNo: TradeNo,
