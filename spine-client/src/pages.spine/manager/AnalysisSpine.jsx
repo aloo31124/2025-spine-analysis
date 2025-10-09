@@ -1,0 +1,446 @@
+import React, { useEffect, useState, useRef } from 'react';
+import './AnalysisSpine.css';
+import neckPatientImage from '../../assets.spine/images/病患側面.png';
+
+function AnalysisSpine() {
+    const neckContainerRef = useRef(null);
+    const neckContainerWrapperRef = useRef(null);
+    
+    // 縮放比例變量
+    const [currentScale, setCurrentScale] = useState(1);
+    const minScale = 0.5;
+    const maxScale = 2.0;
+    const scaleStep = 0.1;
+    
+    // 五個點的初始位置（相對於容器的比例位置）
+    const initialPointPositions = [
+        { x: 0.3, y: 0.1 },   // 頂部
+        { x: 0.35, y: 0.2 },  // 左側
+        { x: 0.37, y: 0.3 },  // 右側
+        { x: 0.3, y: 0.41 },  // 左下
+        { x: 0.24, y: 0.52 }  // 右下
+    ];
+    
+    const [points, setPoints] = useState([]);
+    const [currentPointIndex, setCurrentPointIndex] = useState(0);
+    const [isDragging, setIsDragging] = useState(false);
+    const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+    const [lines, setLines] = useState([]);
+    const [intersectionPoints, setIntersectionPoints] = useState([]);
+
+    // 初始化點位
+    useEffect(() => {
+        initPoints();
+    }, []);
+
+    const initPoints = () => {
+        const container = neckContainerRef.current;
+        if (!container) return;
+
+        const newPoints = initialPointPositions.map((pos, index) => ({
+            id: index,
+            x: pos.x * container.offsetWidth,
+            y: pos.y * container.offsetHeight,
+            isDraggable: index === 0
+        }));
+        
+        setPoints(newPoints);
+        setCurrentPointIndex(0);
+        setLines([]);
+        setIntersectionPoints([]);
+    };
+
+    // 設置當前可拖拽的點
+    const setDraggablePoint = (index) => {
+        setPoints(prevPoints => 
+            prevPoints.map((point, i) => ({
+                ...point,
+                isDraggable: i === index
+            }))
+        );
+        setCurrentPointIndex(index);
+    };
+
+    // 開始拖拽
+    const handleMouseDown = (e, pointIndex) => {
+        if (points[pointIndex] && !points[pointIndex].isDraggable) return;
+        
+        e.preventDefault();
+        setIsDragging(true);
+        
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        
+        const container = neckContainerRef.current;
+        const rect = container.getBoundingClientRect();
+        
+        setDragStart({
+            x: clientX - rect.left - points[pointIndex].x,
+            y: clientY - rect.top - points[pointIndex].y
+        });
+    };
+
+    // 拖拽中
+    const handleMouseMove = (e) => {
+        if (!isDragging) return;
+        
+        e.preventDefault();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        
+        const container = neckContainerRef.current;
+        const rect = container.getBoundingClientRect();
+        
+        let newX = clientX - rect.left - dragStart.x;
+        let newY = clientY - rect.top - dragStart.y;
+        
+        // 限制點在容器範圍內
+        newX = Math.max(0, Math.min(container.offsetWidth - 10, newX));
+        newY = Math.max(0, Math.min(container.offsetHeight - 10, newY));
+        
+        setPoints(prevPoints =>
+            prevPoints.map((point, index) =>
+                index === currentPointIndex ? { ...point, x: newX, y: newY } : point
+            )
+        );
+    };
+
+    // 停止拖拽
+    const handleMouseUp = () => {
+        setIsDragging(false);
+    };
+
+    useEffect(() => {
+        if (isDragging) {
+            document.addEventListener('mousemove', handleMouseMove);
+            document.addEventListener('mouseup', handleMouseUp);
+            document.addEventListener('touchmove', handleMouseMove, { passive: false });
+            document.addEventListener('touchend', handleMouseUp);
+            
+            return () => {
+                document.removeEventListener('mousemove', handleMouseMove);
+                document.removeEventListener('mouseup', handleMouseUp);
+                document.removeEventListener('touchmove', handleMouseMove);
+                document.removeEventListener('touchend', handleMouseUp);
+            };
+        }
+    }, [isDragging, dragStart, currentPointIndex]);
+
+    // 上一個點
+    const handlePrevPoint = () => {
+        if (currentPointIndex > 0) {
+            setDraggablePoint(currentPointIndex - 1);
+        }
+    };
+
+    // 下一個點
+    const handleNextPoint = () => {
+        if (currentPointIndex < points.length - 1) {
+            setDraggablePoint(currentPointIndex + 1);
+        }
+    };
+
+    // 重置
+    const handleReset = () => {
+        setCurrentScale(1);
+        applyScale(1);
+        initPoints();
+        setCurrentPointIndex(0);
+    };
+
+    // 計算功能
+    const handleCalculate = () => {
+        calculateSpecialLines();
+    };
+
+    // 縮放功能
+    const applyScale = (scale) => {
+        const wrapper = neckContainerWrapperRef.current;
+        if (wrapper) {
+            wrapper.style.transform = `scale(${scale})`;
+            wrapper.style.transformOrigin = 'center top';
+            setCurrentScale(scale);
+        }
+    };
+
+    const handleZoomIn = () => {
+        const newScale = Math.min(currentScale + scaleStep, maxScale);
+        applyScale(newScale);
+    };
+
+    const handleZoomOut = () => {
+        const newScale = Math.max(currentScale - scaleStep, minScale);
+        applyScale(newScale);
+    };
+
+    // 計算特殊線條和交點
+    const calculateSpecialLines = () => {
+        const newLines = [];
+        const newIntersectionPoints = [];
+
+        // 1. 畫點1與點4的連線
+        const line14 = {
+            id: 'line14',
+            type: 'diagonal',
+            start: points[0],
+            end: points[3]
+        };
+        newLines.push(line14);
+
+        // 2. 畫點3的水平線
+        const horizontalLine = {
+            id: 'horizontal3',
+            type: 'horizontal',
+            point: points[2]
+        };
+        newLines.push(horizontalLine);
+
+        // 3. 畫點5的垂直線
+        const verticalLine = {
+            id: 'vertical5',
+            type: 'vertical',
+            point: points[4]
+        };
+        newLines.push(verticalLine);
+
+        // 4. 計算水平線3與線14的交點（點6）
+        const intersection6 = calculateLineIntersection(
+            points[2], 'horizontal',
+            points[0], points[3]
+        );
+        if (intersection6) {
+            newIntersectionPoints.push({ id: '6', ...intersection6 });
+        }
+
+        // 5. 計算水平線3與垂直線5的交點（點7）
+        const intersection7 = {
+            x: points[4].x,
+            y: points[2].y
+        };
+        newIntersectionPoints.push({ id: '7', ...intersection7 });
+
+        // 6. 畫點5與點6的連線
+        if (intersection6) {
+            const line56 = {
+                id: 'line56',
+                type: 'diagonal',
+                start: points[4],
+                end: intersection6
+            };
+            newLines.push(line56);
+
+            // 7. 計算角度756（點7-點5-點6的夾角）
+            const angle756 = calculateAngle756(intersection7, points[4], intersection6);
+            
+            // 8. 計算線75和線56的距離
+            const distance75 = calculateDistance(intersection7, points[4]);
+            const distance56 = calculateDistance(points[4], intersection6);
+            
+            // 顯示計算結果
+            const results = [
+                `角度756 (點7-點5-點6): ${angle756.toFixed(1)}°`,
+                `線75距離: ${distance75.toFixed(2)}px`,
+                `線56距離: ${distance56.toFixed(2)}px`
+            ];
+            alert("計算結果:\n" + results.join('\n'));
+        }
+
+        setLines(newLines);
+        setIntersectionPoints(newIntersectionPoints);
+    };
+
+    // 計算線段交點
+    const calculateLineIntersection = (horizontalPoint, horizontalType, diagonalPoint1, diagonalPoint2) => {
+        if (horizontalType === 'horizontal') {
+            const y = horizontalPoint.y;
+            const dx = diagonalPoint2.x - diagonalPoint1.x;
+            const dy = diagonalPoint2.y - diagonalPoint1.y;
+            
+            if (dy === 0) return null;
+            
+            const t = (y - diagonalPoint1.y) / dy;
+            
+            if (t >= 0 && t <= 1) {
+                const x = diagonalPoint1.x + t * dx;
+                return { x, y };
+            }
+        }
+        return null;
+    };
+
+    // 計算角度756
+    const calculateAngle756 = (point7, point5, point6) => {
+        const vector57 = {
+            x: point7.x - point5.x,
+            y: point7.y - point5.y
+        };
+        
+        const vector56 = {
+            x: point6.x - point5.x,
+            y: point6.y - point5.y
+        };
+        
+        const dotProduct = vector57.x * vector56.x + vector57.y * vector56.y;
+        const magnitude57 = Math.sqrt(vector57.x * vector57.x + vector57.y * vector57.y);
+        const magnitude56 = Math.sqrt(vector56.x * vector56.x + vector56.y * vector56.y);
+        
+        if (magnitude57 === 0 || magnitude56 === 0) {
+            return 0;
+        }
+        
+        const cosAngle = dotProduct / (magnitude57 * magnitude56);
+        const clampedCosAngle = Math.max(-1, Math.min(1, cosAngle));
+        const angleRadians = Math.acos(clampedCosAngle);
+        const angleDegrees = angleRadians * 180 / Math.PI;
+        
+        return angleDegrees;
+    };
+
+    // 計算兩點距離
+    const calculateDistance = (point1, point2) => {
+        const dx = point2.x - point1.x;
+        const dy = point2.y - point1.y;
+        return Math.sqrt(dx * dx + dy * dy);
+    };
+
+    return (
+        <div className="analysis-spine">
+            <div className="analysis-content">
+                <div className="neck-container-wrapper" ref={neckContainerWrapperRef}>
+                    <div 
+                        className="neck-container" 
+                        ref={neckContainerRef}
+                        style={{ backgroundImage: `url(${neckPatientImage})` }}
+                    >
+                        {/* 渲染點位 */}
+                        {points.map((point, index) => (
+                            <div
+                                key={point.id}
+                                className={`point ${point.isDraggable ? 'draggable' : ''}`}
+                                style={{
+                                    left: `${point.x}px`,
+                                    top: `${point.y}px`
+                                }}
+                                onMouseDown={(e) => handleMouseDown(e, index)}
+                                onTouchStart={(e) => handleMouseDown(e, index)}
+                            >
+                                {index + 1}
+                            </div>
+                        ))}
+
+                        {/* 渲染線條 */}
+                        {lines.map(line => {
+                            if (line.type === 'diagonal') {
+                                const length = Math.sqrt(
+                                    Math.pow(line.end.x - line.start.x, 2) + 
+                                    Math.pow(line.end.y - line.start.y, 2)
+                                );
+                                const angle = Math.atan2(
+                                    line.end.y - line.start.y, 
+                                    line.end.x - line.start.x
+                                ) * 180 / Math.PI;
+
+                                return (
+                                    <div
+                                        key={line.id}
+                                        className="special-line diagonal-line"
+                                        style={{
+                                            left: `${line.start.x}px`,
+                                            top: `${line.start.y}px`,
+                                            width: `${length}px`,
+                                            transform: `rotate(${angle}deg)`
+                                        }}
+                                    />
+                                );
+                            } else if (line.type === 'horizontal') {
+                                return (
+                                    <div
+                                        key={line.id}
+                                        className="special-line horizontal-line"
+                                        style={{
+                                            left: '0px',
+                                            top: `${line.point.y}px`,
+                                            width: '100%'
+                                        }}
+                                    />
+                                );
+                            } else if (line.type === 'vertical') {
+                                return (
+                                    <div
+                                        key={line.id}
+                                        className="special-line vertical-line"
+                                        style={{
+                                            left: `${line.point.x}px`,
+                                            top: '0px',
+                                            height: '100%'
+                                        }}
+                                    />
+                                );
+                            }
+                            return null;
+                        })}
+
+                        {/* 渲染交點 */}
+                        {intersectionPoints.map(point => (
+                            <div
+                                key={point.id}
+                                className="intersection-point"
+                                style={{
+                                    left: `${point.x}px`,
+                                    top: `${point.y}px`
+                                }}
+                            >
+                                {point.id}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+
+            {/* 控制按鈕 */}
+            <div className="menu-bottom-second">
+                <button 
+                    onClick={handleZoomIn}
+                    disabled={currentScale >= maxScale}
+                    className="control-btn"
+                >
+                    +
+                </button>
+                <button 
+                    onClick={handleZoomOut}
+                    disabled={currentScale <= minScale}
+                    className="control-btn"
+                >
+                    -
+                </button>
+                <span>&nbsp;&nbsp;&nbsp;</span>
+                <button 
+                    onClick={handlePrevPoint}
+                    disabled={currentPointIndex === 0}
+                    className="control-btn"
+                >
+                    &lt;
+                </button>
+                <button 
+                    onClick={handleNextPoint}
+                    disabled={currentPointIndex === points.length - 1}
+                    className="control-btn"
+                >
+                    &gt;
+                </button>
+            </div>
+
+            <div className="menu-bottom">
+                <button onClick={handleCalculate} className="action-btn">
+                    計算
+                </button>
+                <span>&nbsp;&nbsp;&nbsp;</span>
+                <button onClick={handleReset} className="action-btn">
+                    重置
+                </button>
+            </div>
+        </div>
+    );
+}
+
+export default AnalysisSpine;
