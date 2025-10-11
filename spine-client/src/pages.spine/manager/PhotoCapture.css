@@ -3,16 +3,13 @@
 .photo-capture {
     position: relative;
     width: 100%;
-    height: calc(100vh - 70px); /* 扣除 header 高度 */
     background: #f5f5f5;
-    overflow: hidden;
 }
 
 .photo-capture-content {
     margin-bottom: 80px; /* 為底部按鈕留出空間 */
     padding: 20px;
     background: #fff;
-    min-height: calc(100vh - 150px);
     overflow-y: auto;
     display: flex;
     justify-content: center;

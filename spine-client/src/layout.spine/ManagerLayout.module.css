@@ -8,6 +8,7 @@
 .managerMain {
     margin-top: 70px; /* 預留 header 高度 */
     margin-left: 30%;
+    margin-bottom: 15%; /* 預留 footer 高度 */
     padding: 20px;
     background: #fff;
     min-height: calc(100vh - 70px);

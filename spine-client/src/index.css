@@ -17,7 +17,7 @@ body {
 
 /* 自訂滾動條 */
 *::-webkit-scrollbar {
-  width: 10px;               /* 設定垂直滾動條的寬度 */
+  width: 12px;               /* 設定垂直滾動條的寬度 */
   height: 10px;              /* 設定水平滾動條的高度 */
 }
 
@@ -27,6 +27,7 @@ body {
 
 *::-webkit-scrollbar-thumb {
   background: #3DA5FF;       /* 滾動條顏色 */
+  border: #3498db solid 2px; /* 滾動條邊框 */
   border-radius: 6px;        /* 滾動條圓角 */
 }
 

@@ -3,17 +3,15 @@
 .analysis-spine {
     position: relative;
     width: 100%;
-    height: calc(100vh - 70px); /* 扣除 header 高度 */
     background: #f5f5f5;
-    overflow: hidden;
+    /* overflow: hidden; */
 }
 
 .analysis-content {
     margin-bottom: 110px; /* 調整為兩個底部菜單的總高度 */
     padding: 20px;
     background: #fff;
-    min-height: calc(100vh - 180px);
-    overflow: hidden;
+    /* overflow: hidden; */
     display: flex;
     justify-content: center;
     align-items: flex-start;
@@ -28,7 +26,7 @@
     aspect-ratio: 1 / 2;
     border: 2px solid #3DA5FF;
     border-radius: 10px;
-    overflow: hidden;
+    /* overflow: hidden; */
     background-color: rgba(255, 255, 255, 0.8);
     background-size: cover;
     background-position: top;
