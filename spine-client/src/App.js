@@ -63,6 +63,7 @@ import ProductEditPage from './pages/manager/ProductEditPage';     // 編輯商�
 // === 脊椎分析頁面 ===
 import AnalysisSpine from './pages.spine/manager/AnalysisSpine';   // 脊椎分析
 import AnalysisSpineTest from './pages.spine/manager/AnalysisSpineTest';   // 脊椎分析測試版
+import PhotoCapture from './pages.spine/manager/PhotoCapture';     // 拍照上傳
 
 // === 分類管理頁面 ===
 import CategoryListPage from './pages/manager/CategoryListPage';   // 分類列表
@@ -118,6 +119,7 @@ const AppRouter = () => (
       {/* 脊椎分析 */}
       <Route path="analysis/spine" element={<AnalysisSpine />} />       {/* 脊椎分析 */}
       <Route path="analysis/spine/test" element={<AnalysisSpineTest />} />  {/* 脊椎分析測試版 */}
+      <Route path="photo/capture" element={<PhotoCapture />} />        {/* 拍照上傳 */}
       
       {/* 商品管理 */}
       <Route path="product/list" element={<ProductListPage />} />      {/* 商品列表 */}

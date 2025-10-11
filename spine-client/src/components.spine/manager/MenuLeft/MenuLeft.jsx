@@ -32,7 +32,12 @@ function MenuLeft({ isOpen, isHidden, onClose }) {
             ></div>
             
             <div className={`${style.MenuLeft} ${isOpen ? style.open : ''} ${isHidden ? style.hidden : ''}`}>
-                <h3 className={style.MenuTitle}>📋 脊椎分析系統</h3>
+                <h3 className={style.MenuTitle}>頸椎分析系統</h3>
+                <button className={style.MenuLeftButton}
+                    onClick={e => navigate('/manager/photo/capture') }
+                >
+                    拍照上傳
+                </button>
                 <button className={style.MenuLeftButton}
                     onClick={e => navigate('/manager/analysis/spine') }
                 >
