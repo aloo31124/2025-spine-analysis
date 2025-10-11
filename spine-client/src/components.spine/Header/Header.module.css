@@ -57,11 +57,33 @@
     color: #fff;
     padding: 8px 12px;
     border-radius: 5px;
-    transition: background-color 0.3s ease;
+    transition: all 0.3s ease;
 }
 
 .headerButton:hover {
     background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* 移動版按鈕樣式 */
+.headerButtonMobile {
+    min-width: 40px;
+    width: 40px;
+    height: 40px;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.settingsIcon {
+    font-size: 18px;
+    color: #fff;
+    transition: transform 0.3s ease;
+}
+
+.settingsIcon:hover {
+    transform: rotate(90deg);
 }
 
 .headerMenu {
@@ -127,9 +149,9 @@
 /* RWD 響應式設計 */
 @media (max-width: 800px) {
     .headerInputSearch {
-        width: 30%;
-        min-width: 80px;
-        font-size: 14px;
+        width: 55%;
+        min-width: 100px;
+        font-size: 18px;
         padding: 6px 15px;
     }
     
@@ -142,9 +164,22 @@
         padding: 6px 8px;
     }
     
+    /* 移動版系統設定按鈕特殊樣式 */
+    .headerButtonMobile {
+        min-width: 36px;
+        width: 36px;
+        height: 36px;
+        padding: 6px;
+    }
+    
+    .settingsIcon {
+        font-size: 16px;
+    }
+    
     .headerMenu {
         min-width: 120px;
         padding: 8px 15px;
+        right: -10px; /* 調整下拉選單位置，確保不會超出螢幕 */
     }
     
     .headerMenu button {
@@ -154,11 +189,6 @@
 }
 
 @media (max-width: 500px) {
-    .headerInputSearch {
-        width: 25%;
-        font-size: 12px;
-        padding: 5px 10px;
-    }
     
     .headerLogo {
         max-width: 50px;
@@ -167,6 +197,29 @@
     
     .headerButton {
         font-size: 12px;
+    }
+    
+    /* 小螢幕的系統設定按鈕 */
+    .headerButtonMobile {
+        min-width: 32px;
+        width: 32px;
+        height: 32px;
+        padding: 4px;
+    }
+    
+    .settingsIcon {
+        font-size: 14px;
+    }
+    
+    .headerMenu {
+        right: -15px; /* 進一步調整選單位置 */
+        min-width: 100px;
+        padding: 6px 12px;
+    }
+    
+    .headerMenu button {
+        font-size: 12px;
+        padding: 6px;
     }
 }
 

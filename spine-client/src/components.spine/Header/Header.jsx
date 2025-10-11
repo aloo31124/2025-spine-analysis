@@ -1,15 +1,27 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import style from './Header.module.css';
 import logo from '../../assets.spine/logo.png';
 import { logout } from '../../api/auth';
 import {useNavigate} from 'react-router-dom';
+import { FaCog } from 'react-icons/fa';
 
 function Header({ onToggleMenu }) {
     const navigate = useNavigate();
     const [hoveredMenu, setHoveredMenu] = useState(null); // 控制顯示選單
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 800); // 檢測是否為移動設備
 
     const handleMouseEnter = (menu) => setHoveredMenu(menu);
     const handleMouseLeave = () => setHoveredMenu(null);
+
+    // 監聽螢幕尺寸變化
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth < 800);
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     const clickToManager = async () => {
         navigate('/manager/product/list');
@@ -49,8 +61,8 @@ function Header({ onToggleMenu }) {
                         onMouseEnter={() => handleMouseEnter("user")}
                         onMouseLeave={handleMouseLeave}
                     >
-                    <button className={style.headerButton}>
-                        系統設定
+                    <button className={`${style.headerButton} ${isMobile ? style.headerButtonMobile : ''}`}>
+                        {isMobile ? <FaCog className={style.settingsIcon} /> : '系統設定'}
                     </button>
 
                     {hoveredMenu === "user" && (
