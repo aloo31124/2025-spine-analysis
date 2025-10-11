@@ -51,14 +51,14 @@ import FogetPasswordPage from './pages/auth/FogetPasswordPage'; // 忘記密碼
 import PaymentSelectPage from './pages/Payment/PaymentSelectPage'; // 付款方式選擇
 
 // === 帳戶管理頁面 ===
-import InfoPage from './pages/account/InfoPage';             // 個人資訊
-import SelectPaymentPage from './pages/account/SelectPaymentPage'; // 選擇付費方案
-import ShoppingOrder from './pages/account/ShoppingOrder';   // 購物訂單
+import InfoPage from './pages.spine/account/InfoPage';             // 個人資訊
+import SelectPaymentPage from './pages.spine/account/SelectPaymentPage'; // 選擇付費方案
+import ShoppingOrder from './pages.spine/account/ShoppingOrder';   // 購物訂單
 
 // === 商品管理頁面 ===
-import ProductListPage from './pages/manager/ProductListPage';     // 商品列表
-import ProductAddPage from './pages/manager/ProductAddPage';       // 新增商品
-import ProductEditPage from './pages/manager/ProductEditPage';     // 編輯商品
+import ProductListPage from './pages.spine/manager/ProductListPage';     // 商品列表
+import ProductAddPage from './pages.spine/manager/ProductAddPage';       // 新增商品
+import ProductEditPage from './pages.spine/manager/ProductEditPage';     // 編輯商品
 
 // === 脊椎分析頁面 ===
 import AnalysisSpine from './pages.spine/manager/AnalysisSpine';   // 脊椎分析

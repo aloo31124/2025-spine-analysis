@@ -125,6 +125,11 @@ function ProductListPage() {
                 categoryList={categoryList}
                 pagingParam={pagingParam}
             />
+            <PaginationBar 
+                pagingParam={pagingParam} 
+                clickPageChange={handlePageChange} 
+                clickPageSizeChange={handlePageSizeChange}
+            />
             <table>
                 {
                     isLoading ? (

@@ -22,14 +22,14 @@ body {
 }
 
 *::-webkit-scrollbar-track {
-  background: #cfcfcf;   /* 滾動軌道背景設為透明 */
+  background: #3498db;   /* 滾動軌道背景設為透明 */
 }
 
 *::-webkit-scrollbar-thumb {
-  background: #adadad;       /* 滾動條顏色 */
+  background: #3DA5FF;       /* 滾動條顏色 */
   border-radius: 6px;        /* 滾動條圓角 */
 }
 
 *::-webkit-scrollbar-thumb:hover {
-  background: #adadad;       /* 滑鼠移入滾動條時的顏色 */
+  background: #3DA5FF;       /* 滑鼠移入滾動條時的顏色 */
 }

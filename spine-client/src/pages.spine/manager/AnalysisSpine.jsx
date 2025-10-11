@@ -402,14 +402,12 @@ function AnalysisSpine() {
                 <button 
                     onClick={handleZoomIn}
                     disabled={currentScale >= maxScale}
-                    className="control-btn"
                 >
                     +
                 </button>
                 <button 
                     onClick={handleZoomOut}
                     disabled={currentScale <= minScale}
-                    className="control-btn"
                 >
                     -
                 </button>
@@ -417,7 +415,6 @@ function AnalysisSpine() {
                 <button 
                     onClick={handlePrevPoint}
                     disabled={currentPointIndex === 0}
-                    className="control-btn"
                 >
                     &lt;
                 </button>
