@@ -88,7 +88,7 @@ const AppRouter = () => (
     
     {/* === 首頁重導向 === */}
     {/* 原本導向商城首頁，現改為導向管理者商品列表 */}
-    <Route path="/" element={<Navigate to="/manager/product/list" />} />
+    <Route path="/" element={<Navigate to="/manager/analysis/spine" />} />
 
     {/* === 身份驗證路由群組 (無需登入) === */}
     <Route path="/auth/*">
@@ -118,7 +118,6 @@ const AppRouter = () => (
     <Route path="/manager/*" element={<AppRouterVerify element={ManagerLayout} node={"seller"} />}>
       {/* 脊椎分析 */}
       <Route path="analysis/spine" element={<AnalysisSpine />} />       {/* 脊椎分析 */}
-      <Route path="analysis/spine/test" element={<AnalysisSpineTest />} />  {/* 脊椎分析測試版 */}
       <Route path="photo/capture" element={<PhotoCapture />} />        {/* 拍照上傳 */}
       
       {/* 商品管理 */}
