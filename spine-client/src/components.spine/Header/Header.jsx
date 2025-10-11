@@ -40,6 +40,7 @@ function Header({ onToggleMenu }) {
             <input className={style.headerInputSearch}
                 type="text" 
                 placeholder='客戶,頸枕搜尋'
+                onClick={e => alert('功能開發中')}
             />
             <div className={style.headerRightSection} >
 

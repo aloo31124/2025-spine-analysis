@@ -13,11 +13,6 @@ function MenuLeftAccount() {
             >
                 帳號資訊
             </button>
-            <button className={style.MenuLeftButton}
-                onClick={e => navigate('/account/shopping/order')}
-            >
-                購物訂單
-            </button>
         </div>
     )
 }

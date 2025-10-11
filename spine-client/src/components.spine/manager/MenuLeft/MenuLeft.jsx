@@ -38,12 +38,14 @@ function MenuLeft({ isOpen, isHidden, onClose }) {
                 >
                     頸部分析
                 </button>
+                {/*
                 <button className={style.MenuLeftButton}
                     onClick={e => navigate('/manager/analysis/spine/test') }
                 >
                     頸部分析(測試版)
                 </button>
-                <button className={style.MenuLeftButton}>
+                 */}
+                <button className={style.MenuLeftButton} onClick={e => alert('功能開發中')}>
                     客戶管理
                 </button>
                 <button className={style.MenuLeftButton}

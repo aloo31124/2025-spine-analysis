@@ -23,7 +23,7 @@ import { verifyJwt, verifyRole, verifyPayment } from './api/auth';
 import AppRouterVerify from './AppRouterVerify';
 
 // === 布局組件 ===
-import AccountLayout from './layout/AccountLayout';          // 帳戶布局
+import AccountLayout from './layout.spine/AccountLayout';          // 帳戶布局
 import ManagerLayout from './layout.spine/ManagerLayout';          // 管理者布局
 import ShoppingLayout from './layout/ShoppingLayout';        // 購物布局 (已註解)
 

@@ -1,6 +1,6 @@
 import React from "react";
 import style from './AccountLayout.module.css'
-import MenuLeftAccount from "../components/manager/MenuLeft/MenuLeftAccount";
+import MenuLeftAccount from "../components.spine/manager/MenuLeft/MenuLeftAccount";
 import { Outlet } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
 
