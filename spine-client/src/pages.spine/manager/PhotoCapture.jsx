@@ -15,10 +15,14 @@
  */
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './PhotoCapture.css';
 import { FaCamera, FaUpload, FaCrop, FaSave, FaPlus, FaTimes, FaRedo } from 'react-icons/fa';
 
 function PhotoCapture() {
+    // === 路由導航 ===
+    const navigate = useNavigate();
+
     // === 狀態管理 ===
     const [currentView, setCurrentView] = useState('main'); // 'main', 'preview', 'editor', 'result'
     const [imageData, setImageData] = useState(null);
@@ -225,6 +229,20 @@ function PhotoCapture() {
         if (cameraInputRef.current) cameraInputRef.current.value = '';
     }, []);
 
+    // === 切換到分析頁面並傳遞照片 ===
+    const handleGoToAnalysis = useCallback(() => {
+        if (imageData) {
+            // 將照片數據保存到 localStorage
+            localStorage.setItem('spineAnalysisPhoto', imageData);
+            localStorage.setItem('spineAnalysisPhotoTimestamp', Date.now().toString());
+            
+            // 導航到脊椎分析頁面
+            navigate('/manager/analysis/spine');
+        } else {
+            alert('請先拍攝或選擇一張照片');
+        }
+    }, [imageData, navigate]);
+
     // === 裁切區域拖拽處理 ===
     const handleCropMouseDown = useCallback((e) => {
         e.preventDefault();
@@ -417,6 +435,10 @@ function PhotoCapture() {
             {/* 底部控制按鈕 */}
             {currentView === 'preview' && (
                 <div className="photo-bottom-menu">
+                    <button onClick={handleGoToAnalysis}>
+                        <FaPlus />
+                        <span>開始分析</span>
+                    </button>
                     <button onClick={handleEditPhoto}>
                         <FaCrop />
                         <span>編輯</span>
@@ -447,9 +469,13 @@ function PhotoCapture() {
 
             {currentView === 'result' && (
                 <div className="photo-bottom-menu">
-                    <button onClick={handleNewPhoto} >
+                    <button onClick={handleGoToAnalysis} >
                         <FaPlus />
-                        <span>新增照片</span>
+                        <span>開始分析</span>
+                    </button>
+                    <button onClick={handleNewPhoto} >
+                        <FaRedo />
+                        <span>重新拍攝</span>
                     </button>
                 </div>
             )}

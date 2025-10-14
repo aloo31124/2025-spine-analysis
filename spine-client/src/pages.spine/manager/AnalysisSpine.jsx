@@ -1,10 +1,15 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './AnalysisSpine.css';
 import neckPatientImage from '../../assets.spine/images/病患側面.png';
 
 function AnalysisSpine() {
+    const navigate = useNavigate();
     const neckContainerRef = useRef(null);
     const neckContainerWrapperRef = useRef(null);
+    
+    // 背景圖片狀態
+    const [backgroundImage, setBackgroundImage] = useState(neckPatientImage);
     
     // 縮放比例變量
     const [currentScale, setCurrentScale] = useState(1);
@@ -31,6 +36,26 @@ function AnalysisSpine() {
     // 初始化點位
     useEffect(() => {
         initPoints();
+    }, []);
+
+    // 檢查是否有來自拍照頁面的圖片
+    useEffect(() => {
+        const storedPhoto = localStorage.getItem('spineAnalysisPhoto');
+        const photoTimestamp = localStorage.getItem('spineAnalysisPhotoTimestamp');
+        
+        if (storedPhoto && photoTimestamp) {
+            // 檢查照片是否是最近的（避免使用過期的照片）
+            const now = Date.now();
+            const timestamp = parseInt(photoTimestamp);
+            const maxAge = 24 * 60 * 60 * 1000; // 24小時
+            
+            if (now - timestamp < maxAge) {
+                setBackgroundImage(storedPhoto);
+                // 清除已使用的照片數據
+                localStorage.removeItem('spineAnalysisPhoto');
+                localStorage.removeItem('spineAnalysisPhotoTimestamp');
+            }
+        }
     }, []);
 
     const initPoints = () => {
@@ -146,6 +171,17 @@ function AnalysisSpine() {
         applyScale(1);
         initPoints();
         setCurrentPointIndex(0);
+    };
+
+    // 切換回原始圖片
+    const handleUseOriginalImage = () => {
+        setBackgroundImage(neckPatientImage);
+        handleReset();
+    };
+
+    // 導航到拍照頁面
+    const handleGoToPhotoCapture = () => {
+        navigate('/manager/photo/capture');
     };
 
     // 計算功能
@@ -310,7 +346,7 @@ function AnalysisSpine() {
                     <div 
                         className="neck-container" 
                         ref={neckContainerRef}
-                        style={{ backgroundImage: `url(${neckPatientImage})` }}
+                        style={{ backgroundImage: `url(${backgroundImage})` }}
                     >
                         {/* 渲染點位 */}
                         {points.map((point, index) => (
@@ -435,6 +471,18 @@ function AnalysisSpine() {
                 <button onClick={handleReset} className="action-btn">
                     重置
                 </button>
+                <span>&nbsp;&nbsp;&nbsp;</span>
+                <button onClick={handleGoToPhotoCapture} className="action-btn">
+                    拍攝新照片
+                </button>
+                {backgroundImage !== neckPatientImage && (
+                    <>
+                        <span>&nbsp;&nbsp;&nbsp;</span>
+                        <button onClick={handleUseOriginalImage} className="action-btn">
+                            使用原始圖片
+                        </button>
+                    </>
+                )}
             </div>
         </div>
     );
