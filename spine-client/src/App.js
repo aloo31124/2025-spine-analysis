@@ -66,9 +66,14 @@ import AnalysisSpineTest from './pages.spine/manager/AnalysisSpineTest';   // �
 import PhotoCapture from './pages.spine/manager/PhotoCapture';     // 拍照上傳
 
 // === 分類管理頁面 ===
-import CategoryListPage from './pages/manager/CategoryListPage';   // 分類列表
-import CategoryAddPage from './pages/manager/CategoryAddPage';     // 新增分類
-import CategoryEditPage from './pages/manager/CategoryEditPage';   // 編輯分類
+import CategoryListPage from './pages.spine/manager/CategoryListPage';   // 分類列表
+import CategoryAddPage from './pages.spine/manager/CategoryAddPage';     // 新增分類
+import CategoryEditPage from './pages.spine/manager/CategoryEditPage';   // 編輯分類
+
+// 客戶管理頁
+import CustomerListPage from './pages.spine/manager/CustomerListPage';
+import CustomerAddPage from './pages.spine/manager/CustomerAddPage';
+import CustomerEditPage from './pages.spine/manager/CustomerEditPage';
 
 
 /**
@@ -129,6 +134,11 @@ const AppRouter = () => (
       <Route path="product/category/list" element={<CategoryListPage />} />    {/* 分類列表 */}
       <Route path="product/category/add" element={<CategoryAddPage />} />      {/* 新增分類 */}
       <Route path="product/category/edit/:id" element={<CategoryEditPage />} /> {/* 編輯分類 */}
+
+      {/* 客戶管理 */}
+      <Route path="customer/list" element={<CustomerListPage />} />
+      <Route path="customer/add" element={<CustomerAddPage />} />
+      <Route path="customer/edit/:id" element={<CustomerEditPage />} />
       
       {/* 系統管理 */}
       <Route path="system" element={<SystemPage />} />                 {/* 系統頁面 */}

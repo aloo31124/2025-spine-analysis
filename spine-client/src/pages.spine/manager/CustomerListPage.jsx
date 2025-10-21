@@ -1,31 +1,29 @@
 import React, {useEffect, useState} from 'react';
 import { withLoading } from '../../utils/loading';
-import SearchBarProduct from '../../components/manager/SearchBar/SearchBarProduct';
-import TopBtnBarProduct from '../../components/manager/TopBtnBar/TopBtnBarProduct';
+import SearchBarCustomer from '../../components/manager/SearchBar/SearchBarCustomer';
+import TopBtnBarCustomer from '../../components/manager/TopBtnBar/TopBtnBarCustomer';
 import {useNavigate} from 'react-router-dom';
-import {getProductList, getProductCategoryList, deleteProduct, searchProduct} from '../../api/manager/product';
+import {getCustomerList, deleteCustomer, searchCustomer} from '../../api/manager/customer';
 import PaginationBar from '../../components/tools/PaginationBar/PaginationBar'
-import shoppingBag2Img from '../../assets/img/shoppingBag2.png';
+import userIcon from '../../assets/icon/cart.svg';
 import loadingGif from '../../assets/loading.gif';
-import styles from './ProductListPage.module.css';
+import styles from './CustomerListPage.module.css';
 
-function ProductListPage() {
+function CustomerListPage() {
     const navigate = useNavigate();
-    const [productList, setProductList] = useState([]);
-    const [categoryList, setCategoryList] = useState([]);
+    const [customerList, setCustomerList] = useState([]);
     const [pagingParam, setPagingParam] = useState({ pageIndex: 1, pageSize: 5, sort: 'keyword', pageTotal:-1, dataTotal:-1 });
-    const [searchParam, setSearchParam] = useState({keyword:'', state:'', createDate:'', categoryList, priceMin:0, priceMax:0});
+    const [searchParam, setSearchParam] = useState({keyword:'', state:'', createDate:'', phone:'', email:''});
     const [isLoading, setIsLoading] = useState(false);
 
-    // 初始時, 取得商品列表
+    // 初始時, 取得客戶列表
     useEffect(() => {
-        fetchProductList();
-        fetchCategory();
+        fetchCustomerList();
     }, []);
 
-    const fetchProductList = async () => {
+    const fetchCustomerList = async () => {
         await withLoading(
-            getProductList(searchParam, pagingParam),
+            getCustomerList(searchParam, pagingParam),
             {
                 min: 0,
                 timeout: 5000,
@@ -34,34 +32,26 @@ function ProductListPage() {
                 onTimeout: () => alert('網路不穩, 請重新搜尋')
             }
         ).then(res => {
-            setProductList(res.data.result.productList);
+            setCustomerList(res.data.result.customerList);
             setPagingParam(res.data.result.pagingParam);
         }).catch(e => {
-            if (e.message !== 'timeout') console.log('取得商品列表發生錯誤', e);
+            if (e.message !== 'timeout') console.log('取得客戶列表發生錯誤', e);
         });
     }
-
-    const fetchCategory = async () => {
-        const res = await getProductCategoryList();
-        if(res?.status !== 200) {
-            alert("載入商品分類異常。");
-        }
-        setCategoryList(res.data.result.map(c => ({...c, isSelected: false})));
-    }
-
 
     // 切換每頁顯示筆數
     const handlePageSizeChange = async (event) => {
         const newSize = parseInt(event.target.value, 10);
-        const res = await searchProduct(searchParam, { ...pagingParam, pageSize: newSize, pageIndex: 1 });
-        setProductList(res.data.searchResult.productList);
+        const res = await searchCustomer(searchParam, { ...pagingParam, pageSize: newSize, pageIndex: 1 });
+        setCustomerList(res.data.searchResult.customerList);
         setPagingParam({ ...pagingParam, pageSize: newSize, pageIndex: 1 }); // 變更 pageSize 時，重置 pageIndex
     };
+
     // 分頁切換處理
     const handlePageChange = async (pageIndex) => {
         if (pageIndex < 1 || pageIndex > pageIndex) return;
         await withLoading(
-            searchProduct(searchParam, {...pagingParam, pageIndex}),
+            searchCustomer(searchParam, {...pagingParam, pageIndex}),
             {
                 min: 100,
                 timeout: 5000,
@@ -70,23 +60,23 @@ function ProductListPage() {
                 onTimeout: () => alert('網路不穩, 請重新搜尋')
             }
         ).then(res => {
-            setProductList(res.data.searchResult.productList);
+            setCustomerList(res.data.searchResult.customerList);
             setPagingParam({...pagingParam, pageIndex});
         }).catch(e => {
             if (e.message !== 'timeout') alert('網路不穩, 請重新搜尋');
         });
     };
 
-    // 編輯商品
-    const handleEditProduct = (product) => {
-        navigate(`/manager/product/edit/${product.id}`,{ state: { product, categoryList }});
+    // 編輯客戶
+    const handleEditCustomer = (customer) => {
+        navigate(`/manager/customer/edit/${customer.id}`,{ state: { customer }});
     }
 
-    // 搜尋商品結果, 重新渲染商品
+    // 搜尋客戶結果, 重新渲染客戶
     const handleSearchResult = async (_searchParam) => {
         let _pagingParam = { ...pagingParam, pageIndex: 1 }; // 重置頁碼
         await withLoading(
-            searchProduct(_searchParam, _pagingParam),
+            searchCustomer(_searchParam, _pagingParam),
             {
                 min: 0,
                 timeout: 5000,
@@ -96,50 +86,51 @@ function ProductListPage() {
             }
         ).then(res => {
             setSearchParam(_searchParam);
-            setProductList(res.data.searchResult.productList);
+            setCustomerList(res.data.searchResult.customerList);
             setPagingParam(res.data.searchResult.pagingParam);
         }).catch(e => {
             if (e.message !== 'timeout') alert('網路不穩, 請重新搜尋');
         });
     }
 
-    // 刪除商品
-    const handleDeleteProduct = (productId) => {
-        if(!window.confirm('確定要刪除此商品?')) return;
-        deleteProduct(productId).then((res) => {
-            alert('刪除商品成功');
-            const newProductList = productList.filter((product) => product.id !== productId);
-            setProductList(newProductList);
+    // 刪除客戶
+    const handleDeleteCustomer = (customerId) => {
+        if(!window.confirm('確定要刪除此客戶?')) return;
+        deleteCustomer(customerId).then((res) => {
+            alert('刪除客戶成功');
+            const newCustomerList = customerList.filter((customer) => customer.id !== customerId);
+            setCustomerList(newCustomerList);
         }).catch((error) => {
-            console.log('刪除商品發生錯誤', error);
+            console.log('刪除客戶發生錯誤', error);
         });
     }
 
-    // 取得商品狀態樣式
+    // 取得客戶狀態樣式
     const getStatusClass = (state) => {
         switch (state) {
-            case '上架':
             case '正常':
-                return `${styles.productStatus} ${styles.statusActive}`;
-            case '草稿':
-                return `${styles.productStatus} ${styles.statusDraft}`;
-            case '下架':
+            case '活躍':
+                return `${styles.customerStatus} ${styles.statusNormal}`;
+            case '暫停':
             case '停用':
-                return `${styles.productStatus} ${styles.statusInactive}`;
+                return `${styles.customerStatus} ${styles.statusSuspended}`;
+            case '待審核':
+            case '審核中':
+                return `${styles.customerStatus} ${styles.statusPending}`;
             default:
-                return styles.productStatus;
+                return styles.customerStatus;
         }
     };
 
     // 渲染桌面版表格
     const renderDesktopTable = () => (
-        <table className={styles.productTable}>
+        <table className={styles.customerTable}>
             <thead>
                 <tr>
-                    <th>商品圖片</th>
-                    <th>商品名稱</th>
-                    <th>分類</th>
-                    <th>價格</th>
+                    <th>頭像</th>
+                    <th>姓名</th>
+                    <th>電子郵件</th>
+                    <th>電話</th>
                     <th>狀態</th>
                     <th>操作</th>
                 </tr>
@@ -151,51 +142,53 @@ function ProductListPage() {
                             <img src={loadingGif} alt="Loading..." />
                         </td>
                     </tr>
-                ) : productList.length === 0 ? (
+                ) : customerList.length === 0 ? (
                     <tr>
                         <td colSpan="6" className={styles.emptyState}>
                             查無資料
                         </td>
                     </tr>
                 ) : (
-                    productList.map((product) => (
-                        <tr key={product.id}>
+                    customerList.map((customer) => (
+                        <tr key={customer.id}>
                             <td>
                                 <img 
-                                    className={styles.productImage}
-                                    src={product.imgList[0]?.imgUrl || shoppingBag2Img} 
-                                    alt={product.name}
+                                    className={styles.customerAvatar}
+                                    src={customer.avatar || userIcon} 
+                                    alt="客戶頭像"
                                 />
                             </td>
                             <td>
-                                <div className={styles.productName}>
-                                    {product.name}
+                                <div className={styles.customerName}>
+                                    {customer.name}
                                 </div>
                             </td>
                             <td>
-                                {categoryList.find(c => c.id === product.categoryId)?.name || '未分類'}
-                            </td>
-                            <td>
-                                <div className={styles.productPrice}>
-                                    NT$ {product.price?.toLocaleString()}
+                                <div className={styles.customerEmail}>
+                                    {customer.email}
                                 </div>
                             </td>
                             <td>
-                                <span className={getStatusClass(product.state)}>
-                                    {product.state}
+                                <div className={styles.customerPhone}>
+                                    {customer.phone}
+                                </div>
+                            </td>
+                            <td>
+                                <span className={getStatusClass(customer.state)}>
+                                    {customer.state}
                                 </span>
                             </td>
                             <td>
                                 <div className={styles.actionButtons}>
                                     <button 
                                         className={`${styles.actionButton} ${styles.edit}`}
-                                        onClick={() => handleEditProduct(product)}
+                                        onClick={() => handleEditCustomer(customer)}
                                     >
                                         編輯
                                     </button>
                                     <button 
                                         className={`${styles.actionButton} ${styles.delete}`}
-                                        onClick={() => handleDeleteProduct(product.id)}
+                                        onClick={() => handleDeleteCustomer(customer.id)}
                                     >
                                         刪除
                                     </button>
@@ -215,43 +208,41 @@ function ProductListPage() {
                 <div className={styles.loadingContainer}>
                     <img src={loadingGif} alt="Loading..." />
                 </div>
-            ) : productList.length === 0 ? (
+            ) : customerList.length === 0 ? (
                 <div className={styles.emptyState}>
                     查無資料
                 </div>
             ) : (
-                productList.map((product) => (
-                    <div key={product.id} className={styles.productCard}>
+                customerList.map((customer) => (
+                    <div key={customer.id} className={styles.customerCard}>
                         <div className={styles.cardHeader}>
                             <img 
-                                className={styles.cardImage}
-                                src={product.imgList[0]?.imgUrl || shoppingBag2Img} 
-                                alt={product.name}
+                                className={styles.cardAvatar}
+                                src={customer.avatar || userIcon} 
+                                alt="客戶頭像"
                             />
                             <div className={styles.cardTitle}>
-                                {product.name}
+                                {customer.name}
+                            </div>
+                            <div className={styles.cardStatus}>
+                                <span className={getStatusClass(customer.state)}>
+                                    {customer.state}
+                                </span>
                             </div>
                         </div>
                         
                         <div className={styles.cardBody}>
                             <div className={styles.cardRow}>
-                                <span className={styles.cardLabel}>分類：</span>
+                                <span className={styles.cardLabel}>電子郵件：</span>
                                 <span className={styles.cardValue}>
-                                    {categoryList.find(c => c.id === product.categoryId)?.name || '未分類'}
+                                    {customer.email}
                                 </span>
                             </div>
                             
                             <div className={styles.cardRow}>
-                                <span className={styles.cardLabel}>價格：</span>
-                                <span className={`${styles.cardValue} ${styles.productPrice}`}>
-                                    NT$ {product.price?.toLocaleString()}
-                                </span>
-                            </div>
-                            
-                            <div className={styles.cardRow}>
-                                <span className={styles.cardLabel}>狀態：</span>
-                                <span className={getStatusClass(product.state)}>
-                                    {product.state}
+                                <span className={styles.cardLabel}>電話：</span>
+                                <span className={`${styles.cardValue} ${styles.customerPhone}`}>
+                                    {customer.phone}
                                 </span>
                             </div>
                         </div>
@@ -259,13 +250,13 @@ function ProductListPage() {
                         <div className={styles.cardActions}>
                             <button 
                                 className={`${styles.cardButton} ${styles.edit}`}
-                                onClick={() => handleEditProduct(product)}
+                                onClick={() => handleEditCustomer(customer)}
                             >
                                 編輯
                             </button>
                             <button 
                                 className={`${styles.cardButton} ${styles.delete}`}
-                                onClick={() => handleDeleteProduct(product.id)}
+                                onClick={() => handleDeleteCustomer(customer.id)}
                             >
                                 刪除
                             </button>
@@ -277,14 +268,12 @@ function ProductListPage() {
     );
 
     return (
-        <div className={styles.productListContainer}>
-            <TopBtnBarProduct 
-                categoryList={categoryList}
-                productList={productList}
+        <div className={styles.customerListContainer}>
+            <TopBtnBarCustomer 
+                customerList={customerList}
             />
-            <SearchBarProduct 
+            <SearchBarCustomer 
                 getSearchParam={handleSearchResult}
-                categoryList={categoryList}
                 pagingParam={pagingParam}
             />
             
@@ -303,4 +292,4 @@ function ProductListPage() {
     );
 }
 
-export default ProductListPage;
+export default CustomerListPage;

@@ -50,7 +50,9 @@ function MenuLeft({ isOpen, isHidden, onClose }) {
                     頸部分析(測試版)
                 </button>
                  */}
-                <button className={style.MenuLeftButton} onClick={e => alert('功能開發中')}>
+                <button className={style.MenuLeftButton} 
+                        onClick={e => navigate('/manager/customer/list') }
+                >
                     客戶管理
                 </button>
                 <button className={style.MenuLeftButton}
