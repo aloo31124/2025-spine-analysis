@@ -16,6 +16,35 @@
     justify-content: flex-start;
     align-items: center;
     gap:10px;
+    flex-wrap: wrap;
+    width: 100%;
+}
+
+.SearchBarRow input,
+.SearchBarRow select {
+    padding: 6px 12px;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    font-size: 14px;
+    min-width: 120px;
+}
+
+.SearchBarRow button {
+    padding: 6px 12px;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    background: white;
+    color: #495057;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.SearchBarRow button:hover {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
 }
 
 .CalendarWrapper {
@@ -29,4 +58,66 @@
     right: 0;
     border: 1px solid #ccc;
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+    .SearchBar {
+        padding: 15px 10px;
+        gap: 8px;
+    }
+    
+    .SearchBarRow {
+        gap: 8px;
+    }
+    
+    .SearchBarRow input,
+    .SearchBarRow select {
+        padding: 5px 8px;
+        font-size: 12px;
+        min-width: 100px;
+        flex: 1;
+    }
+    
+    .SearchBarRow button {
+        padding: 5px 8px;
+        font-size: 12px;
+        flex-shrink: 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .SearchBar {
+        padding: 12px 8px;
+    }
+    
+    .SearchBarRow {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 6px;
+    }
+    
+    .SearchBarRow input,
+    .SearchBarRow select {
+        padding: 8px 12px;
+        font-size: 14px;
+        min-width: 0;
+        width: 100%;
+    }
+    
+    .SearchBarRow button {
+        padding: 8px 12px;
+        font-size: 14px;
+        width: 100%;
+        text-align: center;
+    }
+    
+    .CalendarContainer {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        right: auto;
+    }
 }

@@ -18,6 +18,7 @@ const authApiController = require('./controllers/auth.api.controller');
 const accountApiController = require('./controllers/account.api.controller');
 const productApiController = require('./controllers/manager/product.api.controller');
 const productCategoryApiController = require('./controllers/manager/productCategory.api.controller');
+const customerApiController = require('./controllers/manager/customer.api.controller');
 //const productImgApiController = require('./controllers/manager/productImg.api.controller')
 const shopApiController = require('./controllers/shop/shop.api.controller');
 const shopPayLogisticsApiController = require('./controllers/shop/shopPayLogistics.api.controller')
@@ -105,12 +106,19 @@ app.post('/api/manager/product/category/add', productCategoryApiController.addPr
 app.patch('/api/manager/product/category/edit', productCategoryApiController.updateProductCategory);
 app.delete('/api/manager/product/category/delete/:id', productCategoryApiController.deleteProductCategory);
 app.post('/api/manager/product/category/search', productCategoryApiController.searchProductCategory);
+// 後台管理 客戶 api
+app.post('/api/manager/customer/list', customerApiController.getCustomerList);
+app.get('/api/manager/customer/:id', customerApiController.getCustomer);
+app.post('/api/manager/customer/add', customerApiController.postCustomer);
+app.patch('/api/manager/customer/edit', customerApiController.updateCustomer);
+app.delete('/api/manager/customer/delete/:id', customerApiController.deleteCustomer);
+app.post('/api/manager/customer/search', customerApiController.searchCustomer);
+app.post('/api/manager/customer/import', customerApiController.importCustomer);
 // 購物 api
 app.post('/api/shop/product/list', shopApiController.searchProductList);
 app.get('/api/shop/product/category/list', shopApiController.searchProductCategory);
 app.get('/api/shop/product/promotion/list', shopApiController.searchPromotion);
 app.get('/api/shop/test', shopPayLogisticsApiController.test);
-app.get('/api/shop/select/logistics/page', shopPayLogisticsApiController.selectLogisticsPage);
 
 // 金流物流 api
 app.post('/api/pay/ecpay/pay/result/server', ecpayApiController.postResultServer);

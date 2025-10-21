@@ -53,7 +53,7 @@ function LoginPage() {
             localStorage.setItem('savedEmailTime', new Date().getTime().toString());
         }
 
-        navigate('/')
+        navigate('/manager/home')
     }
 
     /* 註冊 */

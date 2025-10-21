@@ -7,11 +7,131 @@
     padding: 20px;
     gap: 20px;
     border-right: #cfcfcf solid 2px;
-    min-height: 120vh;
+    min-height: 100vh;
+    width: 150px;
+    background: white;
+    transition: all 0.3s ease-in-out;
+    position: relative;
+    z-index: 1000;
+}
+
+.MenuLeft.collapsed {
+    width: 5px;
+    padding: 20px 10px;
+}
+
+.MenuLeft.mobile {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 150vh;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    transform: translateX(-100%);
+}
+
+.MenuLeft.mobile:not(.collapsed) {
+    transform: translateX(0);
+}
+
+.MenuLeft.mobile.collapsed {
+    width: 40px;
+    transform: translateX(0);
+    padding: 10px 2px;
+}
+
+.toggleButton {
+    position: absolute;
+    top: 20px;
+    right: -15px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 2px solid #cfcfcf;
+    background: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    transition: all 0.3s ease;
+    z-index: 1001;
+}
+
+.toggleButton:hover {
+    background: #f5f5f5;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.toggleIcon {
+    transition: transform 0.3s ease;
+    color: #666;
+}
+
+.toggleIcon.rotated {
+    transform: rotate(180deg);
+}
+
+.menuContent {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+.menuContent.hidden {
+    opacity: 0;
+    pointer-events: none;
 }
 
 .MenuLeftButton {
     border: none;
     background: white;
+    padding: 10px 15px;
+    width: 100%;
+    text-align: center;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.2s ease;
+}
+
+.MenuLeftButton:hover {
+    background: #f0f0f0;
+}
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 150vw;
+    height: 150vh;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+}
+
+/* Mobile specific adjustments */
+@media (max-width: 800px) {
+    .MenuLeft {
+        max-width: 80%;
+    }
+    
+    .MenuLeft.collapsed {
+        width: 40px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 150vh;
+        z-index: 1002;
+    }
+    
+    .toggleButton {
+        right: -15px;
+    }
+    
+    .MenuLeft.collapsed .toggleButton {
+        right: 15px;
+        top: 20px;
+    }
 }
 
