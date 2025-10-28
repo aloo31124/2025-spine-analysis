@@ -30,7 +30,7 @@ const productImgApiController = require('./controllers/manager/productImgFireSto
 
 // 設定 express app 相關設定
 const app = express();
-const PORT = 8081;
+const PORT = 8083;
 app.use(cors());
 
 // 設定 Express 支援 JSON 和 URL Encoded 資料
@@ -48,7 +48,7 @@ const swaggerOptions = {
             contact: {
                 name: 'Amazing Developer'
             },
-            servers: ['http://localhost:8081']
+            servers: ['http://localhost:8083']
         }
     },
     apis: ['./controllers/*.js']

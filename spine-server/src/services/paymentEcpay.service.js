@@ -60,7 +60,7 @@ exports.getPaySelectPageHtml = async (payment, userId) => {
   // 取得 雲函式 url 
   //const cloud_return_url = process.env.CLOUD_RUNTIME_URL || "http:localhost:8082";
   //const cloud_return_url = `https://${process.env.FUNCTION_REGION}-${process.env.GCLOUD_PROJECT}.cloudfunctions.net/${process.env.FUNCTION_NAME}`;
-  //const cloud_return_url = "http://localhost:8081";
+  //const cloud_return_url = "http://localhost:8083";
   const cloud_return_url = "https://api-owgbdh6tra-uc.a.run.app/"; // aloo
 
   let base_param = {

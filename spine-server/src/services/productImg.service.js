@@ -4,7 +4,7 @@ const fs = require('fs-extra');
 const path = require('path');
 const productImgModel = require('../models/productImg.model');
 const upload = require('../utils/upload');
-const IMAGE_BASE_URL = 'http://localhost:8081/api/manager/product/img';
+const IMAGE_BASE_URL = 'http://localhost:8083/api/manager/product/img';
 
 exports.getProductImgList = async (productId) => {
     try {
