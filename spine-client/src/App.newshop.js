@@ -25,7 +25,6 @@ import RegisterInfoPage from './pages/auth/RegisterInfoPage';
 import RegisterVerityPage from './pages/auth/RegisterVerityPage';
 import RegisterPasswordPage from './pages/auth/RegisterPasswordPage';
 import FogetPasswordPage from './pages/auth/FogetPasswordPage';
-import PaymentSelectPage from './pages/Payment/PaymentSelectPage';
 // 帳號 資訊, 購買(賣家)方案, 升級
 import InfoPage from './pages/account/InfoPage';
 import SelectPaymentPage from './pages/account/SelectPaymentPage';
@@ -37,6 +36,13 @@ import ProductEditPage from './pages/manager/ProductEditPage';
 import CategoryListPage from './pages/manager/CategoryListPage';
 import CategoryAddPage from './pages/manager/CategoryAddPage';
 import CategoryEditPage from './pages/manager/CategoryEditPage';
+// 客戶管理頁
+import CustomerListPage from './pages/manager/CustomerListPage';
+import CustomerAddPage from './pages/manager/CustomerAddPage';
+import CustomerEditPage from './pages/manager/CustomerEditPage';
+// 方案管理頁
+import PaymentListPage from './pages/manager/PaymentListPage';
+import PaymentFormPage from './pages/manager/PaymentFormPage';
 
 
 // 路由切換器
@@ -48,7 +54,6 @@ const AppRouter = () => (
       <Route path="regist/flow" element={<RegisterFlow />} />
       <Route path="login" element={<LoginPage />} />
       <Route path="password/forget" element={<FogetPasswordPage />} />
-      <Route path="pay/select" element={<PaymentSelectPage />}/>
     </Route>
     <Route path="/account/*" element={<AppRouterVerify element={AccountLayout} node={"buyer"} />}>
       <Route path="payment/select" element={<SelectPaymentPage/>}/>
@@ -67,6 +72,12 @@ const AppRouter = () => (
       <Route path="product/category/list" element={<CategoryListPage />} />
       <Route path="product/category/add" element={<CategoryAddPage />} />
       <Route path="product/category/edit/:id" element={<CategoryEditPage/>} />
+      <Route path="customer/list" element={<CustomerListPage />} />
+      <Route path="customer/add" element={<CustomerAddPage />} />
+      <Route path="customer/edit/:id" element={<CustomerEditPage />} />
+      <Route path="payment/list" element={<PaymentListPage />} />
+      <Route path="payment/add" element={<PaymentFormPage />} />
+      <Route path="payment/edit/:id" element={<PaymentFormPage />} />
       <Route path="system" element={<SystemPage />} />
     </Route>
   </Routes>

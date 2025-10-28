@@ -4,7 +4,6 @@ import SearchBarCategory from "../../components/manager/SearchBar/SearchBarCateg
 import TableRow from "../../components/manager/TableRow/TableRow";
 import { getProductCategoryList, deleteProductCategory } from "../../api/manager/product-category";
 import { useNavigate } from "react-router-dom";
-import styles from './CategoryListPage.module.css';
 
 function CategoryListPage() {
   const navigate = useNavigate();
@@ -41,101 +40,27 @@ function CategoryListPage() {
     });
   }
 
-  // 渲染桌面版表格
-  const renderDesktopTable = () => (
-    <table className={styles.categoryTable}>
-      <thead>
-        <tr>
-          <th>分類名稱</th>
-          <th>操作</th>
-        </tr>
-      </thead>
-      <tbody>
-        {productCategoryList.length === 0 ? (
-          <tr>
-            <td colSpan="2" className={styles.emptyState}>
-              查無資料
-            </td>
-          </tr>
-        ) : (
-          productCategoryList.map(category => (
-            <tr key={category.id}>
-              <td>
-                <div className={styles.categoryName}>
-                  {category.name}
-                </div>
-              </td>
-              <td>
-                <div className={styles.actionButtons}>
-                  <button 
-                    className={`${styles.actionButton} ${styles.edit}`}
-                    onClick={() => handleEditProductCategory(category)}
-                  >
-                    編輯
-                  </button>
-                  <button 
-                    className={`${styles.actionButton} ${styles.delete}`}
-                    onClick={() => handleDeleteProductCategory(category.id)}
-                  >
-                    刪除
-                  </button>
-                </div>
-              </td>
-            </tr>
-          ))
-        )}
-      </tbody>
-    </table>
-  );
-
-  // 渲染手機版卡片
-  const renderMobileCards = () => (
-    <div className={styles.mobileCardContainer}>
-      {productCategoryList.length === 0 ? (
-        <div className={styles.emptyState}>
-          查無資料
-        </div>
-      ) : (
-        productCategoryList.map(category => (
-          <div key={category.id} className={styles.categoryCard}>
-            <div className={styles.cardContent}>
-              <div className={styles.cardTitle}>
-                {category.name}
-              </div>
-            </div>
-            
-            <div className={styles.cardActions}>
-              <button 
-                className={`${styles.cardButton} ${styles.edit}`}
-                onClick={() => handleEditProductCategory(category)}
-              >
-                編輯
-              </button>
-              <button 
-                className={`${styles.cardButton} ${styles.delete}`}
-                onClick={() => handleDeleteProductCategory(category.id)}
-              >
-                刪除
-              </button>
-            </div>
-          </div>
-        ))
-      )}
-    </div>
-  );
-
   return (
-    <div className={styles.categoryListContainer}>
+    <div>
         <TopBtnBarCategory />
         <SearchBarCategory 
             getSearchResult={handleSearchResult}
         />
-        
-        {/* 桌面版表格 */}
-        {renderDesktopTable()}
-        
-        {/* 手機版卡片 */}
-        {renderMobileCards()}
+        <table>
+          {
+              productCategoryList.map(category => {
+                  return (
+                      <tr>
+                        <td>{category.name}</td>
+                        <td>
+                            <button onClick={() => handleEditProductCategory(category)}>編輯</button>
+                            <button onClick={() => handleDeleteProductCategory(category.id)}>刪除</button>
+                        </td>
+                      </tr>
+                  )
+              })
+          }
+        </table>
     </div>
   );
 }

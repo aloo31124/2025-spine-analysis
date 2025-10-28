@@ -7,7 +7,6 @@ import {getProductList, getProductCategoryList, deleteProduct, searchProduct} fr
 import PaginationBar from '../../components/tools/PaginationBar/PaginationBar'
 import shoppingBag2Img from '../../assets/img/shoppingBag2.png';
 import loadingGif from '../../assets/loading.gif';
-import styles from './ProductListPage.module.css';
 
 function ProductListPage() {
     const navigate = useNavigate();
@@ -115,169 +114,8 @@ function ProductListPage() {
         });
     }
 
-    // 取得商品狀態樣式
-    const getStatusClass = (state) => {
-        switch (state) {
-            case '上架':
-            case '正常':
-                return `${styles.productStatus} ${styles.statusActive}`;
-            case '草稿':
-                return `${styles.productStatus} ${styles.statusDraft}`;
-            case '下架':
-            case '停用':
-                return `${styles.productStatus} ${styles.statusInactive}`;
-            default:
-                return styles.productStatus;
-        }
-    };
-
-    // 渲染桌面版表格
-    const renderDesktopTable = () => (
-        <table className={styles.productTable}>
-            <thead>
-                <tr>
-                    <th>商品圖片</th>
-                    <th>商品名稱</th>
-                    <th>分類</th>
-                    <th>價格</th>
-                    <th>狀態</th>
-                    <th>操作</th>
-                </tr>
-            </thead>
-            <tbody>
-                {isLoading ? (
-                    <tr>
-                        <td colSpan="6" className={styles.loadingContainer}>
-                            <img src={loadingGif} alt="Loading..." />
-                        </td>
-                    </tr>
-                ) : productList.length === 0 ? (
-                    <tr>
-                        <td colSpan="6" className={styles.emptyState}>
-                            查無資料
-                        </td>
-                    </tr>
-                ) : (
-                    productList.map((product) => (
-                        <tr key={product.id}>
-                            <td>
-                                <img 
-                                    className={styles.productImage}
-                                    src={product.imgList[0]?.imgUrl || shoppingBag2Img} 
-                                    alt={product.name}
-                                />
-                            </td>
-                            <td>
-                                <div className={styles.productName}>
-                                    {product.name}
-                                </div>
-                            </td>
-                            <td>
-                                {categoryList.find(c => c.id === product.categoryId)?.name || '未分類'}
-                            </td>
-                            <td>
-                                <div className={styles.productPrice}>
-                                    NT$ {product.price?.toLocaleString()}
-                                </div>
-                            </td>
-                            <td>
-                                <span className={getStatusClass(product.state)}>
-                                    {product.state}
-                                </span>
-                            </td>
-                            <td>
-                                <div className={styles.actionButtons}>
-                                    <button 
-                                        className={`${styles.actionButton} ${styles.edit}`}
-                                        onClick={() => handleEditProduct(product)}
-                                    >
-                                        編輯
-                                    </button>
-                                    <button 
-                                        className={`${styles.actionButton} ${styles.delete}`}
-                                        onClick={() => handleDeleteProduct(product.id)}
-                                    >
-                                        刪除
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    ))
-                )}
-            </tbody>
-        </table>
-    );
-
-    // 渲染手機版卡片
-    const renderMobileCards = () => (
-        <div className={styles.mobileCardContainer}>
-            {isLoading ? (
-                <div className={styles.loadingContainer}>
-                    <img src={loadingGif} alt="Loading..." />
-                </div>
-            ) : productList.length === 0 ? (
-                <div className={styles.emptyState}>
-                    查無資料
-                </div>
-            ) : (
-                productList.map((product) => (
-                    <div key={product.id} className={styles.productCard}>
-                        <div className={styles.cardHeader}>
-                            <img 
-                                className={styles.cardImage}
-                                src={product.imgList[0]?.imgUrl || shoppingBag2Img} 
-                                alt={product.name}
-                            />
-                            <div className={styles.cardTitle}>
-                                {product.name}
-                            </div>
-                        </div>
-                        
-                        <div className={styles.cardBody}>
-                            <div className={styles.cardRow}>
-                                <span className={styles.cardLabel}>分類：</span>
-                                <span className={styles.cardValue}>
-                                    {categoryList.find(c => c.id === product.categoryId)?.name || '未分類'}
-                                </span>
-                            </div>
-                            
-                            <div className={styles.cardRow}>
-                                <span className={styles.cardLabel}>價格：</span>
-                                <span className={`${styles.cardValue} ${styles.productPrice}`}>
-                                    NT$ {product.price?.toLocaleString()}
-                                </span>
-                            </div>
-                            
-                            <div className={styles.cardRow}>
-                                <span className={styles.cardLabel}>狀態：</span>
-                                <span className={getStatusClass(product.state)}>
-                                    {product.state}
-                                </span>
-                            </div>
-                        </div>
-                        
-                        <div className={styles.cardActions}>
-                            <button 
-                                className={`${styles.cardButton} ${styles.edit}`}
-                                onClick={() => handleEditProduct(product)}
-                            >
-                                編輯
-                            </button>
-                            <button 
-                                className={`${styles.cardButton} ${styles.delete}`}
-                                onClick={() => handleDeleteProduct(product.id)}
-                            >
-                                刪除
-                            </button>
-                        </div>
-                    </div>
-                ))
-            )}
-        </div>
-    );
-
     return (
-        <div className={styles.productListContainer}>
+        <div>
             <TopBtnBarProduct 
                 categoryList={categoryList}
                 productList={productList}
@@ -287,18 +125,39 @@ function ProductListPage() {
                 categoryList={categoryList}
                 pagingParam={pagingParam}
             />
-            
-            {/* 桌面版表格 */}
-            {renderDesktopTable()}
-            
-            {/* 手機版卡片 */}
-            {renderMobileCards()}
-            
+            <table>
+                {
+                    isLoading ? (
+                        <tr><img style={{height: '100px'}} src={loadingGif} alt="Loading..." /></tr>
+                    ) : (
+                        productList.length === 0 ? (
+                            <tr><td colSpan="6" style={{textAlign: 'center'}}>查無資料</td></tr>
+                        ) : (
+                            productList.map((product) => {
+                                return (
+                                    <tr key={product.id}>
+                                        <td><img style={{height: '100px'}} src={product.imgList[0]?.imgUrl || shoppingBag2Img} /></td>
+                                        <td>{product.name}</td>
+                                        <td>{categoryList.find(c => c.id === product.categoryId).name}</td>
+                                        <td>{product.price}</td>
+                                        <td>{product.state}</td>
+                                        <td>
+                                            <button onClick={() => handleEditProduct(product)}>編輯</button>
+                                            <button onClick={() => handleDeleteProduct(product.id)}>刪除</button>
+                                        </td>
+                                    </tr>
+                                )
+                            })
+                        )
+                    )
+                }
+            </table>
             <PaginationBar 
                 pagingParam={pagingParam} 
                 clickPageChange={handlePageChange} 
                 clickPageSizeChange={handlePageSizeChange}
             />
+
         </div>
     );
 }

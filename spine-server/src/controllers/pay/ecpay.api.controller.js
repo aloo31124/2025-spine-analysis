@@ -3,8 +3,6 @@
  */
 const payEcpayService = require("../../services/paymentEcpay.service");
 const userToRoleService = require("../../services/userToRole.service");
-const UserToRole = require("../../models/userToRole.model");
-const UserToPayment = require("../../models/userToPayment.model");
 
 /* 取得所有購買方案 */
 exports.getPaymentAll = async (req, res) => {

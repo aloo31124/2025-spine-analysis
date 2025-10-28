@@ -5,9 +5,8 @@ import TopBtnBarCustomer from '../../components/manager/TopBtnBar/TopBtnBarCusto
 import {useNavigate} from 'react-router-dom';
 import {getCustomerList, deleteCustomer, searchCustomer} from '../../api/manager/customer';
 import PaginationBar from '../../components/tools/PaginationBar/PaginationBar'
-import userIcon from '../../assets/icon/cart.svg';
+import userIcon from '../../assets/img/shoppingBag1.png';
 import loadingGif from '../../assets/loading.gif';
-import styles from './CustomerListPage.module.css';
 
 function CustomerListPage() {
     const navigate = useNavigate();
@@ -105,170 +104,8 @@ function CustomerListPage() {
         });
     }
 
-    // 取得客戶狀態樣式
-    const getStatusClass = (state) => {
-        switch (state) {
-            case '正常':
-            case '活躍':
-                return `${styles.customerStatus} ${styles.statusNormal}`;
-            case '暫停':
-            case '停用':
-                return `${styles.customerStatus} ${styles.statusSuspended}`;
-            case '待審核':
-            case '審核中':
-                return `${styles.customerStatus} ${styles.statusPending}`;
-            default:
-                return styles.customerStatus;
-        }
-    };
-
-    // 渲染桌面版表格
-    const renderDesktopTable = () => (
-        <table className={styles.customerTable}>
-            <thead>
-                <tr>
-                    <th>頭像</th>
-                    <th>姓名</th>
-                    <th>電子郵件</th>
-                    <th>電話</th>
-                    <th>狀態</th>
-                    <th>操作</th>
-                </tr>
-            </thead>
-            <tbody>
-                {isLoading ? (
-                    <tr>
-                        <td colSpan="6" className={styles.loadingContainer}>
-                            <img src={loadingGif} alt="Loading..." />
-                        </td>
-                    </tr>
-                ) : customerList.length === 0 ? (
-                    <tr>
-                        <td colSpan="6" className={styles.emptyState}>
-                            查無資料
-                        </td>
-                    </tr>
-                ) : (
-                    customerList.map((customer) => (
-                        <tr key={customer.id}>
-                            <td>
-                                <img 
-                                    className={styles.customerAvatar}
-                                    src={customer.avatar || userIcon} 
-                                    alt="客戶頭像"
-                                />
-                            </td>
-                            <td>
-                                <div className={styles.customerName}>
-                                    {customer.name}
-                                </div>
-                            </td>
-                            <td>
-                                <div className={styles.customerEmail}>
-                                    {customer.email}
-                                </div>
-                            </td>
-                            <td>
-                                <div className={styles.customerPhone}>
-                                    {customer.phone}
-                                </div>
-                            </td>
-                            <td>
-                                <span className={getStatusClass(customer.state)}>
-                                    {customer.state}
-                                </span>
-                            </td>
-                            <td>
-                                <div className={styles.actionButtons}>
-                                    <button 
-                                        className={`${styles.actionButton} ${styles.edit}`}
-                                        onClick={() => handleEditCustomer(customer)}
-                                    >
-                                        編輯
-                                    </button>
-                                    <button 
-                                        className={`${styles.actionButton} ${styles.delete}`}
-                                        onClick={() => handleDeleteCustomer(customer.id)}
-                                    >
-                                        刪除
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    ))
-                )}
-            </tbody>
-        </table>
-    );
-
-    // 渲染手機版卡片
-    const renderMobileCards = () => (
-        <div className={styles.mobileCardContainer}>
-            {isLoading ? (
-                <div className={styles.loadingContainer}>
-                    <img src={loadingGif} alt="Loading..." />
-                </div>
-            ) : customerList.length === 0 ? (
-                <div className={styles.emptyState}>
-                    查無資料
-                </div>
-            ) : (
-                customerList.map((customer) => (
-                    <div key={customer.id} className={styles.customerCard}>
-                        <div className={styles.cardHeader}>
-                            <img 
-                                className={styles.cardAvatar}
-                                src={customer.avatar || userIcon} 
-                                alt="客戶頭像"
-                            />
-                            <div className={styles.cardTitle}>
-                                {customer.name}
-                            </div>
-                            <div className={styles.cardStatus}>
-                                <span className={getStatusClass(customer.state)}>
-                                    {customer.state}
-                                </span>
-                            </div>
-                        </div>
-                        
-                        <div className={styles.cardBody}>
-                            <div className={styles.cardRow}>
-                                <span className={styles.cardLabel}>電子郵件：</span>
-                                <span className={styles.cardValue}>
-                                    {customer.email}
-                                </span>
-                            </div>
-                            
-                            <div className={styles.cardRow}>
-                                <span className={styles.cardLabel}>電話：</span>
-                                <span className={`${styles.cardValue} ${styles.customerPhone}`}>
-                                    {customer.phone}
-                                </span>
-                            </div>
-                        </div>
-                        
-                        <div className={styles.cardActions}>
-                            <button 
-                                className={`${styles.cardButton} ${styles.edit}`}
-                                onClick={() => handleEditCustomer(customer)}
-                            >
-                                編輯
-                            </button>
-                            <button 
-                                className={`${styles.cardButton} ${styles.delete}`}
-                                onClick={() => handleDeleteCustomer(customer.id)}
-                            >
-                                刪除
-                            </button>
-                        </div>
-                    </div>
-                ))
-            )}
-        </div>
-    );
-
     return (
-        <div className={styles.customerListContainer}>
+        <div>
             <TopBtnBarCustomer 
                 customerList={customerList}
             />
@@ -276,18 +113,51 @@ function CustomerListPage() {
                 getSearchParam={handleSearchResult}
                 pagingParam={pagingParam}
             />
-            
-            {/* 桌面版表格 */}
-            {renderDesktopTable()}
-            
-            {/* 手機版卡片 */}
-            {renderMobileCards()}
-            
+            <table>
+                <thead>
+                    <tr>
+                        <th>頭像</th>
+                        <th>姓名</th>
+                        <th>電子郵件</th>
+                        <th>電話</th>
+                        <th>狀態</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {
+                    isLoading ? (
+                        <tr><td colSpan="6"><img style={{height: '100px'}} src={loadingGif} alt="Loading..." /></td></tr>
+                    ) : (
+                        customerList.length === 0 ? (
+                            <tr><td colSpan="6" style={{textAlign: 'center'}}>查無資料</td></tr>
+                        ) : (
+                            customerList.map((customer) => {
+                                return (
+                                    <tr key={customer.id}>
+                                        <td><img style={{height: '50px', width: '50px', borderRadius: '50%'}} src={customer.avatar || userIcon} alt="客戶頭像" /></td>
+                                        <td>{customer.name}</td>
+                                        <td>{customer.email}</td>
+                                        <td>{customer.phone}</td>
+                                        <td>{customer.state}</td>
+                                        <td>
+                                            <button onClick={() => handleEditCustomer(customer)}>編輯</button>
+                                            <button onClick={() => handleDeleteCustomer(customer.id)}>刪除</button>
+                                        </td>
+                                    </tr>
+                                )
+                            })
+                        )
+                    )
+                }
+                </tbody>
+            </table>
             <PaginationBar 
                 pagingParam={pagingParam} 
                 clickPageChange={handlePageChange} 
                 clickPageSizeChange={handlePageSizeChange}
             />
+
         </div>
     );
 }

@@ -23,6 +23,7 @@ const customerApiController = require('./controllers/manager/customer.api.contro
 const shopApiController = require('./controllers/shop/shop.api.controller');
 const shopPayLogisticsApiController = require('./controllers/shop/shopPayLogistics.api.controller')
 const ecpayApiController = require('./controllers/pay/ecpay.api.controller');
+const paymentApiController = require('./controllers/pay/payment.api.controller');
 //const upload = require('./utils/upload');
 const upload = require('./utils/uploadFireStorage');
 const productImgApiController = require('./controllers/manager/productImgFireStorage.api.controller');
@@ -62,6 +63,7 @@ app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 app.get('/api/manager/backup/export/user', backupApiController.getUserExportList);
 app.get('/api/manager/backup/export/product', backupApiController.getProductExportList);
 app.get('/api/manager/backup/export/product/category', backupApiController.getProductCategoryExportList);
+app.get('/api/manager/backup/export/customer', backupApiController.getCustomerExportList);
 app.post('/api/manager/backup/import/all/db', backupApiController.postAllDBTable);
 // [註冊登入] 驗證 api
 app.get('/api/auth/user/exits/:email', authApiController.findUserByEmail);
@@ -83,7 +85,8 @@ app.get('/api/account/role/:userId', accountApiController.getUserRoleByUserId);
 app.get('/api/account/payment/userId/:userId', accountApiController.getUserPaymentByUserId);
 app.get('/api/account/payment/paymentId/:paymentId', accountApiController.getPaymentByPaymentid);
 app.post('/api/account/payment/search', accountApiController.searchPayment);
-app.get('/api/account/payment/ecpay/select/:paymentId', accountApiController.getPaySelectPageHtml);
+app.get('/api/account/payment/select/:paymentId', accountApiController.getPaySelectPageHtml);
+app.post('/api/account/payment/free', accountApiController.postFreePayment);
 // 後台管理 商品 api
 app.post('/api/manager/product/list', productApiController.getProductList);
 app.get('/api/manager/product/:id', productApiController.getProduct);
@@ -124,6 +127,15 @@ app.get('/api/shop/test', shopPayLogisticsApiController.test);
 app.post('/api/pay/ecpay/pay/result/server', ecpayApiController.postResultServer);
 app.get('/api/pay/ecpay/pay/result/client', ecpayApiController.getResultClientPageHtml);
 
+// 後台管理 方案 api
+app.post('/api/manager/payment/list', paymentApiController.getPaymentList);
+app.get('/api/manager/payment/:id', paymentApiController.getPayment);
+app.post('/api/manager/payment/add', paymentApiController.addPayment);
+app.patch('/api/manager/payment/edit', paymentApiController.updatePayment);
+app.delete('/api/manager/payment/delete/:id', paymentApiController.deletePayment);
+app.post('/api/manager/payment/search', paymentApiController.searchPayment);
+app.get('/api/manager/payment/export', paymentApiController.exportPayment);
+app.post('/api/manager/payment/import', paymentApiController.importPayment);
 
 // 處理找無路由
 app.use((req, res) => {

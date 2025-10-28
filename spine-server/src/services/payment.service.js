@@ -63,4 +63,13 @@ exports.getPaymentExportList = async () => {
     }
 }
 
+/* 匯入 全部 方案 */
+exports.importAllPayment = async (paymentList) => {
+    try {
+        return await Payment.importAllPayment(paymentList);
+    } catch (error) {
+        console.error("[importAllPayment] Error:", error);
+    }
+}
+
 

@@ -70,6 +70,10 @@ import CategoryListPage from './pages.spine/manager/CategoryListPage';   // 分�
 import CategoryAddPage from './pages.spine/manager/CategoryAddPage';     // 新增分類
 import CategoryEditPage from './pages.spine/manager/CategoryEditPage';   // 編輯分類
 
+// 方案管理頁
+import PaymentListPage from './pages/manager/PaymentListPage';
+import PaymentFormPage from './pages/manager/PaymentFormPage';
+
 // 客戶管理頁
 import CustomerListPage from './pages.spine/manager/CustomerListPage';
 import CustomerAddPage from './pages.spine/manager/CustomerAddPage';
@@ -139,9 +143,14 @@ const AppRouter = () => (
       <Route path="customer/list" element={<CustomerListPage />} />
       <Route path="customer/add" element={<CustomerAddPage />} />
       <Route path="customer/edit/:id" element={<CustomerEditPage />} />
+
+      {/* 方案管理 */}
+      <Route path="payment/list" element={<PaymentListPage />} />
+      <Route path="payment/add" element={<PaymentFormPage />} />
+      <Route path="payment/edit/:id" element={<PaymentFormPage />} />
       
       {/* 系統管理 */}
-      <Route path="system" element={<SystemPage />} />                 {/* 系統頁面 */}
+      <Route path="system" element={<SystemPage />} />
     </Route>
   </Routes>
 );

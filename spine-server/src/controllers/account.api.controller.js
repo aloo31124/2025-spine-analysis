@@ -123,3 +123,30 @@ exports.getPaySelectPageHtml = async (req, res) => {
 }
 
 
+/** 免費付款方案 儲存 */
+exports.postFreePayment = async (req, res) => {
+    try {
+        console.log(' [postFreePayment] :', req.body, req.query, req.params);
+        const {userId, paymentId} = req.body;
+        // 新增紀錄
+        const result1 = await payEcpayService.addPaymentHistory({userId, paymentId, message: "免費方案成功 "});
+        console.log(' [postFreePayment] addPaymentHistory :', result1);
+        // 更新(新增) 使用者 購買方案
+        const result2 = await payEcpayService.addUserToPayment(userId, paymentId);
+        console.log(' [postFreePayment] addUserToPayment :', result2);
+        // 檢查是否已有 [擁有者] owner 角色, 已有角色為 [續約],  若無 角色為首次購買, 新增角色
+        const result3 = await userToRoleService.getUserRoleByUserId(userId);
+        if(result3?.length > 0) { // 續約
+            console.log(' [postFreePayment] getUserRoleByUserId  續約成功 ', result3);
+        } else { // 首次建立帳號
+            console.log(' [postFreePayment] getUserRoleByUserId 轉創建帳號 result3 : :', result3);
+            const result4 = await userToRoleService.addUserToRole({userId, role: 'seller'});
+            console.log(' [postFreePayment] addUserToRole 首次建立帳號 result4 :', result4);
+        }
+        // 回傳結果
+        res.status(200).send("1|OK");
+    } catch (error) {
+        console.error("[postFreePayment] 失敗 : ", error);
+        res.status(500).json({ error: "[postFreePayment] 失敗 : " + error });
+    }
+}
