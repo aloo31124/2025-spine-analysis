@@ -32,6 +32,7 @@ function AnalysisSpine() {
     const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
     const [lines, setLines] = useState([]);
     const [intersectionPoints, setIntersectionPoints] = useState([]);
+    const [calculationResults, setCalculationResults] = useState([]);
 
     // 初始化點位
     useEffect(() => {
@@ -73,6 +74,7 @@ function AnalysisSpine() {
         setCurrentPointIndex(0);
         setLines([]);
         setIntersectionPoints([]);
+        setCalculationResults([]);
     };
 
     // 設置當前可拖拽的點
@@ -187,6 +189,67 @@ function AnalysisSpine() {
     // 計算功能
     const handleCalculate = () => {
         calculateSpecialLines();
+        calculateAllDistancesAndAngles();
+    };
+
+    // 計算所有點之間的距離和角度
+    const calculateAllDistancesAndAngles = () => {
+        const results = [];
+        
+        // 計算所有點之間的距離
+        results.push("=== 點之間的距離 ===");
+        for (let i = 0; i < points.length; i++) {
+            for (let j = i + 1; j < points.length; j++) {
+                const distance = calculateDistance(points[i], points[j]);
+                results.push(`點${i + 1} 到 點${j + 1}: ${distance.toFixed(2)}px`);
+            }
+        }
+        
+        results.push("");
+        results.push("=== 點之間的角度 ===");
+        
+        // 計算角度（以每個點為頂點，計算與其相鄰點的夾角）
+        for (let i = 0; i < points.length; i++) {
+            for (let j = 0; j < points.length; j++) {
+                for (let k = j + 1; k < points.length; k++) {
+                    if (i !== j && i !== k && j !== k) {
+                        const angle = calculateAngleBetweenThreePoints(points[j], points[i], points[k]);
+                        results.push(`∠點${j + 1}-點${i + 1}-點${k + 1}: ${angle.toFixed(1)}°`);
+                    }
+                }
+            }
+        }
+        
+        // 將結果存儲到狀態中以便顯示
+        setCalculationResults(results);
+    };
+
+    // 計算三點之間的角度
+    const calculateAngleBetweenThreePoints = (pointA, vertex, pointC) => {
+        const vectorAV = {
+            x: pointA.x - vertex.x,
+            y: pointA.y - vertex.y
+        };
+        
+        const vectorCV = {
+            x: pointC.x - vertex.x,
+            y: pointC.y - vertex.y
+        };
+        
+        const dotProduct = vectorAV.x * vectorCV.x + vectorAV.y * vectorCV.y;
+        const magnitudeAV = Math.sqrt(vectorAV.x * vectorAV.x + vectorAV.y * vectorAV.y);
+        const magnitudeCV = Math.sqrt(vectorCV.x * vectorCV.x + vectorCV.y * vectorCV.y);
+        
+        if (magnitudeAV === 0 || magnitudeCV === 0) {
+            return 0;
+        }
+        
+        const cosAngle = dotProduct / (magnitudeAV * magnitudeCV);
+        const clampedCosAngle = Math.max(-1, Math.min(1, cosAngle));
+        const angleRadians = Math.acos(clampedCosAngle);
+        const angleDegrees = angleRadians * 180 / Math.PI;
+        
+        return angleDegrees;
     };
 
     // 縮放功能
@@ -343,6 +406,20 @@ function AnalysisSpine() {
         <div className="analysis-spine">
             <div className="analysis-content">
                 <div className="neck-container-wrapper" ref={neckContainerWrapperRef}>
+                    <div className="neck-calculation-results">
+                        {calculationResults.length > 0 && (
+                            <div className="calculation-results-content">
+                                <h3>計算結果</h3>
+                                <div className="results-list">
+                                    {calculationResults.map((result, index) => (
+                                        <div key={index} className="result-item">
+                                            {result}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
                     <div 
                         className="neck-container" 
                         ref={neckContainerRef}
@@ -465,7 +542,7 @@ function AnalysisSpine() {
 
             <div className="menu-bottom">
                 <button onClick={handleCalculate} className="action-btn">
-                    計算
+                    計算 
                 </button>
                 <span>&nbsp;&nbsp;&nbsp;</span>
                 <button onClick={handleReset} className="action-btn">
