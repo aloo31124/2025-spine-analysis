@@ -2,6 +2,8 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './AnalysisSpine.css';
 import neckPatientImage from '../../assets.spine/images/病患側面.png';
+import { addCustomerAnalysisResult } from '../../api/manager/customerAnalysisResult';
+import { getCustomerList } from '../../api/manager/customer';
 
 function AnalysisSpine() {
     const navigate = useNavigate();
@@ -33,6 +35,13 @@ function AnalysisSpine() {
     const [lines, setLines] = useState([]);
     const [intersectionPoints, setIntersectionPoints] = useState([]);
     const [calculationResults, setCalculationResults] = useState([]);
+    
+    // 新增狀態：保存結果相關
+    const [showSaveOptions, setShowSaveOptions] = useState(false);
+    const [showCustomerModal, setShowCustomerModal] = useState(false);
+    const [customerList, setCustomerList] = useState([]);
+    const [selectedCustomer, setSelectedCustomer] = useState(null);
+    const [isCalculated, setIsCalculated] = useState(false);
 
     // 初始化點位
     useEffect(() => {
@@ -173,6 +182,9 @@ function AnalysisSpine() {
         applyScale(1);
         initPoints();
         setCurrentPointIndex(0);
+        setIsCalculated(false);
+        setShowSaveOptions(false);
+        setShowCustomerModal(false);
     };
 
     // 切換回原始圖片
@@ -190,6 +202,7 @@ function AnalysisSpine() {
     const handleCalculate = () => {
         calculateSpecialLines();
         calculateAllDistancesAndAngles();
+        setIsCalculated(true);
     };
 
     // 計算所有點之間的距離和角度
@@ -402,6 +415,95 @@ function AnalysisSpine() {
         return Math.sqrt(dx * dx + dy * dy);
     };
 
+    // 顯示保存選項對話框
+    const handleSaveResult = () => {
+        setShowSaveOptions(true);
+    };
+
+    // 處理綁定客戶
+    const handleBindCustomer = async () => {
+        try {
+            // 取得客戶列表
+            const searchParam = {};
+            const pagingParam = { pageIndex: 1, pageSize: 1000 };
+            const response = await getCustomerList(searchParam, pagingParam);
+            if (response.status === 200) {
+                setCustomerList(response.data.customerList || []);
+                setShowSaveOptions(false);
+                setShowCustomerModal(true);
+            }
+        } catch (error) {
+            console.error('取得客戶列表錯誤:', error);
+            alert('取得客戶列表失敗');
+        }
+    };
+
+    // 處理新建客戶
+    const handleCreateNewCustomer = async () => {
+        try {
+            // 先保存分析結果（使用臨時客戶ID）
+            const tempCustomerId = 'temp_' + Date.now();
+            const analysisResult = await saveAnalysisResult(tempCustomerId);
+            
+            // 將分析結果ID存儲到localStorage，用於新建客戶後更新
+            localStorage.setItem('pendingAnalysisResultId', analysisResult.id);
+            
+            setShowSaveOptions(false);
+            navigate('/manager/customer/add');
+        } catch (error) {
+            console.error('處理新建客戶錯誤:', error);
+            alert('處理新建客戶失敗');
+        }
+    };
+
+    // 選擇客戶並保存結果
+    const handleSelectCustomer = async (customer) => {
+        try {
+            await saveAnalysisResult(customer.id);
+            setShowCustomerModal(false);
+            navigate('/manager/customer/edit/' + customer.id, { state: { customer } });
+        } catch (error) {
+            console.error('保存分析結果錯誤:', error);
+            alert('保存分析結果失敗');
+        }
+    };
+
+    // 保存分析結果到數據庫
+    const saveAnalysisResult = async (customerId) => {
+        try {
+            const userId = localStorage.getItem('userId') || 'default_user';
+            const analysisData = {
+                customerId: customerId,
+                userId: userId,
+                analysisType: 'spine',
+                analysisData: {
+                    scale: currentScale,
+                    timestamp: new Date().toISOString()
+                },
+                points: points,
+                lines: lines,
+                intersectionPoints: intersectionPoints,
+                calculationResults: calculationResults,
+                backgroundImage: backgroundImage !== neckPatientImage ? backgroundImage : ''
+            };
+
+            const response = await addCustomerAnalysisResult(analysisData);
+            if (response.status === 200) {
+                console.log('分析結果保存成功:', response.data);
+                return response.data;
+            }
+        } catch (error) {
+            console.error('保存分析結果錯誤:', error);
+            throw error;
+        }
+    };
+
+    // 關閉對話框
+    const handleCloseModals = () => {
+        setShowSaveOptions(false);
+        setShowCustomerModal(false);
+    };
+
     return (
         <div className="analysis-spine">
             <div className="analysis-content">
@@ -541,9 +643,15 @@ function AnalysisSpine() {
             </div>
 
             <div className="menu-bottom">
-                <button onClick={handleCalculate} className="action-btn">
-                    計算 
-                </button>
+                {!isCalculated ? (
+                    <button onClick={handleCalculate} className="action-btn">
+                        計算 
+                    </button>
+                ) : (
+                    <button onClick={handleSaveResult} className="action-btn">
+                        儲存結果
+                    </button>
+                )}
                 <span>&nbsp;&nbsp;&nbsp;</span>
                 <button onClick={handleReset} className="action-btn">
                     重置
@@ -561,6 +669,57 @@ function AnalysisSpine() {
                     </>
                 )}
             </div>
+
+            {/* 保存選項對話框 */}
+            {showSaveOptions && (
+                <div className="modal-overlay">
+                    <div className="modal-content">
+                        <h3>選擇保存方式</h3>
+                        <div className="modal-buttons">
+                            <button onClick={handleBindCustomer} className="action-btn">
+                                綁定客戶
+                            </button>
+                            <button onClick={handleCreateNewCustomer} className="action-btn">
+                                新建客戶
+                            </button>
+                            <button onClick={handleCloseModals} className="cancel-btn">
+                                取消
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* 客戶選擇對話框 */}
+            {showCustomerModal && (
+                <div className="modal-overlay">
+                    <div className="modal-content customer-modal">
+                        <h3>選擇客戶</h3>
+                        <div className="customer-list">
+                            {customerList.map(customer => (
+                                <div 
+                                    key={customer.id} 
+                                    className="customer-item"
+                                    onClick={() => handleSelectCustomer(customer)}
+                                >
+                                    <div className="customer-info">
+                                        <div className="customer-name">{customer.name}</div>
+                                        <div className="customer-details">
+                                            {customer.phone && <span>電話: {customer.phone}</span>}
+                                            {customer.email && <span>信箱: {customer.email}</span>}
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                        <div className="modal-buttons">
+                            <button onClick={handleCloseModals} className="cancel-btn">
+                                取消
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

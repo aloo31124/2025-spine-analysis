@@ -19,6 +19,7 @@ const accountApiController = require('./controllers/account.api.controller');
 const productApiController = require('./controllers/manager/product.api.controller');
 const productCategoryApiController = require('./controllers/manager/productCategory.api.controller');
 const customerApiController = require('./controllers/manager/customer.api.controller');
+const customerAnalysisResultApiController = require('./controllers/manager/customerAnalysisResult.api.controller');
 //const productImgApiController = require('./controllers/manager/productImg.api.controller')
 const shopApiController = require('./controllers/shop/shop.api.controller');
 const shopPayLogisticsApiController = require('./controllers/shop/shopPayLogistics.api.controller')
@@ -117,6 +118,14 @@ app.patch('/api/manager/customer/edit', customerApiController.updateCustomer);
 app.delete('/api/manager/customer/delete/:id', customerApiController.deleteCustomer);
 app.post('/api/manager/customer/search', customerApiController.searchCustomer);
 app.post('/api/manager/customer/import', customerApiController.importCustomer);
+// 後台管理 客戶分析結果 api
+app.get('/api/manager/customer-analysis-result', customerAnalysisResultApiController.getCustomerAnalysisResultList);
+app.get('/api/manager/customer-analysis-result/customer/:customerId', customerAnalysisResultApiController.getCustomerAnalysisResultsByCustomerId);
+app.post('/api/manager/customer-analysis-result', customerAnalysisResultApiController.postCustomerAnalysisResult);
+app.get('/api/manager/customer-analysis-result/:id', customerAnalysisResultApiController.getCustomerAnalysisResult);
+app.put('/api/manager/customer-analysis-result/:id', customerAnalysisResultApiController.updateCustomerAnalysisResult);
+app.delete('/api/manager/customer-analysis-result/:id', customerAnalysisResultApiController.deleteCustomerAnalysisResult);
+app.post('/api/manager/customer-analysis-result/import', customerAnalysisResultApiController.importCustomerAnalysisResult);
 // 購物 api
 app.post('/api/shop/product/list', shopApiController.searchProductList);
 app.get('/api/shop/product/category/list', shopApiController.searchProductCategory);
