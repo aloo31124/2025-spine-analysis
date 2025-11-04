@@ -428,7 +428,7 @@ function AnalysisSpine() {
             const pagingParam = { pageIndex: 1, pageSize: 1000 };
             const response = await getCustomerList(searchParam, pagingParam);
             if (response.status === 200) {
-                setCustomerList(response.data.customerList || []);
+                setCustomerList(response.data.result.customerList || []);
                 setShowSaveOptions(false);
                 setShowCustomerModal(true);
             }
