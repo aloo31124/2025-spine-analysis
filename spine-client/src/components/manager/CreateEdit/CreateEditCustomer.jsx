@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import style from './CreateEdit.module.css';
 
-function CreateEditCustomer({typePage, customer, handleUpdateCustomer, handleAddCustomer}) {
+function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCustomer, handleAddCustomer}) {
     // 編輯新增頁狀態
     const typePageList = {CREATE:"CREATE", EDIT:'EDIT'};
     // 編輯客戶資訊
@@ -73,6 +73,69 @@ function CreateEditCustomer({typePage, customer, handleUpdateCustomer, handleAdd
             </div>
 
             <div className={style.CreateEditProductContainer}>
+                
+                <h2>分析結果</h2>
+                <div className={style.CreateEditProductRow}>
+                    {analysisResults && analysisResults.length > 0 ? (
+                        <div className={style.AnalysisResultsContainer}>
+                            {analysisResults.map((result, index) => (
+                                <div key={result.id || index} className={style.AnalysisResultItem}>
+                                    <div className={style.ResultHeader}>
+                                        <h4>分析記錄 #{index + 1}</h4>
+                                        <span className={style.ResultDate}>
+                                            {new Date(result.createdAt).toLocaleString('zh-TW', {
+                                                year: 'numeric',
+                                                month: '2-digit',
+                                                day: '2-digit',
+                                                hour: '2-digit',
+                                                minute: '2-digit'
+                                            })}
+                                        </span>
+                                    </div>
+                                    <div className={style.ResultContent}>
+                                        {result.calculationResults && (
+                                            <div className={style.CalculationResults}>
+                                                <h5>計算結果:</h5>
+                                                <ul>
+                                                    {result.calculationResults.map((calc, calcIndex) => (
+                                                        <li key={calcIndex}>{calc}</li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        )}
+                                        {result.points && (
+                                            <div className={style.PointsData}>
+                                                <h5>標記點位:</h5>
+                                                <div className={style.PointsList}>
+                                                    {result.points.map((point, pointIndex) => (
+                                                        <span key={pointIndex} className={style.PointItem}>
+                                                            點{pointIndex + 1}: ({Math.round(point.x)}, {Math.round(point.y)})
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+                                        {result.backgroundImage && (
+                                            <div className={style.ImagePreview}>
+                                                <h5>分析圖片:</h5>
+                                                <img 
+                                                    src={result.backgroundImage} 
+                                                    alt="分析圖片" 
+                                                    className={style.ResultImage}
+                                                />
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className={style.NoResults}>
+                            <p>暫無分析結果</p>
+                        </div>
+                    )}
+                </div>
+
                 <h2>基本資訊</h2>
                 <div className={style.CreateEditProductRow}>
                     <label>電子郵件: *</label>

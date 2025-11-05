@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { getCustomer, updateCustomer } from '../../api/manager/customer';
+import { getCustomerAnalysisResultsByCustomerId } from '../../api/manager/customerAnalysisResult';
 import CreateEditCustomer from '../../components/manager/CreateEdit/CreateEditCustomer';
 
 /* 客戶編輯 */
@@ -11,6 +12,8 @@ function CustomerEditPage() {
     const customer = state?.customer;
     // 編輯客戶資訊
     const [customerParam, setCustomerParam] = useState({});
+    // 分析結果列表
+    const [analysisResults, setAnalysisResults] = useState([]);
     // 路由
     const navigate = useNavigate();
 
@@ -40,12 +43,27 @@ function CustomerEditPage() {
                     state,
                     notes
                 });
+                
+                // 取得客戶分析結果
+                await fetchCustomerAnalysisResults();
             } catch (error) {
                 alert("取得客戶資訊錯誤");
             }
         }
         fetchEditCustomer();
     }, [customer]);
+
+    /* 取得客戶分析結果 */
+    const fetchCustomerAnalysisResults = async () => {
+        try {
+            const response = await getCustomerAnalysisResultsByCustomerId(id);
+            if (response.status === 200) {
+                setAnalysisResults(response.data);
+            }
+        } catch (error) {
+            console.error("取得分析結果錯誤:", error);
+        }
+    };
 
     /* 編輯客戶, 更新編輯客戶 */
     const handleUpdateCustomer = async (customer) => {
@@ -62,6 +80,7 @@ function CustomerEditPage() {
         <div className='pageContainer'>
             <CreateEditCustomer 
                 customer={customerParam}
+                analysisResults={analysisResults}
                 handleUpdateCustomer={handleUpdateCustomer}
                 typePage='EDIT'
             />

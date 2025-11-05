@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { addCustomer } from '../../api/manager/customer';
-import { updateCustomerAnalysisResult } from '../../api/manager/customerAnalysisResult';
+import { updateCustomerAnalysisResult, getCustomerAnalysisResult } from '../../api/manager/customerAnalysisResult';
 import CreateEditCustomer from '../../components/manager/CreateEdit/CreateEditCustomer';
 
 /* 客戶新增 */
@@ -19,6 +19,27 @@ function CustomerAddPage() {
         state: '正常',
         notes: ''
     });
+    // 待綁定的分析結果
+    const [pendingAnalysisResult, setPendingAnalysisResult] = useState(null);
+
+    // 檢查是否有待綁定的分析結果
+    useEffect(() => {
+        const fetchPendingAnalysisResult = async () => {
+            const pendingAnalysisResultId = localStorage.getItem('pendingAnalysisResultId');
+            if (pendingAnalysisResultId) {
+                try {
+                    const response = await getCustomerAnalysisResult(pendingAnalysisResultId);
+                    if (response.status === 200) {
+                        setPendingAnalysisResult(response.data);
+                    }
+                } catch (error) {
+                    console.error('獲取待綁定分析結果錯誤:', error);
+                }
+            }
+        };
+        
+        fetchPendingAnalysisResult();
+    }, []);
 
     /* post 新增客戶 */
     const handleAddCustomer = async (customer) => {
@@ -57,6 +78,7 @@ function CustomerAddPage() {
         <div className='pageContainer'>
             <CreateEditCustomer 
                 customer={customerParam}
+                analysisResults={pendingAnalysisResult ? [pendingAnalysisResult] : []}
                 handleAddCustomer={handleAddCustomer}
                 typePage='CREATE'
             />
