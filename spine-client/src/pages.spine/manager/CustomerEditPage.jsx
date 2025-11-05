@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { getCustomer, updateCustomer } from '../../api/manager/customer';
-import { getCustomerAnalysisResultsByCustomerId } from '../../api/manager/customerAnalysisResult';
+import { getCustomerAnalysisResultsByCustomerId } from '../../api.spine/manager/customerAnalysisResult';
 import CreateEditCustomer from '../../components/manager/CreateEdit/CreateEditCustomer';
 
 /* 客戶編輯 */
@@ -82,6 +82,7 @@ function CustomerEditPage() {
                 customer={customerParam}
                 analysisResults={analysisResults}
                 handleUpdateCustomer={handleUpdateCustomer}
+                onRefreshAnalysisResults={fetchCustomerAnalysisResults}
                 typePage='EDIT'
             />
         </div>

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import style from './CreateEdit.module.css';
 import AnalysisResult from '../AnalysisResult/AnalysisResult';
 
-function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCustomer, handleAddCustomer}) {
+function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCustomer, handleAddCustomer, onRefreshAnalysisResults}) {
     // 編輯新增頁狀態
     const typePageList = {CREATE:"CREATE", EDIT:'EDIT'};
     // 編輯客戶資訊
@@ -50,6 +50,14 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
         handleUpdateCustomer({name, email, phone, address, birthday, gender, state, notes});
     }
 
+    /* 處理分析結果刪除 */
+    const handleDeleteAnalysisResult = (resultId, index) => {
+        // 通知父組件刷新分析結果列表
+        if (onRefreshAnalysisResults) {
+            onRefreshAnalysisResults();
+        }
+    }
+
     return (
         <div className={style.CreateEditProduct}>
             <div className={style.CreateEditProductTopBar}>
@@ -76,7 +84,10 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
             <div className={style.CreateEditProductContainer}>
                 
                 <h2>分析結果</h2>
-                <AnalysisResult analysisResults={analysisResults} />
+                <AnalysisResult 
+                    analysisResults={analysisResults} 
+                    onDeleteResult={handleDeleteAnalysisResult}
+                />
 
                 <h2>基本資訊</h2>
                 <div className={style.CreateEditProductRow}>

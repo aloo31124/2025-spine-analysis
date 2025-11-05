@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { addCustomer } from '../../api/manager/customer';
-import { updateCustomerAnalysisResult, getCustomerAnalysisResult } from '../../api/manager/customerAnalysisResult';
+import { updateCustomerAnalysisResult, getCustomerAnalysisResult } from '../../api.spine/manager/customerAnalysisResult';
 import CreateEditCustomer from '../../components/manager/CreateEdit/CreateEditCustomer';
 
 /* 客戶新增 */
@@ -40,6 +40,28 @@ function CustomerAddPage() {
         
         fetchPendingAnalysisResult();
     }, []);
+
+    /* 刷新分析結果 */
+    const handleRefreshAnalysisResults = () => {
+        // 對於新增頁面，可能需要重新獲取待綁定的分析結果
+        const fetchPendingAnalysisResult = async () => {
+            const pendingAnalysisResultId = localStorage.getItem('pendingAnalysisResultId');
+            if (pendingAnalysisResultId) {
+                try {
+                    const response = await getCustomerAnalysisResult(pendingAnalysisResultId);
+                    if (response.status === 200) {
+                        setPendingAnalysisResult(response.data);
+                    }
+                } catch (error) {
+                    console.error('獲取待綁定分析結果錯誤:', error);
+                    setPendingAnalysisResult(null);
+                }
+            } else {
+                setPendingAnalysisResult(null);
+            }
+        };
+        fetchPendingAnalysisResult();
+    };
 
     /* post 新增客戶 */
     const handleAddCustomer = async (customer) => {
@@ -80,6 +102,7 @@ function CustomerAddPage() {
                 customer={customerParam}
                 analysisResults={pendingAnalysisResult ? [pendingAnalysisResult] : []}
                 handleAddCustomer={handleAddCustomer}
+                onRefreshAnalysisResults={handleRefreshAnalysisResults}
                 typePage='CREATE'
             />
         </div>
