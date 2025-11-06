@@ -1,7 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { addCustomer } from '../../api/manager/customer';
-import { updateCustomerAnalysisResult, getCustomerAnalysisResult } from '../../api.spine/manager/customerAnalysisResult';
+import { 
+    addCustomerAnalysisResult, 
+    updateCustomerAnalysisResult, 
+    getCustomerAnalysisResult, 
+    getPendingAnalysisData, 
+    clearPendingAnalysisData 
+} from '../../api.spine/manager/customerAnalysisResult';
 import CreateEditCustomer from '../../components/manager/CreateEdit/CreateEditCustomer';
 
 /* 客戶新增 */
@@ -24,43 +30,17 @@ function CustomerAddPage() {
 
     // 檢查是否有待綁定的分析結果
     useEffect(() => {
-        const fetchPendingAnalysisResult = async () => {
-            const pendingAnalysisResultId = localStorage.getItem('pendingAnalysisResultId');
-            if (pendingAnalysisResultId) {
-                try {
-                    const response = await getCustomerAnalysisResult(pendingAnalysisResultId);
-                    if (response.status === 200) {
-                        setPendingAnalysisResult(response.data);
-                    }
-                } catch (error) {
-                    console.error('獲取待綁定分析結果錯誤:', error);
-                }
-            }
-        };
-        
-        fetchPendingAnalysisResult();
+        const pendingAnalysisData = getPendingAnalysisData();
+        if (pendingAnalysisData) {
+            setPendingAnalysisResult(pendingAnalysisData);
+        }
     }, []);
 
     /* 刷新分析結果 */
     const handleRefreshAnalysisResults = () => {
-        // 對於新增頁面，可能需要重新獲取待綁定的分析結果
-        const fetchPendingAnalysisResult = async () => {
-            const pendingAnalysisResultId = localStorage.getItem('pendingAnalysisResultId');
-            if (pendingAnalysisResultId) {
-                try {
-                    const response = await getCustomerAnalysisResult(pendingAnalysisResultId);
-                    if (response.status === 200) {
-                        setPendingAnalysisResult(response.data);
-                    }
-                } catch (error) {
-                    console.error('獲取待綁定分析結果錯誤:', error);
-                    setPendingAnalysisResult(null);
-                }
-            } else {
-                setPendingAnalysisResult(null);
-            }
-        };
-        fetchPendingAnalysisResult();
+        // 重新從localStorage獲取待綁定的分析結果
+        const pendingAnalysisData = getPendingAnalysisData();
+        setPendingAnalysisResult(pendingAnalysisData);
     };
 
     /* post 新增客戶 */
@@ -69,19 +49,29 @@ function CustomerAddPage() {
         try {
             const res = await addCustomer(customer);
             if(res.status === 200) {
-                // 檢查是否有待更新的分析結果
-                const pendingAnalysisResultId = localStorage.getItem('pendingAnalysisResultId');
-                if (pendingAnalysisResultId) {
+                // 檢查是否有待保存的分析結果
+                const pendingAnalysisData = getPendingAnalysisData();
+                if (pendingAnalysisData) {
                     try {
-                        // 更新分析結果的客戶ID
-                        await updateCustomerAnalysisResult({
-                            id: pendingAnalysisResultId,
-                            customerId: res.data.id
-                        });
-                        localStorage.removeItem('pendingAnalysisResultId');
-                        console.log('分析結果已成功綁定到新客戶');
+                        // 將分析結果與新創建的客戶ID一起保存到資料庫
+                        const analysisResultData = {
+                            customerId: res.data.id,
+                            userId: pendingAnalysisData.userId,
+                            analysisType: pendingAnalysisData.analysisType,
+                            analysisData: pendingAnalysisData.analysisData,
+                            points: pendingAnalysisData.points,
+                            lines: pendingAnalysisData.lines,
+                            intersectionPoints: pendingAnalysisData.intersectionPoints,
+                            calculationResults: pendingAnalysisData.calculationResults,
+                            backgroundImage: pendingAnalysisData.backgroundImage
+                        };
+                        
+                        await addCustomerAnalysisResult(analysisResultData);
+                        clearPendingAnalysisData();
+                        console.log('分析結果已成功保存並綁定到新客戶');
                     } catch (error) {
-                        console.error('綁定分析結果到新客戶失敗:', error);
+                        console.error('保存分析結果到新客戶失敗:', error);
+                        // 即使分析結果保存失敗，客戶已創建成功，不影響整體流程
                     }
                 }
                 

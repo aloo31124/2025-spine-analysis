@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import style from '../CreateEdit/CreateEdit.module.css';
-import { deleteCustomerAnalysisResult } from '../../../api.spine/manager/customerAnalysisResult';
+import { deleteCustomerAnalysisResult, clearPendingAnalysisData } from '../../../api.spine/manager/customerAnalysisResult';
 
 function AnalysisResult({ analysisResults, onDeleteResult }) {
     // 控制分析結果的展開/收合狀態
@@ -24,9 +24,12 @@ function AnalysisResult({ analysisResults, onDeleteResult }) {
         try {
             setDeletingResults(prev => ({ ...prev, [index]: true }));
             
-            // 如果有 id，則調用 API 刪除
+            // 如果有 id，則調用 API 刪除（已保存到資料庫的結果）
             if (result.id) {
                 await deleteCustomerAnalysisResult(result.id);
+            } else {
+                // 如果沒有 id，表示是暫存的分析結果，從 localStorage 移除
+                clearPendingAnalysisData();
             }
             
             // 通知父組件更新列表

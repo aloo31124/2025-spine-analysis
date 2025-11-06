@@ -73,3 +73,28 @@ export const importCustomerAnalysisResult = async (resultList) => {
         }
     );
 }
+
+/* 從 localStorage 獲取暫存的分析結果 */
+export const getPendingAnalysisData = () => {
+    const pendingAnalysisDataStr = localStorage.getItem('pendingAnalysisData');
+    if (pendingAnalysisDataStr) {
+        try {
+            return JSON.parse(pendingAnalysisDataStr);
+        } catch (error) {
+            console.error('解析暫存分析結果錯誤:', error);
+            localStorage.removeItem('pendingAnalysisData');
+            return null;
+        }
+    }
+    return null;
+}
+
+/* 清除暫存的分析結果 */
+export const clearPendingAnalysisData = () => {
+    localStorage.removeItem('pendingAnalysisData');
+}
+
+/* 保存暫存的分析結果 */
+export const savePendingAnalysisData = (analysisData) => {
+    localStorage.setItem('pendingAnalysisData', JSON.stringify(analysisData));
+}

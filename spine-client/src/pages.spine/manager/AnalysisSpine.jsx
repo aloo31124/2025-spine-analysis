@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './AnalysisSpine.css';
 import neckPatientImage from '../../assets.spine/images/病患側面.png';
-import { addCustomerAnalysisResult } from '../../api/manager/customerAnalysisResult';
+import { addCustomerAnalysisResult } from '../../api.spine/manager/customerAnalysisResult';
 import { getCustomerList } from '../../api/manager/customer';
 
 function AnalysisSpine() {
@@ -441,12 +441,26 @@ function AnalysisSpine() {
     // 處理新建客戶
     const handleCreateNewCustomer = async () => {
         try {
-            // 先保存分析結果（使用臨時客戶ID）
-            const tempCustomerId = 'temp_' + Date.now();
-            const analysisResult = await saveAnalysisResult(tempCustomerId);
+            const userId = localStorage.getItem('userId') || 'default_user';
             
-            // 將分析結果ID存儲到localStorage，用於新建客戶後更新
-            localStorage.setItem('pendingAnalysisResultId', analysisResult.id);
+            // 將分析結果資料暫時保存到localStorage，不存入資料庫
+            const pendingAnalysisData = {
+                analysisType: 'spine',
+                analysisData: {
+                    scale: currentScale,
+                    timestamp: new Date().toISOString()
+                },
+                points: points,
+                lines: lines,
+                intersectionPoints: intersectionPoints,
+                calculationResults: calculationResults,
+                backgroundImage: backgroundImage !== neckPatientImage ? backgroundImage : '',
+                userId: userId,
+                createdAt: new Date().toISOString()
+            };
+            
+            // 將待綁定的分析結果存儲到localStorage
+            localStorage.setItem('pendingAnalysisData', JSON.stringify(pendingAnalysisData));
             
             setShowSaveOptions(false);
             navigate('/manager/customer/add');
