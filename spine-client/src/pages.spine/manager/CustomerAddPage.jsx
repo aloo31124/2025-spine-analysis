@@ -48,6 +48,7 @@ function CustomerAddPage() {
         console.log(" handleAddCustomer : ", customer)
         try {
             const res = await addCustomer(customer);
+            debugger;
             if(res.status === 200) {
                 // 檢查是否有待保存的分析結果
                 const pendingAnalysisData = getPendingAnalysisData();
@@ -55,7 +56,7 @@ function CustomerAddPage() {
                     try {
                         // 將分析結果與新創建的客戶ID一起保存到資料庫
                         const analysisResultData = {
-                            customerId: res.data.id,
+                            customerId: res.data.result.id,
                             userId: pendingAnalysisData.userId,
                             analysisType: pendingAnalysisData.analysisType,
                             analysisData: pendingAnalysisData.analysisData,

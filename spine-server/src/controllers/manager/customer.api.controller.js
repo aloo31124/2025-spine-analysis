@@ -28,9 +28,9 @@ exports.postCustomer = async (req, res) => {
     console.log("[postCustomer] start : request =", req.body);
     try {
         const payload = authService.verifyJwt(req);
-        const newCustomer = await customerService.addCustomer({ userId: payload.userId, ...req.body.newCustomer });
-        console.log(" newCustomer : ", newCustomer);
-        res.status(200).json({ result: '200', newCustomer });
+        const result = await customerService.addCustomer({ userId: payload.userId, ...req.body.newCustomer });
+        console.log(" newCustomer : ", result);
+        res.status(200).json({result});
     } catch (error) {
         console.error("[postCustomer] error :", error);
         res.status(500).json({ result: '500', error: error.message });
