@@ -4,7 +4,7 @@ import CategoryDialog from '../../dialog/CategoryDialog/CategoryDialog';
 import CalendarPicker from '../../tools/CalendarPicker/CalendarPicker';
 import { handleNumberInput } from '../../../utils/inputHelpers';
 
-function SearchBarProduct({categoryList=[], getSearchParam, pagingParam}) {
+function SearchBarProduct({categoryList, getSearchParam, pagingParam}) {
     // 搜尋欄位所有 搜尋條件設定為 元件狀態useState
     const [keyword, setKeyword] = useState(null);
     const [state, setState] = useState(null);
