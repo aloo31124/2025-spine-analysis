@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import style from '../CreateEdit/CreateEdit.module.css';
-import { deleteCustomerAnalysisResult, clearPendingAnalysisData } from '../../../api.spine/manager/customerAnalysisResult';
+import { deleteCustomerAnalysisResult, clearPendingAnalysisData } from '../../../api/manager/customerAnalysisResult';
 
 function AnalysisResult({ analysisResults, onDeleteResult }) {
     // 控制分析結果的展開/收合狀態
