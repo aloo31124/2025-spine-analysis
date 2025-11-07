@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import style from './CreateEdit.module.css';
 import AnalysisResult from '../AnalysisResult/AnalysisResult';
 
 function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCustomer, handleAddCustomer, onRefreshAnalysisResults}) {
+    const navigate = useNavigate();
     // 編輯新增頁狀態
     const typePageList = {CREATE:"CREATE", EDIT:'EDIT'};
     // 編輯客戶資訊
@@ -58,6 +60,31 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
         }
     }
 
+    /* 處理購買商品按鈕點擊 */
+    const handlePurchaseProduct = () => {
+        // 準備客戶完整資料
+        const customerData = {
+            id: customer?.id,
+            name,
+            email,
+            phone,
+            address,
+            birthday,
+            gender,
+            state,
+            notes,
+            analysisResults
+        };
+        
+        // 跳轉到商品列表頁面，並傳遞客戶資料
+        navigate('/manager/product-spine', { 
+            state: { 
+                customerData,
+                fromCustomerPage: true
+            }
+        });
+    }
+
     return (
         <div className={style.CreateEditProduct}>
             <div className={style.CreateEditProductTopBar}>
@@ -88,6 +115,10 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
                     analysisResults={analysisResults} 
                     onDeleteResult={handleDeleteAnalysisResult}
                 />
+                <h2>購買商品</h2>
+                <div className={style.CreateEditProductRow}>
+                    <button onClick={handlePurchaseProduct}>購買商品</button>
+                </div>
 
                 <h2>基本資訊</h2>
                 <div className={style.CreateEditProductRow}>
@@ -100,6 +131,7 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
                         required
                     />
                 </div>
+
                 <div className={style.CreateEditProductRow}>
                     <label>電話: *</label>
                     <input
