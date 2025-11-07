@@ -16,7 +16,8 @@ exports.getProductList = async (req, res) => {
     try {
         console.log("[getProductList] start ");
         const {searchParam, pagingParam} = req.body;
-        const result = await productService.searchProductJoinCategoryPromotion(searchParam, pagingParam);
+        const payload = authService.verifyJwt(req);
+        const result = await productService.searchProductJoinCategoryPromotion(searchParam, pagingParam, payload?.userId);
         res.status(200).json({ result });
     } catch (error) {
         console.error("[getProductList] error :", error);
