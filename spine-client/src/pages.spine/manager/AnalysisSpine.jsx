@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './AnalysisSpine.css';
 import neckPatientImage from '../../assets.spine/images/病患側面.png';
-import { addCustomerAnalysisResult } from '../../api.spine/manager/customerAnalysisResult';
+import { addCustomerAnalysisResult } from '../../api/manager/customerAnalysisResult';
 import { getCustomerList } from '../../api/manager/customer';
 
 function AnalysisSpine() {

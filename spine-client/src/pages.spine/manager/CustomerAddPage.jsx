@@ -7,7 +7,7 @@ import {
     getCustomerAnalysisResult, 
     getPendingAnalysisData, 
     clearPendingAnalysisData 
-} from '../../api.spine/manager/customerAnalysisResult';
+} from '../../api/manager/customerAnalysisResult';
 import CreateEditCustomer from '../../components/manager/CreateEdit/CreateEditCustomer';
 
 /* 客戶新增 */
