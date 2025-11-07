@@ -1,5 +1,5 @@
 import React, {useState} from "react";
-import style from "../../../pages/manager/manager.module.css";
+import style from "./SearchBar.module.css";
 import {searchProductCategory} from '../../../api/manager/product-category';
 
 function SearchBarCategory({getSearchResult}) {
@@ -13,7 +13,7 @@ function SearchBarCategory({getSearchResult}) {
     }
 
     return (
-        <div className={style.SearchBarContainer}>
+        <div className={style.SearchBar}>
             <div className={style.SearchBarRow}>
                 <input type="text" 
                     placeholder="商品類別不限"

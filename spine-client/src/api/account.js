@@ -14,7 +14,7 @@ export const getECPaymSelectPage = async (paymentId) => {
     const token = localStorage.getItem('jwt');
     if(!token) return null;
     return axios.get(
-        `${BASE_URL}/payment/ecpay/select/${paymentId}`,
+        `${BASE_URL}/payment/select/${paymentId}`,
         {
             headers: {
                 Authorization: `Bearer ${token}`

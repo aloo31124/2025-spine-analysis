@@ -1,5 +1,5 @@
 import React, {useState, useRef, useEffect} from "react";
-import style from "../../../pages/manager/manager.module.css";
+import style from "./SearchBar.module.css";
 import CalendarPicker from '../../tools/CalendarPicker/CalendarPicker';
 import { handleNumberInput } from '../../../utils/inputHelpers';
 
@@ -41,7 +41,7 @@ function SearchBarPayment({getSearchParam, pagingParam}) {
     }, []);
 
     return (
-        <div className={style.SearchBarContainer}>
+        <div className={style.SearchBar}>
             <div className={style.SearchBarRow}>
                 <input type="text" 
                     placeholder="方案名稱不限"
@@ -50,7 +50,7 @@ function SearchBarPayment({getSearchParam, pagingParam}) {
                 />
             </div>
             <div className={style.SearchBarRow}>
-                <span>並且</span>
+                並且
                 <select value={type} onChange={e => setType(e.target.value)}>
                     <option value="">類型不限</option>
                     <option value="basic">基本版</option>
@@ -58,7 +58,7 @@ function SearchBarPayment({getSearchParam, pagingParam}) {
                     <option value="enterprise">企業版</option>
                 </select>
                 
-                <span>並且</span>
+                並且
                 <select value={interval} onChange={e => setInterval(e.target.value)}>
                     <option value="">週期不限</option>
                     <option value="monthly">月繳</option>
@@ -69,7 +69,7 @@ function SearchBarPayment({getSearchParam, pagingParam}) {
                 {/* 暫時註解, 待 後端資料庫建立, 與 增改 資料綁定
                 <div ref={calendarRef} 
                     className={style.CalendarWrapper}>
-                    <span>並且</span>
+                    並且
                     <input type="text" 
                         placeholder="建立日期不限"
                         value={createDate}
@@ -92,22 +92,20 @@ function SearchBarPayment({getSearchParam, pagingParam}) {
 
             </div>
             <div className={style.SearchBarRow}>
-                <span>並且 費用範圍</span>
+                並且 費用範圍
                 <input type="text" 
                     placeholder="0"
                     value={costMin}
                     onChange={e => setCostMin(handleNumberInput(e.target.value, '費用下限'))}
                 />
-                <span>~</span>
+                ~
                 <input type="text" 
                     placeholder="費用上限不限"
                     value={costMax}
                     onChange={e => setCostMax(handleNumberInput(e.target.value, '費用上限'))}
                 />
             </div>
-            <div className={style.SearchBarRow}>
-                <button onClick={clickSearchPayment}>搜尋</button>
-            </div>
+            <button onClick={clickSearchPayment}>搜尋</button>
 
         </div>
     )

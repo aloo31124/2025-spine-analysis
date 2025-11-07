@@ -8,7 +8,6 @@ import {useNavigate} from 'react-router-dom';
 function Header() {
     const navigate = useNavigate();
     const [hoveredMenu, setHoveredMenu] = useState(null); // 控制顯示選單
-    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // 控制手機選單
 
     const handleMouseEnter = (menu) => setHoveredMenu(menu);
     const handleMouseLeave = () => setHoveredMenu(null);
@@ -32,32 +31,16 @@ function Header() {
         alert("購買商品");
     }
 
-    const toggleMobileMenu = () => {
-        setIsMobileMenuOpen(!isMobileMenuOpen);
-    }
-
     return (
         <div className={style.headerContainer}>
-            {/* Logo */}
             <img className={style.headerLogo} 
                 src={logo} 
             />
-            
-            {/* 搜尋框 */}
             <input className={style.headerInputSearch}
                 type="text" 
                 placeholder='搜尋商品'
             />
-
-            {/* 漢堡選單按鈕 (僅在手機版顯示) */}
-            <button className={style.hamburgerButton} onClick={toggleMobileMenu}>
-                <span className={style.hamburgerLine}></span>
-                <span className={style.hamburgerLine}></span>
-                <span className={style.hamburgerLine}></span>
-            </button>
-
-            {/* 桌面版選單 */}
-            <div className={`${style.headerRightSection} ${isMobileMenuOpen ? style.mobileMenuOpen : ''}`}>
+            <div className={style.headerRightSection} >
 
                 <button className={style.headerButton}>
                     拍賣
@@ -103,11 +86,6 @@ function Header() {
                     )}
                 </div>
             </div>
-
-            {/* 手機版遮罩 */}
-            {isMobileMenuOpen && (
-                <div className={style.mobileOverlay} onClick={toggleMobileMenu}></div>
-            )}
         </div>
     )
 }
