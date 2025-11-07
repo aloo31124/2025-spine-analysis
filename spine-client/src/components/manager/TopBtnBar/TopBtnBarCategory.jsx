@@ -1,5 +1,5 @@
 import React from "react";
-import style from "./TopBtnBar.module.css";
+import style from "../../../pages/manager/manager.module.css";
 import { useNavigate } from "react-router-dom";
 
 function TopBtnBarCategory() {
@@ -15,11 +15,16 @@ function TopBtnBarCategory() {
   }
   
   return (
-    <div className={style.TopBtnBar}>
-        <button onClick={clickAddProductCategory}>新增分類</button>
-        <button onClick={clickToProductList}>商品列表</button>
-        <button>匯出分類</button>
-        <button>匯入分類</button>
+    <div className={style.TopBtnBarContainer}>
+        <div className={style.TopBtnBarRow}>
+            <h2>分類管理</h2>
+        </div>
+        <div className={style.TopBtnBarRow}>
+            <button onClick={clickAddProductCategory} className={style.primaryBtn}>新增分類</button>
+            <button onClick={clickToProductList} className={style.secondaryBtn}>商品列表</button>
+            <button className={style.secondaryBtn}>匯出分類</button>
+            <button className={style.secondaryBtn}>匯入分類</button>
+        </div>
     </div>
   );
 }

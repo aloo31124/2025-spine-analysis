@@ -1,5 +1,5 @@
 import React from "react";
-import style from "./TopBtnBar.module.css";
+import style from "../../../pages/manager/manager.module.css";
 import { useNavigate } from "react-router-dom";
 import { importPayment } from "../../../api/manager/payment";
 
@@ -87,10 +87,15 @@ function TopBtnBarPayment({paymentList}) {
     }
 
     return (
-        <div className={style.TopBtnBar}>
-            <button onClick={clickAddPayment}>新增方案</button>
-            <button onClick={clickExportPayment}>匯出方案</button>
-            <button onClick={clickImportPayment}>匯入方案</button>
+        <div className={style.TopBtnBarContainer}>
+            <div className={style.TopBtnBarRow}>
+                <h2>方案管理</h2>
+            </div>
+            <div className={style.TopBtnBarRow}>
+                <button onClick={clickAddPayment} className={style.primaryBtn}>新增方案</button>
+                <button onClick={clickExportPayment} className={style.secondaryBtn}>匯出方案</button>
+                <button onClick={clickImportPayment} className={style.secondaryBtn}>匯入方案</button>
+            </div>
         </div>
     )
 }

@@ -6,7 +6,7 @@ import {useNavigate} from 'react-router-dom';
 import {getPaymentList, deletePayment, searchPayment} from '../../api/manager/payment';
 import PaginationBar from '../../components/tools/PaginationBar/PaginationBar'
 import loadingGif from '../../assets/loading.gif';
-import style from './PaymentListPage.module.css';
+import style from './manager.module.css';
 
 function PaymentListPage() {
     const navigate = useNavigate();
@@ -134,7 +134,7 @@ function PaymentListPage() {
     }
 
     return (
-        <div className={style.PaymentListPage}>
+        <div className={style.ManagerPage}>
             <TopBtnBarPayment 
                 paymentList={paymentList}
             />
@@ -149,7 +149,7 @@ function PaymentListPage() {
                         <img src={loadingGif} alt="Loading..." />
                     </div>
                 ) : (
-                    <table className={style.PaymentTable}>
+                    <table className={style.ManagerTable}>
                         <thead>
                             <tr>
                                 <th>方案名稱</th>
@@ -168,22 +168,16 @@ function PaymentListPage() {
                             ) : (
                                 paymentList.map((payment) => (
                                     <tr key={payment.id}>
-                                        <td className={style.PaymentName}>{payment.name}</td>
-                                        <td>{formatType(payment.type)}</td>
-                                        <td className={style.PaymentCost}>{formatCost(payment.cost)}</td>
-                                        <td>{formatInterval(payment.interval)}</td>
-                                        <td className={style.PaymentDesc}>{payment.desc}</td>
-                                        <td className={style.ActionButtons}>
-                                            <button 
-                                                className={style.EditButton}
-                                                onClick={() => handleEditPayment(payment)}
-                                            >
+                                        <td data-label="方案名稱" className={style.ItemName}>{payment.name}</td>
+                                        <td data-label="類型">{formatType(payment.type)}</td>
+                                        <td data-label="費用" className={style.ItemCost}>{formatCost(payment.cost)}</td>
+                                        <td data-label="週期">{formatInterval(payment.interval)}</td>
+                                        <td data-label="描述" className={style.ItemDesc}>{payment.desc}</td>
+                                        <td data-label="操作" className={style.ActionButtons}>
+                                            <button onClick={() => handleEditPayment(payment)}>
                                                 編輯
                                             </button>
-                                            <button 
-                                                className={style.DeleteButton}
-                                                onClick={() => handleDeletePayment(payment.id)}
-                                            >
+                                            <button onClick={() => handleDeletePayment(payment.id)}>
                                                 刪除
                                             </button>
                                         </td>

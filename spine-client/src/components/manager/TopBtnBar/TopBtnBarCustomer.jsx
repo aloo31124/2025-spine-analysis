@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import style from './TopBtnBar.module.css';
+import style from '../../../pages/manager/manager.module.css';
 
 function TopBtnBarCustomer({ customerList }) {
     const navigate = useNavigate();

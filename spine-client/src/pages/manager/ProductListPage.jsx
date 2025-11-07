@@ -7,6 +7,7 @@ import {getProductList, getProductCategoryList, deleteProduct, searchProduct} fr
 import PaginationBar from '../../components/tools/PaginationBar/PaginationBar'
 import shoppingBag2Img from '../../assets/img/shoppingBag2.png';
 import loadingGif from '../../assets/loading.gif';
+import style from './manager.module.css';
 
 function ProductListPage() {
     const navigate = useNavigate();
@@ -115,7 +116,7 @@ function ProductListPage() {
     }
 
     return (
-        <div>
+        <div className={style.ManagerPage}>
             <TopBtnBarProduct 
                 categoryList={categoryList}
                 productList={productList}
@@ -125,39 +126,54 @@ function ProductListPage() {
                 categoryList={categoryList}
                 pagingParam={pagingParam}
             />
-            <table>
-                {
-                    isLoading ? (
-                        <tr><img style={{height: '100px'}} src={loadingGif} alt="Loading..." /></tr>
-                    ) : (
-                        productList.length === 0 ? (
-                            <tr><td colSpan="6" style={{textAlign: 'center'}}>查無資料</td></tr>
-                        ) : (
-                            productList.map((product) => {
-                                return (
-                                    <tr key={product.id}>
-                                        <td><img style={{height: '100px'}} src={product.imgList[0]?.imgUrl || shoppingBag2Img} /></td>
-                                        <td>{product.name}</td>
-                                        <td>{categoryList.find(c => c.id === product.categoryId).name}</td>
-                                        <td>{product.price}</td>
-                                        <td>{product.state}</td>
-                                        <td>
-                                            <button onClick={() => handleEditProduct(product)}>編輯</button>
-                                            <button onClick={() => handleDeleteProduct(product.id)}>刪除</button>
-                                        </td>
-                                    </tr>
-                                )
-                            })
-                        )
-                    )
-                }
-            </table>
+            <div className={style.TableContainer}>
+                {isLoading ? (
+                    <div className={style.LoadingContainer}>
+                        <img src={loadingGif} alt="Loading..." />
+                    </div>
+                ) : (
+                    <table className={style.ManagerTable}>
+                        <thead>
+                            <tr>
+                                <th>圖片</th>
+                                <th>名稱</th>
+                                <th>分類</th>
+                                <th>價格</th>
+                                <th>狀態</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {productList.length === 0 ? (
+                                <tr>
+                                    <td colSpan="6" className={style.NoData}>查無資料</td>
+                                </tr>
+                            ) : (
+                                productList.map((product) => {
+                                    return (
+                                        <tr key={product.id}>
+                                            <td data-label="圖片"><img className={style.ProductImage} src={product.imgList[0]?.imgUrl || shoppingBag2Img} alt="商品圖片" /></td>
+                                            <td data-label="名稱" className={style.ItemName}>{product.name}</td>
+                                            <td data-label="分類">{categoryList.find(c => c.id === product.categoryId)?.name}</td>
+                                            <td data-label="價格" className={style.ItemCost}>{product.price}</td>
+                                            <td data-label="狀態">{product.state}</td>
+                                            <td data-label="操作" className={style.ActionButtons}>
+                                                <button onClick={() => handleEditProduct(product)}>編輯</button>
+                                                <button onClick={() => handleDeleteProduct(product.id)}>刪除</button>
+                                            </td>
+                                        </tr>
+                                    )
+                                })
+                            )}
+                        </tbody>
+                    </table>
+                )}
+            </div>
             <PaginationBar 
                 pagingParam={pagingParam} 
                 clickPageChange={handlePageChange} 
                 clickPageSizeChange={handlePageSizeChange}
             />
-
         </div>
     );
 }

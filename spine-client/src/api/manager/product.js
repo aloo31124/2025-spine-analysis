@@ -6,7 +6,16 @@ const BASE_URL = HOST + CONTEXT;
 
 /* get 商品列表 */
 export const getProductList = async (searchParam, pagingParam) => {
-    return axios.post(`${BASE_URL}/list`, {searchParam, pagingParam});
+    const token = localStorage.getItem('jwt');
+    return axios.post(
+        `${BASE_URL}/list`,
+        {searchParam, pagingParam},
+        {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        }
+    );
 }
 
 /* get 商品分類 */

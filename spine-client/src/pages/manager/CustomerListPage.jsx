@@ -7,6 +7,7 @@ import {getCustomerList, deleteCustomer, searchCustomer} from '../../api/manager
 import PaginationBar from '../../components/tools/PaginationBar/PaginationBar'
 import userIcon from '../../assets/img/shoppingBag1.png';
 import loadingGif from '../../assets/loading.gif';
+import style from './manager.module.css';
 
 function CustomerListPage() {
     const navigate = useNavigate();
@@ -105,7 +106,7 @@ function CustomerListPage() {
     }
 
     return (
-        <div>
+        <div className={style.ManagerPage}>
             <TopBtnBarCustomer 
                 customerList={customerList}
             />
@@ -113,51 +114,54 @@ function CustomerListPage() {
                 getSearchParam={handleSearchResult}
                 pagingParam={pagingParam}
             />
-            <table>
-                <thead>
-                    <tr>
-                        <th>頭像</th>
-                        <th>姓名</th>
-                        <th>電子郵件</th>
-                        <th>電話</th>
-                        <th>狀態</th>
-                        <th>操作</th>
-                    </tr>
-                </thead>
-                <tbody>
-                {
-                    isLoading ? (
-                        <tr><td colSpan="6"><img style={{height: '100px'}} src={loadingGif} alt="Loading..." /></td></tr>
-                    ) : (
-                        customerList.length === 0 ? (
-                            <tr><td colSpan="6" style={{textAlign: 'center'}}>查無資料</td></tr>
-                        ) : (
-                            customerList.map((customer) => {
-                                return (
-                                    <tr key={customer.id}>
-                                        <td><img style={{height: '50px', width: '50px', borderRadius: '50%'}} src={customer.avatar || userIcon} alt="客戶頭像" /></td>
-                                        <td>{customer.name}</td>
-                                        <td>{customer.email}</td>
-                                        <td>{customer.phone}</td>
-                                        <td>{customer.state}</td>
-                                        <td>
-                                            <button onClick={() => handleEditCustomer(customer)}>編輯</button>
-                                            <button onClick={() => handleDeleteCustomer(customer.id)}>刪除</button>
-                                        </td>
-                                    </tr>
-                                )
-                            })
-                        )
-                    )
-                }
-                </tbody>
-            </table>
+            <div className={style.TableContainer}>
+                {isLoading ? (
+                    <div className={style.LoadingContainer}>
+                        <img src={loadingGif} alt="Loading..." />
+                    </div>
+                ) : (
+                    <table className={style.ManagerTable}>
+                        <thead>
+                            <tr>
+                                <th>頭像</th>
+                                <th>姓名</th>
+                                <th>電子郵件</th>
+                                <th>電話</th>
+                                <th>狀態</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {customerList.length === 0 ? (
+                                <tr>
+                                    <td colSpan="6" className={style.NoData}>查無資料</td>
+                                </tr>
+                            ) : (
+                                customerList.map((customer) => {
+                                    return (
+                                        <tr key={customer.id}>
+                                            <td data-label="頭像"><img className={style.CustomerAvatar} src={customer.avatar || userIcon} alt="客戶頭像" /></td>
+                                            <td data-label="姓名" className={style.ItemName}>{customer.name}</td>
+                                            <td data-label="電子郵件">{customer.email}</td>
+                                            <td data-label="電話">{customer.phone}</td>
+                                            <td data-label="狀態">{customer.state}</td>
+                                            <td data-label="操作" className={style.ActionButtons}>
+                                                <button onClick={() => handleEditCustomer(customer)}>編輯</button>
+                                                <button onClick={() => handleDeleteCustomer(customer.id)}>刪除</button>
+                                            </td>
+                                        </tr>
+                                    )
+                                })
+                            )}
+                        </tbody>
+                    </table>
+                )}
+            </div>
             <PaginationBar 
                 pagingParam={pagingParam} 
                 clickPageChange={handlePageChange} 
                 clickPageSizeChange={handlePageSizeChange}
             />
-
         </div>
     );
 }

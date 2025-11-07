@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import style from './SearchBar.module.css';
+import style from '../../../pages/manager/manager.module.css';
 
 function SearchBarCustomer({ getSearchParam, pagingParam }) {
     const [keyword, setKeyword] = useState('');

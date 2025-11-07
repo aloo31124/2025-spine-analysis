@@ -4,6 +4,7 @@ import SearchBarCategory from "../../components/manager/SearchBar/SearchBarCateg
 import TableRow from "../../components/manager/TableRow/TableRow";
 import { getProductCategoryList, deleteProductCategory } from "../../api/manager/product-category";
 import { useNavigate } from "react-router-dom";
+import style from './manager.module.css';
 
 function CategoryListPage() {
   const navigate = useNavigate();
@@ -41,26 +42,40 @@ function CategoryListPage() {
   }
 
   return (
-    <div>
+    <div className={style.ManagerPage}>
         <TopBtnBarCategory />
         <SearchBarCategory 
             getSearchResult={handleSearchResult}
         />
-        <table>
-          {
-              productCategoryList.map(category => {
-                  return (
-                      <tr>
-                        <td>{category.name}</td>
-                        <td>
-                            <button onClick={() => handleEditProductCategory(category)}>編輯</button>
-                            <button onClick={() => handleDeleteProductCategory(category.id)}>刪除</button>
-                        </td>
-                      </tr>
-                  )
-              })
-          }
-        </table>
+        <div className={style.TableContainer}>
+            <table className={style.ManagerTable}>
+                <thead>
+                    <tr>
+                        <th>分類名稱</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {productCategoryList.length === 0 ? (
+                        <tr>
+                            <td colSpan="2" className={style.NoData}>查無資料</td>
+                        </tr>
+                    ) : (
+                        productCategoryList.map(category => {
+                            return (
+                                <tr key={category.id}>
+                                    <td data-label="分類名稱" className={style.ItemName}>{category.name}</td>
+                                    <td data-label="操作" className={style.ActionButtons}>
+                                        <button onClick={() => handleEditProductCategory(category)}>編輯</button>
+                                        <button onClick={() => handleDeleteProductCategory(category.id)}>刪除</button>
+                                    </td>
+                                </tr>
+                            )
+                        })
+                    )}
+                </tbody>
+            </table>
+        </div>
     </div>
   );
 }

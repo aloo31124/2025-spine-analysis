@@ -1,5 +1,5 @@
 import React from "react";
-import style from "./TopBtnBar.module.css";
+import style from "../../../pages/manager/manager.module.css";
 import { useNavigate } from "react-router-dom";
 import { importProduct } from "../../../api/manager/product";
 
@@ -95,11 +95,16 @@ function TopBtnBarProduct({productList, categoryList}) {
     }
 
     return (
-        <div className={style.TopBtnBar}>
-            <button onClick={clickAddProduct}>新增商品</button>
-            <button onClick={clickToCategoryList}>分類列表</button>
-            <button onClick={clickExportProduct}>匯出商品</button>
-            <button onClick={clickImportProduct}>匯入商品</button>
+        <div className={style.TopBtnBarContainer}>
+            <div className={style.TopBtnBarRow}>
+                <h2>商品管理</h2>
+            </div>
+            <div className={style.TopBtnBarRow}>
+                <button onClick={clickAddProduct} className={style.primaryBtn}>新增商品</button>
+                <button onClick={clickToCategoryList} className={style.secondaryBtn}>分類列表</button>
+                <button onClick={clickExportProduct} className={style.secondaryBtn}>匯出商品</button>
+                <button onClick={clickImportProduct} className={style.secondaryBtn}>匯入商品</button>
+            </div>
         </div>
     )
 }
