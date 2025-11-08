@@ -24,6 +24,7 @@ function CustomerEditPage() {
         const fetchEditCustomer = async  () => {
             try {
                 // 設定 編輯客戶資訊
+                const id = customer.id;
                 const name = customer.name;
                 const email = customer.email;
                 const phone = customer.phone;
@@ -34,6 +35,7 @@ function CustomerEditPage() {
                 const notes = customer.notes || '';
                 
                 setCustomerParam({
+                    id,
                     name,
                     email,
                     phone,
