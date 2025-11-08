@@ -5,6 +5,7 @@ import TopBtnBarProduct from '../../components/manager/TopBtnBar/TopBtnBarProduc
 import AnalysisResult from '../../components/manager/AnalysisResult/AnalysisResult';
 import {useNavigate, useLocation} from 'react-router-dom';
 import {getProductList, getProductCategoryList, deleteProduct, searchProduct} from '../../api/manager/product';
+import {addMultipleCustomerToProduct} from '../../api/manager/customerToProduct';
 import PaginationBar from '../../components/tools/PaginationBar/PaginationBar'
 import shoppingBag2Img from '../../assets/img/shoppingBag2.png';
 import loadingGif from '../../assets/loading.gif';
@@ -23,6 +24,10 @@ function ProductListPage() {
     const [customerData, setCustomerData] = useState(null);
     const [customerEmail, setCustomerEmail] = useState('');
     const [showAnalysisResults, setShowAnalysisResults] = useState(false);
+
+    // 購買相關狀態
+    const [selectedProducts, setSelectedProducts] = useState(new Map()); // Map<productId, {product, quantity, selected}>
+    const [isPurchasing, setIsPurchasing] = useState(false);
 
     // 初始時, 取得商品列表
     useEffect(() => {
@@ -145,6 +150,99 @@ function ProductListPage() {
         navigate(-1); // 返回上一頁
     }
 
+    // 處理商品選擇
+    const handleProductSelect = (product, checked) => {
+        const newSelectedProducts = new Map(selectedProducts);
+        if (checked) {
+            newSelectedProducts.set(product.id, {
+                product: product,
+                quantity: 1,
+                selected: true
+            });
+        } else {
+            newSelectedProducts.delete(product.id);
+        }
+        setSelectedProducts(newSelectedProducts);
+    }
+
+    // 處理數量變更
+    const handleQuantityChange = (productId, quantity) => {
+        const newSelectedProducts = new Map(selectedProducts);
+        if (newSelectedProducts.has(productId)) {
+            const item = newSelectedProducts.get(productId);
+            newSelectedProducts.set(productId, {
+                ...item,
+                quantity: Math.max(1, parseInt(quantity) || 1)
+            });
+        }
+        setSelectedProducts(newSelectedProducts);
+    }
+
+    // 處理確認購買
+    const handleConfirmPurchase = async () => {
+        if (!customerData || !customerData.id) {
+            alert('請先選擇客戶');
+            return;
+        }
+
+        const selectedItems = Array.from(selectedProducts.values()).filter(item => item.selected);
+        if (selectedItems.length === 0) {
+            alert('請選擇要購買的商品');
+            return;
+        }
+
+        if (!window.confirm(`確認為客戶 ${customerData.name} 購買 ${selectedItems.length} 項商品？`)) {
+            return;
+        }
+
+        setIsPurchasing(true);
+        try {
+            // 準備購買資料
+            const customerToProductList = selectedItems.map(item => ({
+                customerId: customerData.id,
+                productId: item.product.id,
+                quantity: item.quantity,
+                price: item.product.price,
+                purchaseDate: new Date().toISOString(),
+                notes: `客戶 ${customerData.name} 購買商品 ${item.product.name}`,
+                state: '正常'
+            }));
+
+            // 調用 API 批量新增購買紀錄
+            const response = await addMultipleCustomerToProduct(customerToProductList);
+            
+            if (response.data.success) {
+                alert('購買成功！即將返回客戶管理頁面');
+                // 返回客戶管理頁面，並帶上購買成功的狀態
+                navigate('/manager/customer-spine', { 
+                    state: { 
+                        purchaseSuccess: true,
+                        customerId: customerData.id,
+                        purchasedItems: selectedItems
+                    }
+                });
+            } else {
+                alert(`購買失敗：${response.data.message}`);
+            }
+        } catch (error) {
+            console.error('購買失敗：', error);
+            alert('購買失敗，請重試');
+        } finally {
+            setIsPurchasing(false);
+        }
+    }
+
+    // 計算總金額
+    const calculateTotal = () => {
+        let total = 0;
+        selectedProducts.forEach(item => {
+            if (item.selected) {
+                total += (item.product.price || 0) * item.quantity;
+            }
+        });
+        return total;
+    }
+
     // 取得商品狀態樣式
     const getStatusClass = (state) => {
         switch (state) {
@@ -166,30 +264,42 @@ function ProductListPage() {
         <table className={styles.productTable}>
             <thead>
                 <tr>
+                    {customerData && <th>選擇</th>}
                     <th>商品圖片</th>
                     <th>商品名稱</th>
                     <th>分類</th>
                     <th>價格</th>
                     <th>狀態</th>
+                    {customerData && <th>數量</th>}
                     <th>操作</th>
                 </tr>
             </thead>
             <tbody>
                 {isLoading ? (
                     <tr>
-                        <td colSpan="6" className={styles.loadingContainer}>
+                        <td colSpan={customerData ? "8" : "6"} className={styles.loadingContainer}>
                             <img src={loadingGif} alt="Loading..." />
                         </td>
                     </tr>
                 ) : productList.length === 0 ? (
                     <tr>
-                        <td colSpan="6" className={styles.emptyState}>
+                        <td colSpan={customerData ? "8" : "6"} className={styles.emptyState}>
                             查無資料
                         </td>
                     </tr>
                 ) : (
                     productList.map((product) => (
                         <tr key={product.id}>
+                            {customerData && (
+                                <td>
+                                    <input
+                                        type="checkbox"
+                                        checked={selectedProducts.has(product.id)}
+                                        onChange={(e) => handleProductSelect(product, e.target.checked)}
+                                        className={styles.productCheckbox}
+                                    />
+                                </td>
+                            )}
                             <td>
                                 <img 
                                     className={styles.productImage}
@@ -215,6 +325,18 @@ function ProductListPage() {
                                     {product.state}
                                 </span>
                             </td>
+                            {customerData && (
+                                <td>
+                                    <input
+                                        type="number"
+                                        min="1"
+                                        value={selectedProducts.get(product.id)?.quantity || 1}
+                                        onChange={(e) => handleQuantityChange(product.id, e.target.value)}
+                                        disabled={!selectedProducts.has(product.id)}
+                                        className={styles.quantityInput}
+                                    />
+                                </td>
+                            )}
                             <td>
                                 <div className={styles.actionButtons}>
                                     <button 
@@ -252,6 +374,17 @@ function ProductListPage() {
             ) : (
                 productList.map((product) => (
                     <div key={product.id} className={styles.productCard}>
+                        {customerData && (
+                            <div className={styles.cardCheckbox}>
+                                <input
+                                    type="checkbox"
+                                    checked={selectedProducts.has(product.id)}
+                                    onChange={(e) => handleProductSelect(product, e.target.checked)}
+                                />
+                                <label>選擇商品</label>
+                            </div>
+                        )}
+                        
                         <div className={styles.cardHeader}>
                             <img 
                                 className={styles.cardImage}
@@ -284,6 +417,20 @@ function ProductListPage() {
                                     {product.state}
                                 </span>
                             </div>
+
+                            {customerData && (
+                                <div className={styles.cardRow}>
+                                    <span className={styles.cardLabel}>數量：</span>
+                                    <input
+                                        type="number"
+                                        min="1"
+                                        value={selectedProducts.get(product.id)?.quantity || 1}
+                                        onChange={(e) => handleQuantityChange(product.id, e.target.value)}
+                                        disabled={!selectedProducts.has(product.id)}
+                                        className={styles.quantityInput}
+                                    />
+                                </div>
+                            )}
                         </div>
                         
                         <div className={styles.cardActions}>
@@ -364,6 +511,37 @@ function ProductListPage() {
                 categoryList={categoryList}
                 productList={productList}
             />
+            
+            {/* 購買確認區域 */}
+            {customerData && selectedProducts.size > 0 && (
+                <div className={styles.purchaseConfirmSection}>
+                    <div className={styles.purchaseHeader}>
+                        <h3>購買確認</h3>
+                        <div className={styles.purchaseTotal}>
+                            總計：NT$ {calculateTotal().toLocaleString()}
+                        </div>
+                    </div>
+                    <div className={styles.selectedItemsList}>
+                        {Array.from(selectedProducts.values()).filter(item => item.selected).map(item => (
+                            <div key={item.product.id} className={styles.selectedItem}>
+                                <span className={styles.itemName}>{item.product.name}</span>
+                                <span className={styles.itemQuantity}>x {item.quantity}</span>
+                                <span className={styles.itemPrice}>
+                                    NT$ {((item.product.price || 0) * item.quantity).toLocaleString()}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                    <button 
+                        className={styles.confirmPurchaseButton}
+                        onClick={handleConfirmPurchase}
+                        disabled={isPurchasing}
+                    >
+                        {isPurchasing ? '處理中...' : '確認購買'}
+                    </button>
+                </div>
+            )}
+            
             <SearchBarProduct 
                 getSearchParam={handleSearchResult}
                 categoryList={categoryList}

@@ -181,5 +181,207 @@
     margin: 0;
 }
 
+/* 購買商品功能樣式 */
+.PurchaseStatsContainer {
+    width: 100%;
+    margin-top: 15px;
+    padding: 15px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 8px;
+    color: white;
+}
+
+.PurchaseStatsContainer h4 {
+    margin: 0 0 15px 0;
+    color: white;
+    font-size: 16px;
+}
+
+.StatsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.StatItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    backdrop-filter: blur(10px);
+}
+
+.StatLabel {
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.StatValue {
+    font-weight: bold;
+    color: #ffd700;
+    font-size: 16px;
+}
+
+.PurchasedProductsContainer {
+    width: 100%;
+    margin-top: 20px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.PurchasedProductsContainer h4 {
+    margin: 0;
+    padding: 15px;
+    background-color: #f8f9fa;
+    color: #333;
+    font-size: 16px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.PurchasedProductsList {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.PurchasedProductItem {
+    padding: 15px;
+    border-bottom: 1px solid #f0f0f0;
+    background-color: #fff;
+    transition: background-color 0.2s ease;
+}
+
+.PurchasedProductItem:hover {
+    background-color: #f8f9fa;
+}
+
+.PurchasedProductItem:last-child {
+    border-bottom: none;
+}
+
+.ProductBasicInfo {
+    margin-bottom: 10px;
+}
+
+.ProductBasicInfo h5 {
+    margin: 0 0 5px 0;
+    color: #333;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.PurchaseDate {
+    margin: 0;
+    color: #666;
+    font-size: 13px;
+}
+
+.ProductPurchaseInfo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 10px 0;
+    padding: 8px 12px;
+    background-color: #f8f9fa;
+    border-radius: 6px;
+    border-left: 4px solid #28a745;
+}
+
+.Quantity,
+.Price,
+.Total {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.Quantity {
+    color: #007bff;
+}
+
+.Price {
+    color: #6c757d;
+}
+
+.Total {
+    color: #28a745;
+    font-weight: bold;
+}
+
+.PurchaseNotes {
+    margin: 8px 0 0 0;
+    padding: 8px 12px;
+    background-color: #fff3cd;
+    border-left: 4px solid #ffc107;
+    border-radius: 4px;
+    font-size: 13px;
+    color: #856404;
+}
+
+/* 響應式設計 - 購買功能 */
+@media (max-width: 768px) {
+    .StatsGrid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    
+    .StatItem {
+        padding: 8px 12px;
+    }
+    
+    .StatLabel,
+    .StatValue {
+        font-size: 14px;
+    }
+    
+    .ProductPurchaseInfo {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 5px;
+    }
+    
+    .Quantity,
+    .Price,
+    .Total {
+        text-align: center;
+        padding: 4px 0;
+    }
+    
+    .PurchasedProductsList {
+        max-height: 300px;
+    }
+    
+    .PurchasedProductItem {
+        padding: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .PurchaseStatsContainer {
+        padding: 12px;
+    }
+    
+    .PurchaseStatsContainer h4,
+    .PurchasedProductsContainer h4 {
+        font-size: 14px;
+    }
+    
+    .ProductBasicInfo h5 {
+        font-size: 15px;
+    }
+    
+    .PurchaseDate,
+    .PurchaseNotes {
+        font-size: 12px;
+    }
+    
+    .Quantity,
+    .Price,
+    .Total {
+        font-size: 13px;
+    }
+}
+
 
 

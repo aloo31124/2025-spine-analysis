@@ -20,6 +20,7 @@ const productApiController = require('./controllers/manager/product.api.controll
 const productCategoryApiController = require('./controllers/manager/productCategory.api.controller');
 const customerApiController = require('./controllers/manager/customer.api.controller');
 const customerAnalysisResultApiController = require('./controllers/manager/customerAnalysisResult.api.controller');
+const customerToProductApiController = require('./controllers/manager/customerToProduct.api.controller');
 //const productImgApiController = require('./controllers/manager/productImg.api.controller')
 const shopApiController = require('./controllers/shop/shop.api.controller');
 const shopPayLogisticsApiController = require('./controllers/shop/shopPayLogistics.api.controller')
@@ -126,6 +127,17 @@ app.get('/api/manager/customer-analysis-result/:id', customerAnalysisResultApiCo
 app.put('/api/manager/customer-analysis-result/:id', customerAnalysisResultApiController.updateCustomerAnalysisResult);
 app.delete('/api/manager/customer-analysis-result/:id', customerAnalysisResultApiController.deleteCustomerAnalysisResult);
 app.post('/api/manager/customer-analysis-result/import', customerAnalysisResultApiController.importCustomerAnalysisResult);
+// 後台管理 客戶購買商品關聯 api
+app.get('/api/manager/customer-to-product/list', customerToProductApiController.getAllCustomerToProductList);
+app.post('/api/manager/customer-to-product/add', customerToProductApiController.addCustomerToProduct);
+app.post('/api/manager/customer-to-product/add-multiple', customerToProductApiController.addMultipleCustomerToProduct);
+app.get('/api/manager/customer-to-product/:id', customerToProductApiController.getCustomerToProduct);
+app.get('/api/manager/customer-to-product/customer/:customerId', customerToProductApiController.getCustomerToProductByCustomerId);
+app.get('/api/manager/customer-to-product/product/:productId', customerToProductApiController.getCustomerToProductByProductId);
+app.patch('/api/manager/customer-to-product/edit', customerToProductApiController.updateCustomerToProduct);
+app.delete('/api/manager/customer-to-product/delete/:id', customerToProductApiController.deleteCustomerToProduct);
+app.post('/api/manager/customer-to-product/search', customerToProductApiController.searchCustomerToProduct);
+app.get('/api/manager/customer-to-product/stats/:customerId', customerToProductApiController.getCustomerPurchaseStats);
 // 購物 api
 app.post('/api/shop/product/list', shopApiController.searchProductList);
 app.get('/api/shop/product/category/list', shopApiController.searchProductCategory);

@@ -500,3 +500,198 @@
         font-size: 14px;
     }
 }
+
+/* 購買功能相關樣式 */
+.productCheckbox {
+    transform: scale(1.2);
+    margin: 0;
+}
+
+.quantityInput {
+    width: 80px;
+    padding: 4px 8px;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    font-size: 14px;
+    text-align: center;
+}
+
+.quantityInput:disabled {
+    background-color: #f8f9fa;
+    color: #6c757d;
+}
+
+/* 購買確認區域樣式 */
+.purchaseConfirmSection {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 12px;
+    padding: 20px;
+    margin: 20px 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.purchaseHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    padding-bottom: 10px;
+}
+
+.purchaseHeader h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.purchaseTotal {
+    font-size: 20px;
+    font-weight: bold;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 8px 16px;
+    border-radius: 8px;
+}
+
+.selectedItemsList {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.selectedItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    backdrop-filter: blur(10px);
+}
+
+.itemName {
+    flex: 1;
+    font-weight: 500;
+}
+
+.itemQuantity {
+    margin: 0 15px;
+    font-weight: 600;
+    color: #ffd700;
+}
+
+.itemPrice {
+    font-weight: bold;
+    min-width: 100px;
+    text-align: right;
+}
+
+.confirmPurchaseButton {
+    width: 100%;
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 15px 20px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.confirmPurchaseButton:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
+}
+
+.confirmPurchaseButton:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* 手機版購買功能樣式 */
+.cardCheckbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    padding: 8px 12px;
+    background: #f8f9fa;
+    border-radius: 6px;
+}
+
+.cardCheckbox input[type="checkbox"] {
+    transform: scale(1.2);
+}
+
+.cardCheckbox label {
+    font-weight: 500;
+    color: #495057;
+    margin: 0;
+    font-size: 14px;
+}
+
+/* 響應式設計 - 購買功能 */
+@media (max-width: 768px) {
+    .purchaseConfirmSection {
+        margin: 15px 0;
+        padding: 15px;
+    }
+    
+    .purchaseHeader {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+    
+    .purchaseTotal {
+        text-align: center;
+        font-size: 18px;
+    }
+    
+    .selectedItem {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 5px;
+    }
+    
+    .itemQuantity {
+        margin: 0;
+        text-align: center;
+    }
+    
+    .itemPrice {
+        text-align: center;
+        min-width: auto;
+    }
+    
+    .confirmPurchaseButton {
+        padding: 12px 16px;
+        font-size: 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .purchaseHeader h3 {
+        font-size: 16px;
+    }
+    
+    .purchaseTotal {
+        font-size: 16px;
+        padding: 6px 12px;
+    }
+    
+    .selectedItem {
+        padding: 8px 12px;
+    }
+    
+    .itemName,
+    .itemQuantity,
+    .itemPrice {
+        font-size: 14px;
+    }
+}

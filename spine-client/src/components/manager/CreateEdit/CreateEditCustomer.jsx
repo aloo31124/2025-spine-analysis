@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import style from './CreateEdit.module.css';
 import AnalysisResult from '../AnalysisResult/AnalysisResult';
+import { getCustomerToProductByCustomerId } from '../../../api/manager/customerToProduct';
 
 function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCustomer, handleAddCustomer, onRefreshAnalysisResults}) {
     const navigate = useNavigate();
+    const location = useLocation();
+    
     // 編輯新增頁狀態
     const typePageList = {CREATE:"CREATE", EDIT:'EDIT'};
     // 編輯客戶資訊
@@ -16,6 +19,11 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
     const [gender, setGender] = useState('');
     const [state, setState] = useState("正常");
     const [notes, setNotes] = useState('');
+    
+    // 購買商品相關狀態
+    const [purchasedProducts, setPurchasedProducts] = useState([]);
+    const [purchaseStats, setPurchaseStats] = useState(null);
+    const [showPurchasedProducts, setShowPurchasedProducts] = useState(false);
 
     /* 初始客戶, 編輯客戶資訊 */
     useEffect(() => {
@@ -29,8 +37,67 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
             setGender(customer.gender || '');
             setState(customer.state || '正常');
             setNotes(customer.notes || '');
+            
+            // 載入客戶的購買商品
+            if (customer.id) {
+                fetchPurchasedProducts(customer.id);
+            }
         }
     }, [customer]);
+
+    /* 檢查是否從商品頁面購買成功返回 */
+    useEffect(() => {
+        if (location.state?.purchaseSuccess && customer?.id) {
+            alert(`購買成功！已為客戶 ${customer.name} 新增購買紀錄`);
+            // 重新載入購買商品列表
+            fetchPurchasedProducts(customer.id);
+            
+            // 清除 location state 避免重複提示
+            navigate(location.pathname, { replace: true });
+        }
+    }, [location.state, customer, navigate]);
+
+    /* 載入客戶購買的商品 */
+    const fetchPurchasedProducts = async (customerId) => {
+        try {
+            const response = await getCustomerToProductByCustomerId(customerId);
+            if (response.data.success) {
+                setPurchasedProducts(response.data.result);
+                
+                // 計算購買統計
+                const stats = calculatePurchaseStats(response.data.result);
+                setPurchaseStats(stats);
+            }
+        } catch (error) {
+            console.error('載入客戶購買商品失敗:', error);
+        }
+    }
+
+    /* 計算購買統計 */
+    const calculatePurchaseStats = (purchases) => {
+        let totalQuantity = 0;
+        let totalAmount = 0;
+        const productCounts = {};
+        
+        purchases.forEach(purchase => {
+            totalQuantity += purchase.quantity || 0;
+            totalAmount += (purchase.price || 0) * (purchase.quantity || 0);
+            
+            const productName = purchase.productInfo?.name || '未知商品';
+            if (productCounts[productName]) {
+                productCounts[productName] += purchase.quantity || 0;
+            } else {
+                productCounts[productName] = purchase.quantity || 0;
+            }
+        });
+        
+        return {
+            totalPurchases: purchases.length,
+            totalQuantity,
+            totalAmount,
+            productCounts
+        };
+    }
 
     /* post 新增客戶 */
     const clickAddCustomer = async () => {
@@ -115,10 +182,68 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
                     analysisResults={analysisResults} 
                     onDeleteResult={handleDeleteAnalysisResult}
                 />
+                
                 <h2>購買商品</h2>
                 <div className={style.CreateEditProductRow}>
                     <button onClick={handlePurchaseProduct}>購買商品</button>
+                    {purchasedProducts.length > 0 && (
+                        <button onClick={() => setShowPurchasedProducts(!showPurchasedProducts)}>
+                            {showPurchasedProducts ? '隱藏' : '顯示'}購買紀錄
+                        </button>
+                    )}
                 </div>
+                
+                {/* 購買統計 */}
+                {purchaseStats && (
+                    <div className={style.PurchaseStatsContainer}>
+                        <h4>購買統計</h4>
+                        <div className={style.StatsGrid}>
+                            <div className={style.StatItem}>
+                                <span className={style.StatLabel}>總購買次數:</span>
+                                <span className={style.StatValue}>{purchaseStats.totalPurchases}</span>
+                            </div>
+                            <div className={style.StatItem}>
+                                <span className={style.StatLabel}>總購買數量:</span>
+                                <span className={style.StatValue}>{purchaseStats.totalQuantity}</span>
+                            </div>
+                            <div className={style.StatItem}>
+                                <span className={style.StatLabel}>總消費金額:</span>
+                                <span className={style.StatValue}>NT$ {purchaseStats.totalAmount.toLocaleString()}</span>
+                            </div>
+                        </div>
+                    </div>
+                )}
+                
+                {/* 購買商品列表 */}
+                {showPurchasedProducts && purchasedProducts.length > 0 && (
+                    <div className={style.PurchasedProductsContainer}>
+                        <h4>購買商品列表</h4>
+                        <div className={style.PurchasedProductsList}>
+                            {purchasedProducts.map((purchase, index) => (
+                                <div key={`${purchase.id}-${index}`} className={style.PurchasedProductItem}>
+                                    <div className={style.ProductBasicInfo}>
+                                        <h5>{purchase.productInfo?.name || '未知商品'}</h5>
+                                        <p className={style.PurchaseDate}>
+                                            購買日期: {new Date(purchase.purchaseDate).toLocaleDateString()}
+                                        </p>
+                                    </div>
+                                    <div className={style.ProductPurchaseInfo}>
+                                        <span className={style.Quantity}>數量: {purchase.quantity}</span>
+                                        <span className={style.Price}>
+                                            單價: NT$ {(purchase.price || 0).toLocaleString()}
+                                        </span>
+                                        <span className={style.Total}>
+                                            小計: NT$ {((purchase.price || 0) * (purchase.quantity || 0)).toLocaleString()}
+                                        </span>
+                                    </div>
+                                    {purchase.notes && (
+                                        <p className={style.PurchaseNotes}>{purchase.notes}</p>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
 
                 <h2>基本資訊</h2>
                 <div className={style.CreateEditProductRow}>
