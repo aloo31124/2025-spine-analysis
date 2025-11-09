@@ -214,11 +214,9 @@ function ProductListPage() {
             if (response.data.success) {
                 alert('購買成功！即將返回客戶管理頁面');
                 // 返回客戶管理頁面，並帶上購買成功的狀態
-                navigate('/manager/customer-spine', { 
+                navigate(`/manager/customer/edit/${customerData.id}`, { 
                     state: { 
-                        purchaseSuccess: true,
-                        customerId: customerData.id,
-                        purchasedItems: selectedItems
+                        customer: {...customerData}
                     }
                 });
             } else {
