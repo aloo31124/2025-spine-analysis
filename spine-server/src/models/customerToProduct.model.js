@@ -78,12 +78,18 @@ class CustomerToProduct {
     static async getCustomerToProductByCustomerId(customerId) {
         const snapshot = await db.collection(COLLECTION_NAME)
             .where('customerId', '==', customerId)
-            .orderBy('purchaseDate', 'desc')
             .get();
         
         const customerToProductList = [];
         snapshot.forEach(doc => {
             customerToProductList.push({id: doc.id, ...doc.data()});
+        });
+        
+        // 在記憶體中進行排序，避免需要建立複合索引
+        customerToProductList.sort((a, b) => {
+            const dateA = new Date(a.purchaseDate);
+            const dateB = new Date(b.purchaseDate);
+            return dateB - dateA; // 由新到舊排序
         });
         
         console.log(`取得客戶 ${customerId} 的購買紀錄 : `, customerToProductList);
@@ -94,12 +100,18 @@ class CustomerToProduct {
     static async getCustomerToProductByProductId(productId) {
         const snapshot = await db.collection(COLLECTION_NAME)
             .where('productId', '==', productId)
-            .orderBy('purchaseDate', 'desc')
             .get();
         
         const customerToProductList = [];
         snapshot.forEach(doc => {
             customerToProductList.push({id: doc.id, ...doc.data()});
+        });
+        
+        // 在記憶體中進行排序，避免需要建立複合索引
+        customerToProductList.sort((a, b) => {
+            const dateA = new Date(a.purchaseDate);
+            const dateB = new Date(b.purchaseDate);
+            return dateB - dateA; // 由新到舊排序
         });
         
         console.log(`取得商品 ${productId} 的購買紀錄 : `, customerToProductList);
