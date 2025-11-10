@@ -504,11 +504,6 @@ function ProductListPage() {
                     />
                 </div>
             )}
-
-            <TopBtnBarProduct 
-                categoryList={categoryList}
-                productList={productList}
-            />
             
             {/* 購買確認區域 */}
             {customerData && selectedProducts.size > 0 && (
