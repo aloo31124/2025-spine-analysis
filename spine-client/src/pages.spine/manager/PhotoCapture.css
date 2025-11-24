@@ -223,6 +223,84 @@
     animation: processingPulse 1.5s ease-in-out infinite;
 }
 
+/* 分析選擇對話框 */
+.photo-analysis-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2500;
+    padding: 20px;
+}
+
+.photo-analysis-modal__content {
+    background: #fff;
+    border-radius: 16px;
+    padding: 30px;
+    width: 100%;
+    max-width: 420px;
+    text-align: center;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+    border: 2px solid #3498db;
+}
+
+.photo-analysis-modal__content h3 {
+    margin-bottom: 10px;
+    color: #2c3e50;
+}
+
+.photo-analysis-modal__content p {
+    margin: 0 0 20px 0;
+    color: #555;
+    font-size: 14px;
+}
+
+.photo-analysis-modal__actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.photo-analysis-modal__actions button {
+    flex: 1 1 150px;
+    padding: 12px 20px;
+    border-radius: 10px;
+    border: none;
+    background: #3498db;
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+}
+
+.photo-analysis-modal__actions button:hover {
+    background: #2c80bf;
+    transform: translateY(-2px);
+}
+
+.photo-analysis-modal__close {
+    display: inline-block;
+    padding: 10px 25px;
+    border-radius: 999px;
+    border: none;
+    background: #95a5a6;
+    color: #fff;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.2s;
+}
+
+.photo-analysis-modal__close:hover {
+    background: #7f8c8d;
+}
+
 @keyframes processingPulse {
     0%, 100% {
         transform: scale(1);
