@@ -4,6 +4,7 @@ import './AnalysisSpine.css';
 import neckPatientImage from '../../assets.spine/images/病患側面.png';
 import { addCustomerAnalysisResult } from '../../api/manager/customerAnalysisResult';
 import { getCustomerList } from '../../api/manager/customer';
+import ScaleIndicator from '../../components/ScaleIndicator';
 
 function AnalysisTail() {
     const navigate = useNavigate();
@@ -416,6 +417,8 @@ function AnalysisTail() {
                                 style={lineStyle}
                             />
                         )}
+
+                        <ScaleIndicator />
                     </div>
                 </div>
             </div>

@@ -18,6 +18,7 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './PhotoCapture.css';
 import { FaCamera, FaUpload, FaCrop, FaSave, FaPlus, FaTimes, FaRedo } from 'react-icons/fa';
+import ScaleIndicator from '../../components/ScaleIndicator';
 
 function PhotoCapture() {
     // === 路由導航 ===
@@ -345,6 +346,8 @@ function PhotoCapture() {
                 <div className="device-info-display">
                     {deviceInfo}
                 </div>
+
+                <ScaleIndicator className="scale-indicator--capture" />
             </div>
         </div>
     );
@@ -362,6 +365,8 @@ function PhotoCapture() {
                         className="photo-preview-image"
                     />
                 </div>
+
+                <ScaleIndicator className="scale-indicator--capture" />
             </div>
         </div>
     );
@@ -393,6 +398,8 @@ function PhotoCapture() {
                         />
                     </div>
                 </div>
+
+                <ScaleIndicator className="scale-indicator--capture" />
             </div>
         </div>
     );
@@ -409,6 +416,8 @@ function PhotoCapture() {
                         className="photo-result-image"
                     />
                 </div>
+
+                <ScaleIndicator className="scale-indicator--capture" />
             </div>
         </div>
     );
