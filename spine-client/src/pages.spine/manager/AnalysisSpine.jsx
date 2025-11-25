@@ -5,6 +5,7 @@ import neckPatientImage from '../../assets.spine/images/病患側面.png';
 import { addCustomerAnalysisResult } from '../../api/manager/customerAnalysisResult';
 import { getCustomerList } from '../../api/manager/customer';
 import ScaleIndicator from '../../components/ScaleIndicator';
+import { formatPxCmText } from '../../utils/scaleConversion';
 
 function AnalysisSpine() {
     const navigate = useNavigate();
@@ -215,7 +216,7 @@ function AnalysisSpine() {
         for (let i = 0; i < points.length; i++) {
             for (let j = i + 1; j < points.length; j++) {
                 const distance = calculateDistance(points[i], points[j]);
-                results.push(`點${i + 1} 到 點${j + 1}: ${distance.toFixed(2)}px`);
+                results.push(`點${i + 1} 到 點${j + 1}: ${formatPxCmText(distance)}`);
             }
         }
         
@@ -352,8 +353,8 @@ function AnalysisSpine() {
             // 顯示計算結果
             const results = [
                 `角度756 (點7-點5-點6): ${angle756.toFixed(1)}°`,
-                `線75距離: ${distance75.toFixed(2)}px`,
-                `線56距離: ${distance56.toFixed(2)}px`
+                `線75距離: ${formatPxCmText(distance75)}`,
+                `線56距離: ${formatPxCmText(distance56)}`
             ];
             alert("計算結果:\n" + results.join('\n'));
         }

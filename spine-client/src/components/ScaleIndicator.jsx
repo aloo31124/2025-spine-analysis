@@ -1,9 +1,10 @@
 import React from 'react';
 import './ScaleIndicator.css';
+import { SCALE_REFERENCE } from '../utils/scaleConversion';
 
 const SEGMENT_COUNT = 5;
-const SEGMENT_CM = 10;
-const PIXELS_PER_SEGMENT = 40;
+const SEGMENT_CM = SCALE_REFERENCE.cmPerSegment;
+const PIXELS_PER_SEGMENT = SCALE_REFERENCE.pxPerSegment;
 
 function ScaleIndicator({ className = '' }) {
     const segments = Array.from({ length: SEGMENT_COUNT });

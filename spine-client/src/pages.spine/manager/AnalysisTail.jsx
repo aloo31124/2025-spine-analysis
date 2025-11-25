@@ -5,6 +5,7 @@ import neckPatientImage from '../../assets.spine/images/病患側面.png';
 import { addCustomerAnalysisResult } from '../../api/manager/customerAnalysisResult';
 import { getCustomerList } from '../../api/manager/customer';
 import ScaleIndicator from '../../components/ScaleIndicator';
+import { convertPxToCm, formatPxCmText } from '../../utils/scaleConversion';
 
 function AnalysisTail() {
     const navigate = useNavigate();
@@ -209,11 +210,18 @@ function AnalysisTail() {
         const dy = p2.y - p1.y;
         const distance = calculateDistance(p1, p2);
         const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+        const horizontalShiftAbs = Math.abs(dx);
+        const verticalShiftAbs = Math.abs(dy);
 
         return {
             distance,
+            distanceCm: convertPxToCm(distance),
             horizontalShift: dx,
+            horizontalShiftAbs,
+            horizontalShiftCm: convertPxToCm(horizontalShiftAbs),
             verticalShift: dy,
+            verticalShiftAbs,
+            verticalShiftCm: convertPxToCm(verticalShiftAbs),
             horizontalAngle: angle
         };
     };
@@ -235,9 +243,9 @@ function AnalysisTail() {
 
         setCalculationResults([
             '=== 尾椎量測結果 ===',
-            `點 1-2 距離：${metrics.distance.toFixed(2)} px`,
-            `水平位移：${Math.abs(metrics.horizontalShift).toFixed(2)} px`,
-            `垂直位移：${Math.abs(metrics.verticalShift).toFixed(2)} px`,
+            `點 1-2 距離：${formatPxCmText(metrics.distance)}`,
+            `水平位移：${formatPxCmText(metrics.horizontalShiftAbs)} (${metrics.horizontalShift >= 0 ? '向右' : '向左'})`,
+            `垂直位移：${formatPxCmText(metrics.verticalShiftAbs)} (${metrics.verticalShift >= 0 ? '向下' : '向上'})`,
             `與水平夾角：${Math.abs(metrics.horizontalAngle).toFixed(2)}°`
         ]);
         setIsCalculated(true);
