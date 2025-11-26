@@ -43,6 +43,10 @@ function MenuLeft({ isOpen, isHidden, onClose }) {
                 >
                     頸部分析
                 </button>
+                <button className={style.MenuLeftButton} 
+                    onClick={e => navigate('/manager/analysis/tail')}>
+                    尾椎分析
+                </button>
                 {/*
                 <button className={style.MenuLeftButton}
                     onClick={e => navigate('/manager/analysis/spine/test') }

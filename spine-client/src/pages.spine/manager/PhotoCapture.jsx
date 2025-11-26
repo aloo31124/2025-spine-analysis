@@ -30,6 +30,7 @@ function PhotoCapture() {
     const [deviceInfo, setDeviceInfo] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
     const [isMobileDevice, setIsMobileDevice] = useState(false);
+    const [showAnalysisModal, setShowAnalysisModal] = useState(false);
     
     // === 編輯相關狀態 ===
     const [cropArea, setCropArea] = useState({ x: 0, y: 0, width: 300, height: 300 });
@@ -223,6 +224,7 @@ function PhotoCapture() {
         setPreviewUrl(null);
         setImageData(null);
         setCropArea({ x: 0, y: 0, width: 300, height: 300 });
+        setShowAnalysisModal(false);
         
         // 清理文件輸入
         if (fileInputRef.current) fileInputRef.current.value = '';
@@ -242,6 +244,31 @@ function PhotoCapture() {
             alert('請先拍攝或選擇一張照片');
         }
     }, [imageData, navigate]);
+
+    const handleOpenAnalysisChoice = useCallback(() => {
+        if (!imageData) {
+            alert("請先拍照或選擇一張照片");
+        }
+        setShowAnalysisModal(true);
+    }, [imageData]);
+
+    const handleSelectAnalysis = useCallback((target) => {
+        if(!imageData) {
+            setShowAnalysisModal(false);
+            return;
+        }
+
+        localStorage.setItem('spineAnalysisPhoto', imageData);
+        localStorage.setItem('spineAnalysisPhotoTimestamp', Date.now().toString());
+
+        const targetPath = target === 'tail' ? '/manager/analysis/tail' : '/manager/analysis/spine';
+        navigate(targetPath);
+        setShowAnalysisModal(false);
+    }, [imageData, navigate]);
+
+    const handleCloseAnalysisChoice = useCallback(() => {
+        setShowAnalysisModal(false);
+    }, []);
 
     // === 裁切區域拖拽處理 ===
     const handleCropMouseDown = useCallback((e) => {
@@ -435,7 +462,7 @@ function PhotoCapture() {
             {/* 底部控制按鈕 */}
             {currentView === 'preview' && (
                 <div className="photo-bottom-menu">
-                    <button onClick={handleGoToAnalysis}>
+                    <button onClick={handleOpenAnalysisChoice}>
                         <FaPlus />
                         <span>開始分析</span>
                     </button>
@@ -469,7 +496,7 @@ function PhotoCapture() {
 
             {currentView === 'result' && (
                 <div className="photo-bottom-menu">
-                    <button onClick={handleGoToAnalysis} >
+                    <button onClick={handleOpenAnalysisChoice} >
                         <FaPlus />
                         <span>開始分析</span>
                     </button>
@@ -477,6 +504,27 @@ function PhotoCapture() {
                         <FaRedo />
                         <span>重新拍攝</span>
                     </button>
+                </div>
+            )}
+
+            {showAnalysisModal && (
+                <div className="photo-analysis-modal" >
+                    <div className="photo-analysis-modal__content">
+                        <h3>請選擇分析項目</h3>
+                        <p>請選擇分析頁面</p>
+                        <div className="photo-analysis-modal__actions">
+                            <button onClick={() => handleSelectAnalysis('spine')}>
+                                頸部分析
+                            </button>
+                            <button onClick={() => handleSelectAnalysis('tail')}>
+                                尾椎分析
+                            </button>
+                        </div>
+                        <button className="photo-analysis-modal__close"
+                        >
+                            取消
+                        </button>
+                    </div>
                 </div>
             )}
         </div>
