@@ -48,15 +48,21 @@ function CustomerAddPage() {
         console.log(" handleAddCustomer : ", customer)
         try {
             const res = await addCustomer(customer);
-            debugger;
             if(res.status === 200) {
+                const createdCustomerId = res.data?.newCustomer?.id;
+                if (!createdCustomerId) {
+                    console.error('新增客戶成功，但回傳資料缺少 newCustomer.id');
+                }
                 // 檢查是否有待保存的分析結果
                 const pendingAnalysisData = getPendingAnalysisData();
                 if (pendingAnalysisData) {
                     try {
+                        if (!createdCustomerId) {
+                            throw new Error('無法取得新客戶 ID，分析結果無法綁定');
+                        }
                         // 將分析結果與新創建的客戶ID一起保存到資料庫
                         const analysisResultData = {
-                            customerId: res.data.result.id,
+                            customerId: createdCustomerId,
                             userId: pendingAnalysisData.userId,
                             analysisType: pendingAnalysisData.analysisType,
                             analysisData: pendingAnalysisData.analysisData,
