@@ -303,6 +303,75 @@
     background: #7f8c8d;
 }
 
+.photo-camera-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2600;
+    padding: 20px;
+}
+
+.photo-camera-overlay__frame {
+    position: relative;
+    width: min(520px, 90vw);
+    height: min(80vh, 720px);
+    background: #000;
+    border-radius: 24px;
+    overflow: hidden;
+    border: 2px solid #3498db;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.photo-camera-overlay__video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    background: #000;
+}
+
+.photo-camera-overlay__controls {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 24px;
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    padding: 0 24px;
+}
+
+.photo-camera-overlay__controls button {
+    flex: 1;
+    max-width: 160px;
+    padding: 12px 18px;
+    border-radius: 999px;
+    border: none;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s, opacity 0.2s;
+    color: #fff;
+}
+
+.photo-camera-overlay__controls button:first-child {
+    background: #27ae60;
+}
+
+.photo-camera-overlay__controls button:last-child {
+    background: #e74c3c;
+}
+
+.photo-camera-overlay__controls button:hover {
+    transform: translateY(-2px);
+    opacity: 0.95;
+}
+
 @keyframes processingPulse {
     0%, 100% {
         transform: scale(1);
@@ -479,4 +548,10 @@
     .photo-processing-message {
         animation: none;
     }
+}
+
+.scale-indicator--camera {
+    top: 16px;
+    left: 16px;
+    z-index: 3;
 }
