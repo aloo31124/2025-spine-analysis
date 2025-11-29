@@ -342,21 +342,6 @@ function AnalysisSpine() {
                 end: intersection6
             };
             newLines.push(line56);
-
-            // 7. 計算角度756（點7-點5-點6的夾角）
-            const angle756 = calculateAngle756(intersection7, points[4], intersection6);
-            
-            // 8. 計算線75和線56的距離
-            const distance75 = calculateDistance(intersection7, points[4]);
-            const distance56 = calculateDistance(points[4], intersection6);
-            
-            // 顯示計算結果
-            const results = [
-                `角度756 (點7-點5-點6): ${angle756.toFixed(1)}°`,
-                `線75距離: ${formatPxCmText(distance75)}`,
-                `線56距離: ${formatPxCmText(distance56)}`
-            ];
-            alert("計算結果:\n" + results.join('\n'));
         }
 
         setLines(newLines);

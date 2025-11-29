@@ -77,7 +77,6 @@
     .scale-indicator {
         padding: 6px 8px;
         border-radius: 8px;
-        min-width: 100px;
     }
 
     .scale-indicator__segment {

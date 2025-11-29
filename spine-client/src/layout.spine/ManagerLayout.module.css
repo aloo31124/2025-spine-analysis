@@ -25,6 +25,7 @@
 @media (max-width: 800px) {
     .managerMain {
         margin-left: 0;
+        padding: 2px;
     }
     
     .managerMain.menuHidden {
