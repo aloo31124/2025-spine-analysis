@@ -468,7 +468,7 @@ function AnalysisSpine() {
             navigate('/manager/customer/add');
         } catch (error) {
             console.error('處理新建客戶錯誤:', error);
-            alert('處理新建客戶失敗');
+            alert('處理新建客戶失敗', error);
         }
     };
 

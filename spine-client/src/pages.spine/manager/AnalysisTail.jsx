@@ -306,7 +306,7 @@ function AnalysisTail() {
             navigate('/manager/customer/edit/' + customer.id, { state: { customer } });
         } catch (error) {
             console.error('保存分析結果錯誤:', error);
-            alert('保存分析結果失敗');
+            alert('保存分析結果失敗', error);
         }
     };
 
