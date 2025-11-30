@@ -81,10 +81,6 @@
         border-radius: 8px;
     }
 
-    .scale-indicator__segment {
-        height: 32px;
-    }
-
     .scale-indicator__title,
     .scale-indicator__note {
         font-size: 10px;
