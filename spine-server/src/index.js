@@ -21,6 +21,7 @@ const productCategoryApiController = require('./controllers/manager/productCateg
 const customerApiController = require('./controllers/manager/customer.api.controller');
 const customerAnalysisResultApiController = require('./controllers/manager/customerAnalysisResult.api.controller');
 const customerToProductApiController = require('./controllers/manager/customerToProduct.api.controller');
+const customerToProductPillowApiController = require('./controllers/manager/customerToProductPillow.api.controller');
 const productPillowApiController = require('./controllers/manager/productPillow.api.controller');
 //const productImgApiController = require('./controllers/manager/productImg.api.controller')
 const shopApiController = require('./controllers/shop/shop.api.controller');
@@ -147,6 +148,17 @@ app.patch('/api/manager/customer-to-product/edit', customerToProductApiControlle
 app.delete('/api/manager/customer-to-product/delete/:id', customerToProductApiController.deleteCustomerToProduct);
 app.post('/api/manager/customer-to-product/search', customerToProductApiController.searchCustomerToProduct);
 app.get('/api/manager/customer-to-product/stats/:customerId', customerToProductApiController.getCustomerPurchaseStats);
+// 後台管理 客戶購買枕頭商品關聯 api
+app.get('/api/manager/customer-to-product-pillow/list', customerToProductPillowApiController.getAllCustomerToProductPillowList);
+app.post('/api/manager/customer-to-product-pillow/add', customerToProductPillowApiController.addCustomerToProductPillow);
+app.post('/api/manager/customer-to-product-pillow/add-multiple', customerToProductPillowApiController.addMultipleCustomerToProductPillow);
+app.get('/api/manager/customer-to-product-pillow/:id', customerToProductPillowApiController.getCustomerToProductPillow);
+app.get('/api/manager/customer-to-product-pillow/customer/:customerId', customerToProductPillowApiController.getCustomerToProductPillowByCustomerId);
+app.get('/api/manager/customer-to-product-pillow/product-pillow/:productPillowId', customerToProductPillowApiController.getCustomerToProductPillowByProductPillowId);
+app.patch('/api/manager/customer-to-product-pillow/edit', customerToProductPillowApiController.updateCustomerToProductPillow);
+app.delete('/api/manager/customer-to-product-pillow/delete/:id', customerToProductPillowApiController.deleteCustomerToProductPillow);
+app.post('/api/manager/customer-to-product-pillow/search', customerToProductPillowApiController.searchCustomerToProductPillow);
+app.get('/api/manager/customer-to-product-pillow/stats/:customerId', customerToProductPillowApiController.getCustomerPurchaseStats);
 // 購物 api
 app.post('/api/shop/product/list', shopApiController.searchProductList);
 app.get('/api/shop/product/category/list', shopApiController.searchProductCategory);

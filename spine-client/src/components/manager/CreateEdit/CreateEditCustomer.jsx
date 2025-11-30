@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import style from './CreateEdit.module.css';
 import AnalysisResult from '../AnalysisResult/AnalysisResult';
-import { getCustomerToProductByCustomerId } from '../../../api/manager/customerToProduct';
+import { getCustomerToProductPillowByCustomerId } from '../../../api/manager/customerToProductPillow';
 
 function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCustomer, handleAddCustomer, onRefreshAnalysisResults}) {
     const navigate = useNavigate();
@@ -57,19 +57,20 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
         }
     }, [location.state, customer, navigate]);
 
-    /* 載入客戶購買的商品 */
+    /* 載入客戶購買的枕頭商品 */
     const fetchPurchasedProducts = async (customerId) => {
         try {
-            const response = await getCustomerToProductByCustomerId(customerId);
-            if (response.data.success) {
-                setPurchasedProducts(response.data.result);
+            const response = await getCustomerToProductPillowByCustomerId(customerId);
+            debugger;
+            if (response?.data?.records) {
+                setPurchasedProducts(response.data.records);
                 
                 // 計算購買統計
-                const stats = calculatePurchaseStats(response.data.result);
+                const stats = calculatePurchaseStats(response.data.records);
                 setPurchaseStats(stats);
             }
         } catch (error) {
-            console.error('載入客戶購買商品失敗:', error);
+            console.error('載入客戶購買枕頭商品失敗:', error);
         }
     }
 
@@ -83,7 +84,7 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
             totalQuantity += purchase.quantity || 0;
             totalAmount += (purchase.price || 0) * (purchase.quantity || 0);
             
-            const productName = purchase.productInfo?.name || '未知商品';
+            const productName = purchase.productPillowInfo?.name || '未知枕頭商品';
             if (productCounts[productName]) {
                 productCounts[productName] += purchase.quantity || 0;
             } else {
@@ -183,9 +184,9 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
                     onDeleteResult={handleDeleteAnalysisResult}
                 />
                 
-                <h2>購買商品</h2>
+                <h2>購買枕頭商品</h2>
                 <div className={style.CreateEditProductRow}>
-                    <button onClick={handlePurchaseProduct}>購買商品</button>
+                    <button onClick={handlePurchaseProduct}>購買枕頭商品</button>
                     {purchasedProducts.length > 0 && (
                         <button onClick={() => setShowPurchasedProducts(!showPurchasedProducts)}>
                             {showPurchasedProducts ? '隱藏' : '顯示'}購買紀錄
@@ -196,7 +197,7 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
                 {/* 購買統計 */}
                 {purchaseStats && (
                     <div className={style.PurchaseStatsContainer}>
-                        <h4>購買統計</h4>
+                        <h4>購買枕頭統計</h4>
                         <div className={style.StatsGrid}>
                             <div className={style.StatItem}>
                                 <span className={style.StatLabel}>總購買次數:</span>
@@ -214,15 +215,15 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
                     </div>
                 )}
                 
-                {/* 購買商品列表 */}
+                {/* 購買枕頭商品列表 */}
                 {showPurchasedProducts && purchasedProducts.length > 0 && (
                     <div className={style.PurchasedProductsContainer}>
-                        <h4>購買商品列表</h4>
+                        <h4>購買枕頭商品列表</h4>
                         <div className={style.PurchasedProductsList}>
                             {purchasedProducts.map((purchase, index) => (
                                 <div key={`${purchase.id}-${index}`} className={style.PurchasedProductItem}>
                                     <div className={style.ProductBasicInfo}>
-                                        <h5>{purchase.productInfo?.name || '未知商品'}</h5>
+                                        <h5>{purchase.productPillowInfo?.name || '未知枕頭商品'}</h5>
                                         <p className={style.PurchaseDate}>
                                             購買日期: {new Date(purchase.purchaseDate).toLocaleDateString()}
                                         </p>
