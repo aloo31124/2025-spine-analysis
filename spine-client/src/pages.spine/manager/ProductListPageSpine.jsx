@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import { withLoading } from '../../utils/loading';
 import AnalysisResult from '../../components/manager/AnalysisResult/AnalysisResult';
+import ProductRecommendationModal from '../../components/manager/ProductRecommendation/ProductRecommendationModal';
 import {useNavigate, useLocation} from 'react-router-dom';
 import {getProductPillowList, searchProductPillow} from '../../api/manager/productPillow';
 import {addMultipleCustomerToProductPillow} from '../../api/manager/customerToProductPillow';
@@ -42,6 +43,9 @@ function ProductListPageSpine() {
     // 購買相關狀態
     const [selectedProducts, setSelectedProducts] = useState(new Map()); // Map<productPillowId, {productPillow, quantity, selected}>
     const [isPurchasing, setIsPurchasing] = useState(false);
+
+    // 推薦商品彈窗狀態
+    const [showRecommendationModal, setShowRecommendationModal] = useState(false);
 
     // 初始時, 取得枕頭商品列表
     useEffect(() => {
@@ -535,13 +539,28 @@ function ProductListPageSpine() {
             {/* 客戶分析結果區塊 */}
             {customerData && showAnalysisResults && customerData.analysisResults && customerData.analysisResults.length > 0 && (
                 <div className={styles.analysisResultsSection}>
-                    <h2>客戶分析結果</h2>
+                    <div className={styles.sectionHeader}>
+                        <h2>客戶分析結果</h2>
+                        <button 
+                            className={styles.recommendButton}
+                            onClick={() => setShowRecommendationModal(true)}
+                        >
+                            推薦商品
+                        </button>
+                    </div>
                     <AnalysisResult 
                         analysisResults={customerData.analysisResults}
                         onDeleteResult={null}
                     />
                 </div>
             )}
+            
+            {/* 推薦商品彈窗 */}
+            <ProductRecommendationModal
+                isOpen={showRecommendationModal}
+                onClose={() => setShowRecommendationModal(false)}
+                analysisResults={customerData?.analysisResults || []}
+            />
             
             {/* 購買確認區域 */}
             {customerData && selectedProducts.size > 0 && (

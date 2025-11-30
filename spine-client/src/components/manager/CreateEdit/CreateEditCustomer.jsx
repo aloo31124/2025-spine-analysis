@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import style from './CreateEdit.module.css';
 import AnalysisResult from '../AnalysisResult/AnalysisResult';
+import ProductRecommendationModal from '../ProductRecommendation/ProductRecommendationModal';
 import { getCustomerToProductPillowByCustomerId } from '../../../api/manager/customerToProductPillow';
 
 function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCustomer, handleAddCustomer, onRefreshAnalysisResults}) {
@@ -24,6 +25,9 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
     const [purchasedProducts, setPurchasedProducts] = useState([]);
     const [purchaseStats, setPurchaseStats] = useState(null);
     const [showPurchasedProducts, setShowPurchasedProducts] = useState(false);
+    
+    // 推薦商品彈窗狀態
+    const [showRecommendationModal, setShowRecommendationModal] = useState(false);
 
     /* 初始客戶, 編輯客戶資訊 */
     useEffect(() => {
@@ -178,10 +182,27 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
 
             <div className={style.CreateEditProductContainer}>
                 
-                <h2>分析結果</h2>
+                <div className={style.SectionHeader}>
+                    <h2>分析結果</h2>
+                    {analysisResults && analysisResults.length > 0 && (
+                        <button 
+                            className={style.RecommendButton}
+                            onClick={() => setShowRecommendationModal(true)}
+                        >
+                            推薦商品
+                        </button>
+                    )}
+                </div>
                 <AnalysisResult 
                     analysisResults={analysisResults} 
                     onDeleteResult={handleDeleteAnalysisResult}
+                />
+                
+                {/* 推薦商品彈窗 */}
+                <ProductRecommendationModal
+                    isOpen={showRecommendationModal}
+                    onClose={() => setShowRecommendationModal(false)}
+                    analysisResults={analysisResults}
                 />
                 
                 <h2>購買枕頭商品</h2>

@@ -694,6 +694,43 @@
     padding-bottom: 10px;
 }
 
+/* 區塊標題與按鈕容器 */
+.sectionHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #f8f9fa;
+}
+
+.sectionHeader h2 {
+    margin: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+/* 推薦商品按鈕 */
+.recommendButton {
+    background-color: #ff9800;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    font-weight: 500;
+}
+
+.recommendButton:hover {
+    background-color: #f57c00;
+}
+
+.recommendButton:active {
+    background-color: #e65100;
+}
+
 /* 響應式設計 - 客戶資訊 */
 @media (max-width: 768px) {
     .customerHeader {
