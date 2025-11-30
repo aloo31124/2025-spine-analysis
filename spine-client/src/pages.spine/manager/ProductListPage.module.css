@@ -5,6 +5,199 @@
     padding: 10px;
 }
 
+/* 頂部按鈕區 */
+.topBtnBar {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 15px;
+}
+
+.addButton {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 20px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.addButton:hover {
+    background-color: #0056b3;
+}
+
+/* 搜尋區域樣式 */
+.searchBar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    padding: 15px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.searchBar input[type="text"] {
+    flex: 1;
+    min-width: 150px;
+    padding: 10px 15px;
+    border: 2px solid #e9ecef;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border-color 0.2s ease;
+}
+
+.searchBar input[type="text"]:focus {
+    outline: none;
+    border-color: #007bff;
+}
+
+.searchBar .typeInput {
+    flex: 0.5;
+    min-width: 120px;
+}
+
+.searchBar button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.searchBar button:first-of-type {
+    background-color: #007bff;
+    color: white;
+}
+
+.searchBar button:first-of-type:hover {
+    background-color: #0056b3;
+}
+
+.advancedToggle {
+    background-color: #6c757d;
+    color: white;
+}
+
+.advancedToggle:hover {
+    background-color: #5a6268;
+}
+
+.clearButton {
+    background-color: #dc3545;
+    color: white;
+}
+
+.clearButton:hover {
+    background-color: #c82333;
+}
+
+/* 進階搜尋區域 */
+.advancedSearchBar {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e9ecef;
+}
+
+/* 狀態多選區域 */
+.stateCheckboxGroup {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e9ecef;
+    flex-wrap: wrap;
+}
+
+.stateCheckboxGroup > label:first-child {
+    font-weight: 600;
+    color: #495057;
+    min-width: 50px;
+}
+
+.checkboxLabel {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    padding: 6px 12px;
+    background-color: #f8f9fa;
+    border-radius: 20px;
+    border: 1px solid #dee2e6;
+    transition: all 0.2s ease;
+}
+
+.checkboxLabel:hover {
+    background-color: #e9ecef;
+}
+
+.checkboxLabel input[type="checkbox"] {
+    transform: scale(1.1);
+    cursor: pointer;
+}
+
+.checkboxLabel input[type="checkbox"]:checked + span,
+.checkboxLabel:has(input:checked) {
+    color: #007bff;
+}
+
+/* 範圍搜尋網格 */
+.rangeSearchGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 15px;
+}
+
+.rangeInputGroup {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 15px;
+    background-color: #f8f9fa;
+    border-radius: 6px;
+}
+
+.rangeInputGroup label {
+    font-weight: 500;
+    color: #495057;
+    min-width: 60px;
+    white-space: nowrap;
+}
+
+.rangeInput {
+    width: 80px;
+    padding: 8px 10px;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    font-size: 14px;
+    text-align: center;
+    transition: border-color 0.2s ease;
+}
+
+.rangeInput:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
+}
+
+.rangeInputGroup span {
+    color: #6c757d;
+}
+
+.unit {
+    color: #6c757d;
+    font-size: 13px;
+    min-width: 25px;
+}
+
 /* 桌面版表格樣式 */
 .productTable {
     width: 100%;
@@ -265,6 +458,51 @@
     /* 調整其他組件在手機上的間距 */
     .productListContainer > * {
         margin-bottom: 10px;
+    }
+
+    /* 搜尋區域響應式 */
+    .searchBar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .searchBar input[type="text"] {
+        width: 100%;
+        min-width: auto;
+    }
+
+    .searchBar .typeInput {
+        flex: 1;
+    }
+
+    .searchBar button {
+        width: 100%;
+    }
+
+    /* 進階搜尋響應式 */
+    .advancedSearchBar {
+        padding: 15px;
+    }
+
+    .stateCheckboxGroup {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .rangeSearchGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .rangeInputGroup {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .rangeInputGroup label {
+        width: 100%;
+        text-align: center;
+        margin-bottom: 5px;
     }
 }
 

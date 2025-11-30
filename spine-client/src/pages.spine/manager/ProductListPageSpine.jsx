@@ -17,8 +17,22 @@ function ProductListPageSpine() {
     const location = useLocation();
     const [productPillowList, setProductPillowList] = useState([]);
     const [pagingParam, setPagingParam] = useState({ pageIndex: 1, pageSize: 5, sort: 'name', pageTotal:-1, dataTotal:-1 });
-    const [searchParam, setSearchParam] = useState({keyword:'', state:''});
+    const [searchParam, setSearchParam] = useState({ 
+        keyword: '', 
+        type: '',
+        stateList: [],  // 狀態多選
+        priceMin: '', priceMax: '',
+        shortHeightMin: '', shortHeightMax: '',
+        longHeightMin: '', longHeightMax: '',
+        shortCurvatureMin: '', shortCurvatureMax: '',
+        mediumCurvatureMin: '', mediumCurvatureMax: '',
+        longCurvatureMin: '', longCurvatureMax: ''
+    });
     const [isLoading, setIsLoading] = useState(false);
+    const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
+    
+    // 狀態選項
+    const stateOptions = ['草稿', '上架', '下架'];
     
     // 客戶相關狀態
     const [customerData, setCustomerData] = useState(null);
@@ -113,6 +127,56 @@ function ProductListPageSpine() {
             if (e.message !== 'timeout') alert('網路不穩, 請重新搜尋');
         });
     }
+
+    // 處理狀態多選變更
+    const handleStateChange = (state) => {
+        const currentList = [...searchParam.stateList];
+        const index = currentList.indexOf(state);
+        if (index > -1) {
+            currentList.splice(index, 1);
+        } else {
+            currentList.push(state);
+        }
+        setSearchParam({ ...searchParam, stateList: currentList });
+    }
+
+    // 清除搜尋條件
+    const handleClearSearch = () => {
+        setSearchParam({
+            keyword: '', 
+            type: '',
+            stateList: [],
+            priceMin: '', priceMax: '',
+            shortHeightMin: '', shortHeightMax: '',
+            longHeightMin: '', longHeightMax: '',
+            shortCurvatureMin: '', shortCurvatureMax: '',
+            mediumCurvatureMin: '', mediumCurvatureMax: '',
+            longCurvatureMin: '', longCurvatureMax: ''
+        });
+    }
+
+    // 渲染範圍輸入元件
+    const renderRangeInput = (label, minKey, maxKey, unit = '') => (
+        <div className={styles.rangeInputGroup}>
+            <label>{label}：</label>
+            <input
+                type="number"
+                placeholder="最小"
+                value={searchParam[minKey]}
+                onChange={(e) => setSearchParam({ ...searchParam, [minKey]: e.target.value })}
+                className={styles.rangeInput}
+            />
+            <span>~</span>
+            <input
+                type="number"
+                placeholder="最大"
+                value={searchParam[maxKey]}
+                onChange={(e) => setSearchParam({ ...searchParam, [maxKey]: e.target.value })}
+                className={styles.rangeInput}
+            />
+            {unit && <span className={styles.unit}>{unit}</span>}
+        </div>
+    );
 
     // 處理客戶信箱輸入變更
     const handleCustomerEmailChange = (e) => {
@@ -520,17 +584,55 @@ function ProductListPageSpine() {
                         if (e.key === 'Enter') handleSearchResult(searchParam);
                     }}
                 />
-                <select
-                    value={searchParam.state}
-                    onChange={(e) => setSearchParam({ ...searchParam, state: e.target.value })}
-                >
-                    <option value="">全部狀態</option>
-                    <option value="草稿">草稿</option>
-                    <option value="上架">上架</option>
-                    <option value="下架">下架</option>
-                </select>
+                <input
+                    type="text"
+                    placeholder="搜尋類型..."
+                    value={searchParam.type}
+                    onChange={(e) => setSearchParam({ ...searchParam, type: e.target.value })}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter') handleSearchResult(searchParam);
+                    }}
+                    className={styles.typeInput}
+                />
                 <button onClick={() => handleSearchResult(searchParam)}>搜尋</button>
+                <button 
+                    onClick={() => setShowAdvancedSearch(!showAdvancedSearch)}
+                    className={styles.advancedToggle}
+                >
+                    {showAdvancedSearch ? '收起進階' : '進階搜尋'}
+                </button>
+                <button onClick={handleClearSearch} className={styles.clearButton}>清除</button>
             </div>
+
+            {/* 進階搜尋區域 */}
+            {showAdvancedSearch && (
+                <div className={styles.advancedSearchBar}>
+                    {/* 狀態多選 */}
+                    <div className={styles.stateCheckboxGroup}>
+                        <label>狀態：</label>
+                        {stateOptions.map((state) => (
+                            <label key={state} className={styles.checkboxLabel}>
+                                <input
+                                    type="checkbox"
+                                    checked={searchParam.stateList.includes(state)}
+                                    onChange={() => handleStateChange(state)}
+                                />
+                                {state}
+                            </label>
+                        ))}
+                    </div>
+
+                    {/* 範圍搜尋 */}
+                    <div className={styles.rangeSearchGrid}>
+                        {renderRangeInput('價格', 'priceMin', 'priceMax', '元')}
+                        {renderRangeInput('短高度', 'shortHeightMin', 'shortHeightMax', 'cm')}
+                        {renderRangeInput('長高度', 'longHeightMin', 'longHeightMax', 'cm')}
+                        {renderRangeInput('短弧度', 'shortCurvatureMin', 'shortCurvatureMax', '°')}
+                        {renderRangeInput('中弧度', 'mediumCurvatureMin', 'mediumCurvatureMax', '°')}
+                        {renderRangeInput('長弧度', 'longCurvatureMin', 'longCurvatureMax', '°')}
+                    </div>
+                </div>
+            )}
             
             {/* 桌面版表格 */}
             {renderDesktopTable()}
