@@ -189,12 +189,6 @@ function AnalysisSpine() {
         setShowCustomerModal(false);
     };
 
-    // 切換回原始圖片
-    const handleUseOriginalImage = () => {
-        setBackgroundImage(neckPatientImage);
-        handleReset();
-    };
-
     // 導航到拍照頁面
     const handleGoToPhotoCapture = () => {
         navigate('/manager/photo/capture');
@@ -663,14 +657,6 @@ function AnalysisSpine() {
                 <button onClick={handleGoToPhotoCapture} className="action-btn">
                     拍攝新照片
                 </button>
-                {backgroundImage !== neckPatientImage && (
-                    <>
-                        <span>&nbsp;&nbsp;&nbsp;</span>
-                        <button onClick={handleUseOriginalImage} className="action-btn">
-                            使用原始圖片
-                        </button>
-                    </>
-                )}
             </div>
 
             {/* 保存選項對話框 */}

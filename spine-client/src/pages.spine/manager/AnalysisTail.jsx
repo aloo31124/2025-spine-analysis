@@ -188,11 +188,6 @@ function AnalysisTail() {
         setShowCustomerModal(false);
     };
 
-    const handleUseOriginalImage = () => {
-        setBackgroundImage(neckPatientImage);
-        initPoints();
-    };
-
     const handleGoToPhotoCapture = () => {
         navigate('/manager/photo/capture');
     };
@@ -465,14 +460,6 @@ function AnalysisTail() {
                 <button onClick={handleGoToPhotoCapture} className="action-btn">
                     拍攝新照片
                 </button>
-                {backgroundImage !== neckPatientImage && (
-                    <>
-                        <span>&nbsp;&nbsp;&nbsp;</span>
-                        <button onClick={handleUseOriginalImage} className="action-btn">
-                            使用原始圖片
-                        </button>
-                    </>
-                )}
             </div>
 
             {showSaveOptions && (
