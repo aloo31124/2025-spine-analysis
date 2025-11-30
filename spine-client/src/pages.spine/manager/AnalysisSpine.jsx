@@ -178,17 +178,6 @@ function AnalysisSpine() {
         }
     };
 
-    // 重置
-    const handleReset = () => {
-        setCurrentScale(1);
-        applyScale(1);
-        initPoints();
-        setCurrentPointIndex(0);
-        setIsCalculated(false);
-        setShowSaveOptions(false);
-        setShowCustomerModal(false);
-    };
-
     // 導航到拍照頁面
     const handleGoToPhotoCapture = () => {
         navigate('/manager/photo/capture');
@@ -671,10 +660,6 @@ function AnalysisSpine() {
                         儲存結果
                     </button>
                 )}
-                <span>&nbsp;&nbsp;&nbsp;</span>
-                <button onClick={handleReset} className="action-btn">
-                    重置
-                </button>
                 <span>&nbsp;&nbsp;&nbsp;</span>
                 <button onClick={handleGoToPhotoCapture} className="action-btn">
                     拍攝新照片

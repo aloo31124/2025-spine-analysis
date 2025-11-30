@@ -285,30 +285,6 @@ function PhotoCapture() {
         }
     }, []);
 
-    // === 編輯照片 ===
-    const handleEditPhoto = useCallback(() => {
-        if (!previewImageRef.current) return;
-        
-        setCurrentView('editor');
-        
-        // 等待圖片加載完成後初始化裁切區域
-        setTimeout(() => {
-            if (editorImageRef.current) {
-                const img = editorImageRef.current;
-                const width = Math.min(img.offsetWidth, 300);
-                const height = Math.min(img.offsetHeight, 300);
-                const x = (img.offsetWidth - width) / 2;
-                const y = (img.offsetHeight - height) / 2;
-                
-                setCropArea({ x, y, width, height });
-            }
-        }, 100);
-    }, []);
-
-    // === 保存照片 ===
-    const handleSavePhoto = useCallback(() => {
-        setCurrentView('result');
-    }, []);
 
     // === 執行裁切 ===
     const handleCropPhoto = useCallback(async () => {
@@ -622,14 +598,6 @@ function PhotoCapture() {
                     <button onClick={handleOpenAnalysisChoice}>
                         <FaPlus />
                         <span>開始分析</span>
-                    </button>
-                    <button onClick={handleEditPhoto}>
-                        <FaCrop />
-                        <span>編輯</span>
-                    </button>
-                    <button onClick={handleSavePhoto}>
-                        <FaSave />
-                        <span>保存</span>
                     </button>
                     <button onClick={handleNewPhoto}>
                         <FaRedo />

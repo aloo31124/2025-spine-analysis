@@ -181,14 +181,6 @@ function AnalysisTail() {
         applyScale(newScale);
     };
 
-    const handleReset = () => {
-        setBackgroundImage(neckPatientImage);
-        applyScale(1);
-        initPoints();
-        setShowSaveOptions(false);
-        setShowCustomerModal(false);
-    };
-
     const handleGoToPhotoCapture = () => {
         navigate('/manager/photo/capture');
     };
@@ -476,10 +468,6 @@ function AnalysisTail() {
                         儲存結果
                     </button>
                 )}
-                <span>&nbsp;&nbsp;&nbsp;</span>
-                <button onClick={handleReset} className="action-btn">
-                    重置
-                </button>
                 <span>&nbsp;&nbsp;&nbsp;</span>
                 <button onClick={handleGoToPhotoCapture} className="action-btn">
                     拍攝新照片
