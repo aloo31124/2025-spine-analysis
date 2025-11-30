@@ -18,9 +18,10 @@ function AnalysisTail() {
     const maxScale = 2.0;
     const scaleStep = 0.1;
 
-    // 兩個尾椎參考點的初始相對位置 (以容器寬高的比例表示)
+    // 三個尾椎參考點的初始相對位置 (以容器寬高的比例表示)
     const initialPointPositions = [
-        { x: 0.42, y: 0.68 },
+        { x: 0.32, y: 0.58 },
+        { x: 0.40, y: 0.73 },
         { x: 0.48, y: 0.88 }
     ];
 
@@ -199,49 +200,65 @@ function AnalysisTail() {
     };
 
     const buildTailMetrics = () => {
-        if (points.length < 2) return null;
-        const [p1, p2] = points;
-        const dx = p2.x - p1.x;
-        const dy = p2.y - p1.y;
-        const distance = calculateDistance(p1, p2);
-        const angle = Math.atan2(dy, dx) * 180 / Math.PI;
-        const horizontalShiftAbs = Math.abs(dx);
-        const verticalShiftAbs = Math.abs(dy);
+        if (points.length < 3) return null;
+        const [p1, p2, p3] = points;
+        
+        // 三點之間互相的距離
+        const distance12 = calculateDistance(p1, p2);
+        const distance23 = calculateDistance(p2, p3);
+        const distance13 = calculateDistance(p1, p3);
+        
+        // 計算點 2 處的夾角 (1-2-3 的夾角)
+        // 使用向量計算夾角
+        const v21 = { x: p1.x - p2.x, y: p1.y - p2.y }; // 從點2指向點1的向量
+        const v23 = { x: p3.x - p2.x, y: p3.y - p2.y }; // 從點2指向點3的向量
+        
+        // 點積
+        const dotProduct = v21.x * v23.x + v21.y * v23.y;
+        // 向量長度
+        const mag21 = Math.sqrt(v21.x * v21.x + v21.y * v21.y);
+        const mag23 = Math.sqrt(v23.x * v23.x + v23.y * v23.y);
+        // 夾角 (弧度轉角度)
+        const angle123 = Math.acos(dotProduct / (mag21 * mag23)) * 180 / Math.PI;
 
         return {
-            distance,
-            distanceCm: convertPxToCm(distance),
-            horizontalShift: dx,
-            horizontalShiftAbs,
-            horizontalShiftCm: convertPxToCm(horizontalShiftAbs),
-            verticalShift: dy,
-            verticalShiftAbs,
-            verticalShiftCm: convertPxToCm(verticalShiftAbs),
-            horizontalAngle: angle
+            distance12,
+            distance12Cm: convertPxToCm(distance12),
+            distance23,
+            distance23Cm: convertPxToCm(distance23),
+            distance13,
+            distance13Cm: convertPxToCm(distance13),
+            angle123
         };
     };
 
     const handleCalculate = () => {
-        if (points.length < 2) return;
+        if (points.length < 3) return;
 
         const metrics = buildTailMetrics();
         if (!metrics) return;
 
         setLines([
             {
-                id: 'tail-line',
+                id: 'tail-line-1',
                 type: 'diagonal',
                 start: points[0],
                 end: points[1]
+            },
+            {
+                id: 'tail-line-2',
+                type: 'diagonal',
+                start: points[1],
+                end: points[2]
             }
         ]);
 
         setCalculationResults([
             '=== 尾椎量測結果 ===',
-            `點 1-2 距離：${formatPxCmText(metrics.distance)}`,
-            `水平位移：${formatPxCmText(metrics.horizontalShiftAbs)} (${metrics.horizontalShift >= 0 ? '向右' : '向左'})`,
-            `垂直位移：${formatPxCmText(metrics.verticalShiftAbs)} (${metrics.verticalShift >= 0 ? '向下' : '向上'})`,
-            `與水平夾角：${Math.abs(metrics.horizontalAngle).toFixed(2)}°`
+            `點 1-2 距離：${formatPxCmText(metrics.distance12)}`,
+            `點 2-3 距離：${formatPxCmText(metrics.distance23)}`,
+            `點 1-3 距離：${formatPxCmText(metrics.distance13)}`,
+            `∠123 夾角：${metrics.angle123.toFixed(2)}°`
         ]);
         setIsCalculated(true);
     };
@@ -359,9 +376,8 @@ function AnalysisTail() {
         };
     };
 
-    const getMeasurementLineStyle = () => {
-        if (points.length < 2) return null;
-        const [start, end] = points;
+    const getMeasurementLineStyle = (start, end) => {
+        if (!start || !end) return null;
         const distance = calculateDistance(start, end);
         const angle = Math.atan2(end.y - start.y, end.x - start.x) * 180 / Math.PI;
 
@@ -374,7 +390,8 @@ function AnalysisTail() {
         };
     };
 
-    const lineStyle = getMeasurementLineStyle();
+    const lineStyle1 = points.length >= 2 ? getMeasurementLineStyle(points[0], points[1]) : null;
+    const lineStyle2 = points.length >= 3 ? getMeasurementLineStyle(points[1], points[2]) : null;
 
     return (
         <div className="analysis-spine">
@@ -414,10 +431,17 @@ function AnalysisTail() {
                             </div>
                         ))}
 
-                        {lineStyle && (
+                        {lineStyle1 && (
                             <div
                                 className="connection-line"
-                                style={lineStyle}
+                                style={lineStyle1}
+                            />
+                        )}
+
+                        {lineStyle2 && (
+                            <div
+                                className="connection-line"
+                                style={lineStyle2}
                             />
                         )}
 
