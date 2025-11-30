@@ -510,8 +510,6 @@ function PhotoCapture() {
                 <div className="device-info-display">
                     {deviceInfo}
                 </div>
-
-                <ScaleIndicator className="scale-indicator--capture" />
             </div>
         </div>
     );
@@ -528,9 +526,8 @@ function PhotoCapture() {
                         alt="照片預覽" 
                         className="photo-preview-image"
                     />
+                    <ScaleIndicator className="scale-indicator--capture" />
                 </div>
-
-                <ScaleIndicator className="scale-indicator--capture" />
             </div>
         </div>
     );
@@ -560,10 +557,9 @@ function PhotoCapture() {
                             onMouseDown={handleCropMouseDown}
                             onTouchStart={handleCropMouseDown}
                         />
+                        <ScaleIndicator className="scale-indicator--capture" />
                     </div>
                 </div>
-
-                <ScaleIndicator className="scale-indicator--capture" />
             </div>
         </div>
     );
@@ -579,9 +575,8 @@ function PhotoCapture() {
                         alt="最終結果" 
                         className="photo-result-image"
                     />
+                    <ScaleIndicator className="scale-indicator--capture" />
                 </div>
-
-                <ScaleIndicator className="scale-indicator--capture" />
             </div>
         </div>
     );
