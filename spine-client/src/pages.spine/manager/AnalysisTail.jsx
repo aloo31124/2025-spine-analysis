@@ -20,9 +20,9 @@ function AnalysisTail() {
 
     // 三個尾椎參考點的初始相對位置 (以容器寬高的比例表示)
     const initialPointPositions = [
-        { x: 0.32, y: 0.58 },
-        { x: 0.40, y: 0.73 },
-        { x: 0.48, y: 0.88 }
+        { x: 0.42, y: 0.50 },
+        { x: 0.34, y: 0.70 },
+        { x: 0.34, y: 0.50 }
     ];
 
     const [points, setPoints] = useState([]);
@@ -365,7 +365,7 @@ function AnalysisTail() {
             return {
                 ...style,
                 backgroundPosition: 'center bottom',
-                backgroundSize: 'auto 180%'
+                backgroundSize: 'auto 135%'
             };
         }
 

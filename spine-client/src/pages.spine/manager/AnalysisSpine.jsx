@@ -499,6 +499,28 @@ function AnalysisSpine() {
         setShowCustomerModal(false);
     };
 
+    
+    
+    const getContainerStyle = () => {
+        const style = {
+            backgroundImage: `url(${backgroundImage})`
+        };
+
+        if (backgroundImage === neckPatientImage) {
+            return {
+                ...style,
+                backgroundPosition: 'center top',
+                backgroundSize: 'auto 135%'
+            };
+        }
+
+        return {
+            ...style,
+            backgroundPosition: 'center',
+            backgroundSize: 'cover'
+        };
+    };
+
     return (
         <div className="analysis-spine">
             <div className="analysis-content">
@@ -520,7 +542,7 @@ function AnalysisSpine() {
                     <div 
                         className="neck-container" 
                         ref={neckContainerRef}
-                        style={{ backgroundImage: `url(${backgroundImage})` }}
+                        style={getContainerStyle()}
                     >
                         {/* 渲染點位 */}
                         {points.map((point, index) => (
