@@ -21,6 +21,7 @@ const productCategoryApiController = require('./controllers/manager/productCateg
 const customerApiController = require('./controllers/manager/customer.api.controller');
 const customerAnalysisResultApiController = require('./controllers/manager/customerAnalysisResult.api.controller');
 const customerToProductApiController = require('./controllers/manager/customerToProduct.api.controller');
+const productPillowApiController = require('./controllers/manager/productPillow.api.controller');
 //const productImgApiController = require('./controllers/manager/productImg.api.controller')
 const shopApiController = require('./controllers/shop/shop.api.controller');
 const shopPayLogisticsApiController = require('./controllers/shop/shopPayLogistics.api.controller')
@@ -104,6 +105,14 @@ app.delete('/api/manager/product/img/delete/all', productImgApiController.delete
 app.delete('/api/manager/product/img/delete/:productId/:storedName', productImgApiController.deleteProductImg);
 // 提供靜態圖片服務 (讓前端可以透過 URL 訪問圖片)
 //app.use('/api/manager/product/img/', express.static(upload.getProductImgBasePath()));
+// 後台管理 枕頭商品 api
+app.post('/api/manager/product-pillow/list', productPillowApiController.getProductPillowList);
+app.get('/api/manager/product-pillow/:id', productPillowApiController.getProductPillow);
+app.post('/api/manager/product-pillow/add', productPillowApiController.postProductPillow);
+app.patch('/api/manager/product-pillow/edit', productPillowApiController.updateProductPillow);
+app.delete('/api/manager/product-pillow/delete/:id', productPillowApiController.deleteProductPillow);
+app.post('/api/manager/product-pillow/search', productPillowApiController.searchProductPillow);
+app.post('/api/manager/product-pillow/import', productPillowApiController.importProductPillow);
 // 後台管理 商品分類 api
 app.get('/api/manager/product/category/list', productCategoryApiController.getProductCategoryList);
 app.get('/api/manager/product/category/:id', productCategoryApiController.getProductCategory);
