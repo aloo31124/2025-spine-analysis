@@ -1,0 +1,152 @@
+.PaymentListPage {
+    width: 100%;
+    min-height: 100vh;
+    background-color: #f5f5f5;
+}
+
+.TableContainer {
+    padding: 20px;
+    overflow-x: auto;
+}
+
+.PaymentTable {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.PaymentTable th,
+.PaymentTable td {
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.PaymentTable th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    color: #333;
+    position: sticky;
+    top: 0;
+}
+
+.PaymentTable tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+.PaymentName {
+    font-weight: 500;
+    color: #1976d2;
+}
+
+.PaymentCost {
+    font-weight: 600;
+    color: #2e7d32;
+}
+
+.PaymentDesc {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ActionButtons {
+    display: flex;
+    gap: 8px;
+}
+
+.EditButton,
+.DeleteButton {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.EditButton {
+    background-color: #1976d2;
+    color: white;
+}
+
+.EditButton:hover {
+    background-color: #1565c0;
+}
+
+.DeleteButton {
+    background-color: #d32f2f;
+    color: white;
+}
+
+.DeleteButton:hover {
+    background-color: #c62828;
+}
+
+.LoadingContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+}
+
+.LoadingContainer img {
+    height: 100px;
+}
+
+.NoData {
+    text-align: center;
+    color: #666;
+    font-style: italic;
+    padding: 40px;
+}
+
+/* RWD 響應式設計 */
+@media (max-width: 768px) {
+    .PaymentTable {
+        font-size: 14px;
+    }
+    
+    .PaymentTable th,
+    .PaymentTable td {
+        padding: 8px 12px;
+    }
+    
+    .PaymentDesc {
+        max-width: 120px;
+    }
+    
+    .ActionButtons {
+        flex-direction: column;
+        gap: 4px;
+    }
+    
+    .EditButton,
+    .DeleteButton {
+        padding: 4px 8px;
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .TableContainer {
+        padding: 10px;
+    }
+    
+    .PaymentTable {
+        font-size: 12px;
+    }
+    
+    .PaymentTable th,
+    .PaymentTable td {
+        padding: 6px 8px;
+    }
+    
+    .PaymentDesc {
+        max-width: 80px;
+    }
+}

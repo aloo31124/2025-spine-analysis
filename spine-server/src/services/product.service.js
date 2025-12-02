@@ -34,7 +34,7 @@ exports.getProductList = async () => {
 }
 
 /* 搜尋商品, 合併 商品分類, 促銷, 價錢範圍 */
-exports.searchProductJoinCategoryPromotion = async (searchParam, pagingParam) => {
+exports.searchProductJoinCategoryPromotion = async (searchParam, pagingParam, userId = null) => {
     try {
         console.log("[searchProductJoinCategoryPromotion] start :");
         // 取得所有商品, 篩選價格, 關鍵字
@@ -42,7 +42,8 @@ exports.searchProductJoinCategoryPromotion = async (searchParam, pagingParam) =>
         // 需整合進  Product.searchProduct()
         const _productList = (await Product.getAllProductList()).filter(product => 
             (keyword ? product.name.includes(keyword) : true) 
-            && (state ? product.state === state : true) 
+            && (userId ? product.userId === userId : true)
+            && (state ? product.state === state : true)
             && (Number(priceRange?.min) ? Number(product.price) >= Number(priceRange.min) : true) 
             && (Number(priceRange?.max) ? Number(product.price) <= Number(priceRange.max) : true) 
         ); 

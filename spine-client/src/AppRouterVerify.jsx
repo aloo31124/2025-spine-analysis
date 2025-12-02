@@ -53,7 +53,8 @@ function AppRouterVerify({ element: Component, node="" }) {
       
       return { userId: payload.userId, email: payload.email }; 
     } catch (error) {
-      alert(`token驗證發生錯誤: ${error}`);
+      alert(`請重新登入`);
+      console.error('JWT 驗證錯誤:', error);
       navigate('/auth/login');
       return null;
     }

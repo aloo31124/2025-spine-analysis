@@ -79,23 +79,26 @@ table td button  {
 }
 
 input, select {
-  border: #cfcfcf solid 2px;
+  border: #3498db solid 2px;
   border-radius: 16px;
   font-size: 16px;
   padding: 5px 16px;
 }
 
 button {
-  border: #cfcfcf solid 2px;
+  border: #3498db solid 2px;
+  background: #3DA5FF;
+  color: white;
   border-radius: 20px;
   font-size: 16px;
   padding: 5px 16px;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 button:hover {
-    background: #333;
-    color: #cfcfcf
+    background: white;
+    color: #3DA5FF
 }
 
 .tabItem {
@@ -103,7 +106,7 @@ button:hover {
     flex-direction: row;
     justify-content: center;
     align-items: center;
-    background: #cfcfcf;
+    background: #3DA5FF;
     font-size: 14px;
     padding: 6px 16px;
     border-radius: 20px;
@@ -114,16 +117,16 @@ button:hover {
     flex-direction: row;
     justify-content: center;
     align-items: center;
-    background: #282c34;
-    color: #cfcfcf;
+    background: white;
+    color: #3DA5FF;
     font-size: 14px;
     padding: 6px 16px;
     border-radius: 20px;
     cursor: pointer;
 }
 .tabItem:hover {
-    background: #282c34;
-    color: #cfcfcf
+    background: white;
+    color: #3DA5FF
 }
 
 /** 密碼隱藏欄位 */

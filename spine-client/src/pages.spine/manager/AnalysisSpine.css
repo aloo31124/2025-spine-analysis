@@ -1,0 +1,416 @@
+/* AnalysisSpine.css - 脊椎分析頁面樣式 */
+
+.analysis-spine {
+    position: relative;
+    width: 100%;
+    background: #f5f5f5;
+    /* overflow: hidden; */
+}
+
+.analysis-content {
+    margin-bottom: 110px; /* 調整為兩個底部菜單的總高度 */
+    padding: 20px;
+    background: #fff;
+    /* overflow: hidden; */
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding-top: 40px;
+}
+
+/* 頸部容器包裝器 */
+.neck-container-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 600px;
+    aspect-ratio: 1 / 2;
+    border: 2px solid #3DA5FF;
+    border-radius: 10px;
+    /* overflow: hidden; */
+    background-color: rgba(255, 255, 255, 0.8);
+    background-size: cover;
+    background-position: top;
+    background-repeat: no-repeat;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+    transform-origin: center top;
+}
+
+.neck-container {
+    position: absolute;
+    width: 95%;
+    aspect-ratio: 1 / 1.5;
+    background-color: rgba(236, 240, 241, 0.3);
+    border: 2px dashed #7f8c8d;
+    border-radius: 10px;
+    top: 2%;
+    left: 2%;
+    z-index: 2;
+    background-size: cover;
+    background-position: top;
+    background-repeat: no-repeat;
+    overflow: visible;
+}
+
+/* 點位樣式 */
+.point {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #3DA5FF;
+    background-color: #3DA5FF;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    cursor: pointer;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+    text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+    user-select: none;
+}
+
+.point.draggable {
+    animation: pulse 1.5s infinite;
+    box-shadow: 0 0 20px #3DA5FF;
+}
+
+.point.draggable:hover {
+    transform: translate(-50%, -50%) scale(1.5);
+}
+
+@keyframes pulse {
+    0% {
+        background-color: #3DA5FF;
+        box-shadow: 0 0 20px #3DA5FF, 0 0 40px #3DA5FF;
+        transform: translate(-50%, -50%) scale(1);
+    }
+    50% {
+        background-color: white;
+        box-shadow: 0 0 30px white, 0 0 60px rgba(255, 255, 255, 0.8);
+        transform: translate(-50%, -50%) scale(1.3);
+    }
+    100% {
+        background-color: #3DA5FF;
+        box-shadow: 0 0 20px #3DA5FF, 0 0 40px #3DA5FF;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+/* 連接線樣式 */
+.connection-line {
+    position: absolute;
+    height: 2px;
+    background: transparent;
+    border-top: 2px dashed #e74c3c;
+    z-index: 1;
+    transform-origin: left center;
+    pointer-events: none;
+}
+
+/* 特殊線條樣式 */
+.special-line {
+    position: absolute;
+    background: #2ecc71;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.horizontal-line {
+    height: 2px;
+    border-top: 2px solid #2ecc71;
+}
+
+.vertical-line {
+    width: 2px;
+    border-left: 2px solid #2ecc71;
+}
+
+.diagonal-line {
+    height: 2px;
+    border-top: 2px solid #2ecc71;
+    transform-origin: left center;
+}
+
+/* 交點樣式 */
+.intersection-point {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border: 2px solid #f39c12;
+    background-color: #f39c12;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 3;
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 10px;
+    font-weight: bold;
+    text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+}
+
+/* 計算結果樣式 */
+.neck-calculation-results {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    max-width: 300px;
+    max-height: 400px;
+    overflow-y: auto;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+}
+
+.calculation-results-content {
+    padding: 15px;
+}
+
+.calculation-results-content h3 {
+    margin: 0 0 10px 0;
+    font-size: 16px;
+    color: #333;
+    border-bottom: 2px solid #3DA5FF;
+    padding-bottom: 5px;
+}
+
+.results-list {
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.result-item {
+    padding: 2px 0;
+    color: #555;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.result-item:last-child {
+    border-bottom: none;
+}
+
+.result-item:empty {
+    height: 8px;
+    border-bottom: none;
+}
+
+/* 底部控制按鈕 */
+.menu-bottom-second {
+    background: none;
+    position: fixed;
+    bottom: 50px;
+    left: 0;
+    right: 0;
+    height: 50px;
+    z-index: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.menu-bottom {
+    background: #3DA5FF;
+    color: #fff;
+    border-radius: 10px;
+    padding: 15px;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 50px;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+
+/* RWD 響應式設計 */
+@media (max-width: 800px) {
+    .analysis-content {
+        padding: 2px;
+    }
+    
+    .neck-container-wrapper {
+        max-width: 95%;
+    }
+}
+
+/* 對話框樣式 */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    max-width: 90%;
+    max-height: 90%;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+.modal-content h3 {
+    margin: 0 0 20px 0;
+    text-align: center;
+    color: #333;
+    font-size: 18px;
+}
+
+.modal-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.modal-buttons .action-btn {
+    background: #3DA5FF;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s;
+}
+
+.modal-buttons .action-btn:hover {
+    background: #2980b9;
+}
+
+.modal-buttons .cancel-btn {
+    background: #95a5a6;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s;
+}
+
+.modal-buttons .cancel-btn:hover {
+    background: #7f8c8d;
+}
+
+/* 客戶選擇對話框樣式 */
+.customer-modal {
+    min-width: 400px;
+    max-width: 500px;
+}
+
+.customer-list {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
+
+.customer-item {
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.customer-item:hover {
+    background-color: #f8f9fa;
+}
+
+.customer-item:last-child {
+    border-bottom: none;
+}
+
+.customer-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.customer-name {
+    font-weight: bold;
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.customer-details {
+    font-size: 12px;
+    color: #666;
+    display: flex;
+    gap: 15px;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@media (max-width: 480px) {
+    .control-btn, .action-btn {
+        padding: 8px 15px;
+        font-size: 12px;
+        min-width: 40px;
+    }
+    
+    .point {
+        width: 16px;
+        height: 16px;
+        font-size: 10px;
+    }
+    
+    .intersection-point {
+        width: 10px;
+        height: 10px;
+        font-size: 8px;
+    }
+
+    .customer-modal {
+        min-width: 95%;
+        max-width: 95%;
+        margin: 10px;
+    }
+    
+    .modal-content {
+        padding: 15px;
+        max-width: 95%;
+    }
+    
+    .modal-buttons {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .modal-buttons .action-btn,
+    .modal-buttons .cancel-btn {
+        width: 100%;
+        margin: 5px 0;
+    }
+}

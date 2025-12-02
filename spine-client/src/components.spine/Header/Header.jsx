@@ -1,0 +1,83 @@
+import React, {useState, useEffect} from 'react';
+import style from './Header.module.css';
+import logo from '../../assets.spine/logo.png';
+import { logout } from '../../api/auth';
+import {useNavigate} from 'react-router-dom';
+import { FaCog } from 'react-icons/fa';
+
+function Header({ onToggleMenu }) {
+    const navigate = useNavigate();
+    const [hoveredMenu, setHoveredMenu] = useState(null); // 控制顯示選單
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 800); // 檢測是否為移動設備
+
+    const handleMouseEnter = (menu) => setHoveredMenu(menu);
+    const handleMouseLeave = () => setHoveredMenu(null);
+
+    // 監聽螢幕尺寸變化
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth < 800);
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    const clickToManager = async () => {
+        navigate('/manager/product/list');
+    }
+
+    const clickToAccount = async () => {
+        navigate('/account/info');
+    }
+
+    const clickLogout = async () => {
+        logout();
+        navigate('/auth/login');
+        alert('登出成功');
+    }
+
+    return (
+        <div className={style.headerContainer}>
+            {/* 漢堡選單按鈕 */}
+            <div className={style.hamburger} onClick={onToggleMenu}>
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            
+            <img className={style.headerLogo} 
+                src={logo} 
+            />
+            <input className={style.headerInputSearch}
+                type="text" 
+                placeholder='客戶,頸枕搜尋'
+                onClick={e => alert('功能開發中')}
+            />
+            <div className={style.headerRightSection} >
+
+                {/* 動態選單 : 我的: 買家中心,賣家中心,登出 */}
+                <div className={style.headerButtonWrapper}
+                        onMouseEnter={() => handleMouseEnter("user")}
+                        onMouseLeave={handleMouseLeave}
+                    >
+                    <button className={`${style.headerButton} ${isMobile ? style.headerButtonMobile : ''}`}>
+                        {isMobile ? <FaCog className={style.settingsIcon} /> : '系統設定'}
+                    </button>
+
+                    {hoveredMenu === "user" && (
+                        <div className={style.headerMenu}>
+                            <button onClick={clickToAccount}>帳號管理</button>
+                            <button onClick={clickToManager}>管理頁面</button>
+                            <button onClick={clickLogout}>登出</button>
+                        </div>
+                    )}
+                </div>
+
+                
+            </div>
+        </div>
+    )
+}
+
+export default Header;

@@ -47,6 +47,7 @@ function SearchBarProduct({categoryList, getSearchParam, pagingParam}) {
     return (
         <div className={style.SearchBar}>
             <div className={style.SearchBarRow}>
+                <span className={style.SearchLabel}>商品名稱:</span>
                 <input type="text" 
                     placeholder="商品名稱不限"
                     value={keyword}
@@ -54,7 +55,7 @@ function SearchBarProduct({categoryList, getSearchParam, pagingParam}) {
                 />
             </div>
             <div className={style.SearchBarRow}>
-                並且
+                <span className={style.SearchLabel}>狀態:</span>
                 <input type="text" 
                     placeholder="狀態不限"
                     value={state}
@@ -64,7 +65,7 @@ function SearchBarProduct({categoryList, getSearchParam, pagingParam}) {
                 {/* 暫時註解, 待 後端資料庫建立, 與 增改 資料綁定
                 <div ref={calendarRef} 
                     className={style.CalendarWrapper}>
-                    並且
+                    <span className={style.SearchLabel}>建立日期:</span>
                     <input type="text" 
                         placeholder="建立日期不限"
                         value={createDate}
@@ -84,29 +85,32 @@ function SearchBarProduct({categoryList, getSearchParam, pagingParam}) {
                     )}
                 </div>
                 */}
-                並且
+                <span className={style.SearchLabel}>分類:</span>
                 <input type="text" 
                     placeholder="分類不限"
                     value={categoryList.find(c => c.id === categoryId)?.name || ''}
                     onClick={() => setIsCategoryDialogOpen(true)} // 點擊時打開 Dialog
+                    readOnly
                 />
 
             </div>
-            <div className={style.SearchBarRow}>
-                並且 價格範圍
+            <div className={`${style.SearchBarRow} ${style.PriceRangeRow}`}>
+                <span className={style.SearchLabel}>價格範圍:</span>
                 <input type="text" 
                     placeholder="0"
                     value={priceMin}
                     onChange={e => setPriceMin(handleNumberInput(e.target.value, '價格下限'))}
                 />
-                ~
+                <span className={style.SearchSeparator}>~</span>
                 <input type="text" 
                     placeholder="價位上限不限"
                     value={priceMax}
                     onChange={e => setPriceMax(handleNumberInput(e.target.value, '價格上限'))}
                 />
             </div>
-            <button onClick={clickSearchProduct}>搜尋</button>
+            <div className={style.SearchBarRow}>
+                <button onClick={clickSearchProduct}>搜尋</button>
+            </div>
 
             
             {/* CategoryDialog 分類視窗 */}

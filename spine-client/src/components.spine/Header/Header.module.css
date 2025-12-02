@@ -1,0 +1,225 @@
+
+.headerContainer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background: #3DA5FF;
+    color: #fff;
+    border-radius: 0 0 10px 10px;
+    z-index: 1000;
+    box-sizing: border-box;
+}
+
+.headerLogo {
+    max-width: 60px;
+    padding: 5px;
+    cursor: pointer;
+    margin-left: 50px;
+}
+
+.headerInputSearch {
+    border: none;
+    border-radius: 20px;
+    padding: 8px 20px;
+    width: 40%;
+    min-width: 100px;
+    font-size: 16px;
+    background: rgba(255, 255, 255, 0.9);
+}
+
+.headerRightSection {
+    display: flex;
+    justify-content: row;
+    align-items: center;
+    font-size: 18px;
+    padding: 10px;
+}
+
+.headerButtonWrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.headerButton {
+    background: transparent;
+    border: none;
+    white-space: nowrap;
+    font-size: 16px;
+    cursor: pointer;
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+.headerButton:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* 移動版按鈕樣式 */
+.headerButtonMobile {
+    min-width: 40px;
+    width: 40px;
+    height: 40px;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.settingsIcon {
+    font-size: 18px;
+    color: #fff;
+    transition: transform 0.3s ease;
+}
+
+.settingsIcon:hover {
+    transform: rotate(90deg);
+}
+
+.headerMenu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    min-width: 140px;
+    background: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    padding: 10px 20px;
+    z-index: 1100;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* 下拉選單按鈕 */
+.headerMenu button {
+    background: none;
+    border: none;
+    text-align: left;
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    color: #333;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.headerMenu button:hover {
+    background-color: #f0f0f0;
+}
+
+/* 漢堡選單按鈕樣式 */
+.hamburger {
+    display: flex;
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    width: 35px;
+    height: 28px;
+    flex-direction: column;
+    justify-content: space-between;
+    cursor: pointer;
+    z-index: 1100;
+}
+
+.hamburger span {
+    display: block;
+    height: 4px;
+    background: #fff;
+    border-radius: 2px;
+    transition: all 0.3s ease;
+}
+
+.headerIcon {
+    padding: 10px;
+    cursor: pointer;
+}
+
+/* RWD 響應式設計 */
+@media (max-width: 800px) {
+    .headerInputSearch {
+        width: 55%;
+        min-width: 100px;
+        font-size: 18px;
+        padding: 6px 15px;
+    }
+    
+    .headerRightSection {
+        font-size: 14px;
+    }
+    
+    .headerButton {
+        font-size: 14px;
+        padding: 6px 8px;
+    }
+    
+    /* 移動版系統設定按鈕特殊樣式 */
+    .headerButtonMobile {
+        min-width: 36px;
+        width: 36px;
+        height: 36px;
+        padding: 6px;
+    }
+    
+    .settingsIcon {
+        font-size: 16px;
+    }
+    
+    .headerMenu {
+        min-width: 120px;
+        padding: 8px 15px;
+        right: -10px; /* 調整下拉選單位置，確保不會超出螢幕 */
+    }
+    
+    .headerMenu button {
+        font-size: 14px;
+        padding: 8px;
+    }
+}
+
+@media (max-width: 500px) {
+    
+    .headerLogo {
+        max-width: 50px;
+        margin-left: 45px;
+    }
+    
+    .headerButton {
+        font-size: 12px;
+    }
+    
+    /* 小螢幕的系統設定按鈕 */
+    .headerButtonMobile {
+        min-width: 32px;
+        width: 32px;
+        height: 32px;
+        padding: 4px;
+    }
+    
+    .settingsIcon {
+        font-size: 14px;
+    }
+    
+    .headerMenu {
+        right: -15px; /* 進一步調整選單位置 */
+        min-width: 100px;
+        padding: 6px 12px;
+    }
+    
+    .headerMenu button {
+        font-size: 12px;
+        padding: 6px;
+    }
+}
+
