@@ -93,6 +93,7 @@ button {
   font-size: 16px;
   padding: 5px 16px;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 button:hover {

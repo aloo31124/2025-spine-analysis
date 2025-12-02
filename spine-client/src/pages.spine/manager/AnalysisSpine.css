@@ -37,18 +37,18 @@
 
 .neck-container {
     position: absolute;
-    width: 80%;
+    width: 95%;
     aspect-ratio: 1 / 1.5;
-    background-color: rgba(236, 240, 241, 0.7);
-    opacity: 0.7;
+    background-color: rgba(236, 240, 241, 0.3);
     border: 2px dashed #7f8c8d;
     border-radius: 10px;
-    top: 5%;
-    left: 10%;
+    top: 2%;
+    left: 2%;
     z-index: 2;
     background-size: cover;
     background-position: top;
     background-repeat: no-repeat;
+    overflow: visible;
 }
 
 /* 點位樣式 */
@@ -238,12 +238,11 @@
 /* RWD 響應式設計 */
 @media (max-width: 800px) {
     .analysis-content {
-        padding: 10px;
-        padding-top: 20px;
+        padding: 2px;
     }
     
     .neck-container-wrapper {
-        max-width: 90%;
+        max-width: 95%;
     }
 }
 

@@ -43,6 +43,11 @@ function MenuLeft({ isOpen, isHidden, onClose }) {
                 >
                     頸部分析
                 </button>
+                <button className={style.MenuLeftButton}
+                    onClick={e => navigate('/manager/analysis/tail') }
+                >
+                    尾椎分析
+                </button>
                 {/*
                 <button className={style.MenuLeftButton}
                     onClick={e => navigate('/manager/analysis/spine/test') }
@@ -56,9 +61,9 @@ function MenuLeft({ isOpen, isHidden, onClose }) {
                     客戶管理
                 </button>
                 <button className={style.MenuLeftButton}
-                    onClick={e => navigate('/manager/product/list') }
+                    onClick={e => navigate('/manager/product-pillow/list') }
                 >
-                    頸枕管理
+                    枕頭商品
                 </button>
                 <button className={style.MenuLeftButton}
                     onClick={e => navigate('/manager/payment/list') }

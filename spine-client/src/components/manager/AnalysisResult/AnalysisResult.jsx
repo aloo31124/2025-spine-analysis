@@ -7,6 +7,80 @@ function AnalysisResult({ analysisResults, onDeleteResult }) {
     const [expandedResults, setExpandedResults] = useState({});
     const [deletingResults, setDeletingResults] = useState({});
 
+    const getAnalysisTypeLabel = (analysisType) => {
+        switch (analysisType) {
+            case 'tail':
+                return '尾椎分析';
+            case 'spine':
+                return '頸部分析';
+            default:
+                return '';
+        }
+    };
+
+    const parseDateValue = (value) => {
+        if (!value) return null;
+        if (value instanceof Date) return value;
+
+        if (typeof value === 'number') {
+            const numericValue = value > 1e12 ? value : value * 1000;
+            const dateFromNumber = new Date(numericValue);
+            return Number.isNaN(dateFromNumber.getTime()) ? null : dateFromNumber;
+        }
+
+        if (typeof value === 'string') {
+            const trimmed = value.trim();
+            if (!trimmed) return null;
+
+            const normalized = trimmed.replace(' ', 'T');
+            let parsed = new Date(normalized);
+
+            if (Number.isNaN(parsed.getTime())) {
+                const timeMatch = trimmed.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})(?::(\d{2}))?$/);
+                if (timeMatch) {
+                    const [, year, month, day, hour, minute, second = '00'] = timeMatch;
+                    parsed = new Date(
+                        parseInt(year, 10),
+                        parseInt(month, 10) - 1,
+                        parseInt(day, 10),
+                        parseInt(hour, 10),
+                        parseInt(minute, 10),
+                        parseInt(second, 10)
+                    );
+                }
+            }
+
+            return Number.isNaN(parsed.getTime()) ? null : parsed;
+        }
+
+        return null;
+    };
+
+    const formatAnalysisDate = (result) => {
+        if (!result) return '';
+
+        // 從不同欄位推測分析建立時間，避免後端欄位命名不一致
+        const rawValue =
+            result.createdAt ||
+            result.createAt ||
+            result.createdDate ||
+            result.createDate ||
+            result.createdTime ||
+            result.createTime ||
+            result.analysisData?.timestamp;
+
+        const parsedDate = parseDateValue(rawValue);
+        if (!parsedDate) return '';
+
+        return parsedDate.toLocaleString('zh-TW', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    };
+
     /* 切換分析結果的展開/收合狀態 */
     const toggleResultExpansion = (index) => {
         setExpandedResults(prev => ({
@@ -50,87 +124,85 @@ function AnalysisResult({ analysisResults, onDeleteResult }) {
         <div className={style.CreateEditProductRow}>
             {analysisResults && analysisResults.length > 0 ? (
                 <div className={style.AnalysisResultsContainer}>
-                    {analysisResults.map((result, index) => (
-                        <div key={result.id || index} className={style.AnalysisResultItem}>
-                            <div className={style.ResultHeader}>
-                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                    <div 
-                                        style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', flex: 1 }}
-                                        onClick={() => toggleResultExpansion(index)}
-                                    >
-                                        <span>{expandedResults[index] ? '▼' : '▶'}</span>
-                                        <h4>分析記錄 #{index + 1}</h4>
-                                    </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                        <span className={style.ResultDate}>
-                                            {new Date(result.createdAt).toLocaleString('zh-TW', {
-                                                year: 'numeric',
-                                                month: '2-digit',
-                                                day: '2-digit',
-                                                hour: '2-digit',
-                                                minute: '2-digit'
-                                            })}
-                                        </span>
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleDeleteResult(result, index);
-                                            }}
-                                            disabled={deletingResults[index]}
-                                            style={{
-                                                backgroundColor: '#ff4444',
-                                                color: 'white',
-                                                border: 'none',
-                                                borderRadius: '4px',
-                                                padding: '5px 10px',
-                                                cursor: deletingResults[index] ? 'not-allowed' : 'pointer',
-                                                fontSize: '12px',
-                                                opacity: deletingResults[index] ? 0.6 : 1
-                                            }}
+                    {analysisResults.map((result, index) => {
+                        const typeLabel = getAnalysisTypeLabel(result.analysisType);
+                        const formattedDate = formatAnalysisDate(result);
+                        const fallbackTitle = `分析記錄 #${index + 1}`;
+                        const headerTitle = `${typeLabel || fallbackTitle}${formattedDate ? `｜${formattedDate}` : ''}`;
+
+                        return (
+                            <div key={result.id || index} className={style.AnalysisResultItem}>
+                                <div className={style.ResultHeader}>
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                        <div 
+                                            style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', flex: 1 }}
+                                            onClick={() => toggleResultExpansion(index)}
                                         >
-                                            {deletingResults[index] ? '刪除中...' : '刪除'}
-                                        </button>
+                                            <span>{expandedResults[index] ? '▼' : '▶'}</span>
+                                            <h4>{headerTitle}</h4>
+                                        </div>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDeleteResult(result, index);
+                                                }}
+                                                disabled={deletingResults[index]}
+                                                style={{
+                                                    backgroundColor: '#ff4444',
+                                                    color: 'white',
+                                                    border: 'none',
+                                                    borderRadius: '4px',
+                                                    padding: '5px 10px',
+                                                    cursor: deletingResults[index] ? 'not-allowed' : 'pointer',
+                                                    fontSize: '12px',
+                                                    opacity: deletingResults[index] ? 0.6 : 1
+                                                }}
+                                            >
+                                                {deletingResults[index] ? '刪除中...' : '刪除'}
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            {expandedResults[index] && (
-                                <div className={style.ResultContent}>
-                                    {result.calculationResults && (
-                                        <div className={style.CalculationResults}>
-                                            <h5>計算結果:</h5>
-                                            <ul>
-                                                {result.calculationResults.map((calc, calcIndex) => (
-                                                    <li key={calcIndex}>{calc}</li>
-                                                ))}
-                                            </ul>
-                                        </div>
-                                    )}
-                                    {result.points && (
-                                        <div className={style.PointsData}>
-                                            <h5>標記點位:</h5>
-                                            <div className={style.PointsList}>
-                                                {result.points.map((point, pointIndex) => (
-                                                    <span key={pointIndex} className={style.PointItem}>
-                                                        點{pointIndex + 1}: ({Math.round(point.x)}, {Math.round(point.y)})
-                                                    </span>
-                                                ))}
+                                {expandedResults[index] && (
+                                    <div className={style.ResultContent}>
+                                        {result.calculationResults && (
+                                            <div className={style.CalculationResults}>
+                                                <h5>計算結果:</h5>
+                                                <ul>
+                                                    {result.calculationResults.map((calc, calcIndex) => (
+                                                        <li key={calcIndex}>{calc}</li>
+                                                    ))}
+                                                </ul>
                                             </div>
-                                        </div>
-                                    )}
-                                    {result.backgroundImage && (
-                                        <div className={style.ImagePreview}>
-                                            <h5>分析圖片:</h5>
-                                            <img 
-                                                src={result.backgroundImage} 
-                                                alt="分析圖片" 
-                                                className={style.ResultImage}
-                                            />
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-                        </div>
-                    ))}
+                                        )}
+                                        {result.points && (
+                                            <div className={style.PointsData}>
+                                                <h5>標記點位:</h5>
+                                                <div className={style.PointsList}>
+                                                    {result.points.map((point, pointIndex) => (
+                                                        <span key={pointIndex} className={style.PointItem}>
+                                                            點{pointIndex + 1}: ({Math.round(point.x)}, {Math.round(point.y)})
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+                                        {result.backgroundImage && (
+                                            <div className={style.ImagePreview}>
+                                                <h5>分析圖片:</h5>
+                                                <img 
+                                                    src={result.backgroundImage} 
+                                                    alt="分析圖片" 
+                                                    className={style.ResultImage}
+                                                />
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })}
                 </div>
             ) : (
                 <div className={style.NoResults}>

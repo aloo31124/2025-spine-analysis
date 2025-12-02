@@ -18,6 +18,21 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './PhotoCapture.css';
 import { FaCamera, FaUpload, FaCrop, FaSave, FaPlus, FaTimes, FaRedo } from 'react-icons/fa';
+import ScaleIndicator from '../../components/ScaleIndicator';
+
+const MAX_IMAGE_DIMENSION = 1600;
+const MIN_IMAGE_DIMENSION = 800;
+const MAX_IMAGE_BYTES = 900 * 1024; // Firestore 單筆文件上限 1MB，留些餘裕
+const DEFAULT_JPEG_QUALITY = 0.85;
+const MIN_JPEG_QUALITY = 0.5;
+
+const getBase64SizeInBytes = (dataUrl) => {
+    if (!dataUrl) return 0;
+    const base64 = dataUrl.split(',')[1];
+    if (!base64) return 0;
+    const padding = base64.endsWith('==') ? 2 : base64.endsWith('=') ? 1 : 0;
+    return Math.ceil((base64.length * 3) / 4) - padding;
+};
 
 function PhotoCapture() {
     // === 路由導航 ===
@@ -30,6 +45,8 @@ function PhotoCapture() {
     const [deviceInfo, setDeviceInfo] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
     const [isMobileDevice, setIsMobileDevice] = useState(false);
+    const [showAnalysisModal, setShowAnalysisModal] = useState(false);
+    const [showCameraOverlay, setShowCameraOverlay] = useState(false);
     
     // === 編輯相關狀態 ===
     const [cropArea, setCropArea] = useState({ x: 0, y: 0, width: 300, height: 300 });
@@ -58,100 +75,208 @@ function PhotoCapture() {
     }, []);
 
     // === 初始化 ===
+    const stopCameraStream = useCallback(() => {
+        if (streamRef.current) {
+            streamRef.current.getTracks().forEach(track => track.stop());
+            streamRef.current = null;
+        }
+
+        if (videoRef.current) {
+            videoRef.current.srcObject = null;
+        }
+    }, []);
+
     useEffect(() => {
         detectDevice();
         return () => {
-            // 清理視頻流
-            if (streamRef.current) {
-                streamRef.current.getTracks().forEach(track => track.stop());
+            stopCameraStream();
+        };
+    }, [detectDevice, stopCameraStream]);
+
+    useEffect(() => {
+        if (!showCameraOverlay) {
+            return () => undefined;
+        }
+
+        let isCancelled = false;
+
+        const startCamera = async () => {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                setShowCameraOverlay(false);
+                if (cameraInputRef.current) {
+                    cameraInputRef.current.click();
+                } else {
+                    alert('您的瀏覽器不支持攝像頭功能，請使用較新版本的瀏覽器');
+                }
+                return;
+            }
+
+            setIsProcessing(true);
+            try {
+                const constraints = {
+                    video: {
+                        facingMode: isMobileDevice ? { ideal: 'environment' } : 'user'
+                    }
+                };
+                const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+
+                if (isCancelled) {
+                    mediaStream.getTracks().forEach(track => track.stop());
+                    return;
+                }
+
+                streamRef.current = mediaStream;
+
+                if (videoRef.current) {
+                    videoRef.current.srcObject = mediaStream;
+                    try {
+                        await videoRef.current.play();
+                    } catch (playError) {
+                        console.warn('無法自動播放攝像頭影像:', playError);
+                    }
+                }
+            } catch (error) {
+                console.error('攝像頭訪問錯誤:', error);
+                const errorMessage = error?.name === 'NotAllowedError'
+                    ? '攝像頭權限被拒絕，請在瀏覽器設定中允許攝像頭權限'
+                    : error?.name === 'NotFoundError'
+                        ? '未檢測到攝像頭設備，請確認設備已正確連接'
+                        : `無法訪問攝像頭: ${error?.message || '未知錯誤'}`;
+                alert(errorMessage);
+                setShowCameraOverlay(false);
+            } finally {
+                if (!isCancelled) {
+                    setIsProcessing(false);
+                }
             }
         };
-    }, [detectDevice]);
+
+        startCamera();
+
+        return () => {
+            isCancelled = true;
+            stopCameraStream();
+        };
+    }, [showCameraOverlay, isMobileDevice, stopCameraStream]);
+
+    const optimizeImageData = useCallback((dataUrl) => {
+        return new Promise((resolve, reject) => {
+            if (!dataUrl) {
+                reject(new Error('圖片資料不存在'));
+                return;
+            }
+
+            const img = new Image();
+            img.onload = () => {
+                let targetWidth = img.width;
+                let targetHeight = img.height;
+                const longestSide = Math.max(targetWidth, targetHeight);
+
+                if (longestSide > MAX_IMAGE_DIMENSION) {
+                    const scale = MAX_IMAGE_DIMENSION / longestSide;
+                    targetWidth = Math.round(targetWidth * scale);
+                    targetHeight = Math.round(targetHeight * scale);
+                }
+
+                const canvas = document.createElement('canvas');
+                const redraw = () => {
+                    canvas.width = Math.max(1, Math.round(targetWidth));
+                    canvas.height = Math.max(1, Math.round(targetHeight));
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                };
+
+                redraw();
+
+                let quality = DEFAULT_JPEG_QUALITY;
+                let optimizedDataUrl = canvas.toDataURL('image/jpeg', quality);
+                let attempts = 0;
+
+                while (
+                    getBase64SizeInBytes(optimizedDataUrl) > MAX_IMAGE_BYTES &&
+                    attempts < 12
+                ) {
+                    if (quality > MIN_JPEG_QUALITY) {
+                        quality = Math.max(
+                            MIN_JPEG_QUALITY,
+                            parseFloat((quality - 0.1).toFixed(2))
+                        );
+                    } else if (Math.max(targetWidth, targetHeight) > MIN_IMAGE_DIMENSION) {
+                        targetWidth = Math.round(targetWidth * 0.85);
+                        targetHeight = Math.round(targetHeight * 0.85);
+                        redraw();
+                    } else {
+                        break;
+                    }
+
+                    optimizedDataUrl = canvas.toDataURL('image/jpeg', quality);
+                    attempts += 1;
+                }
+
+                resolve(optimizedDataUrl);
+            };
+
+            img.onerror = () => reject(new Error('圖片載入失敗'));
+            img.src = dataUrl;
+        });
+    }, []);
+
+    const updatePreviewFromDataUrl = useCallback(async (dataUrl) => {
+        try {
+            const optimizedDataUrl = await optimizeImageData(dataUrl);
+            setPreviewUrl(optimizedDataUrl);
+            setImageData(optimizedDataUrl);
+            setCurrentView('preview');
+        } catch (error) {
+            console.error('圖片處理失敗:', error);
+            alert('圖片處理失敗，請重試');
+        } finally {
+            setIsProcessing(false);
+        }
+    }, [optimizeImageData]);
 
     // === 處理文件選擇 ===
     const handleFileSelect = useCallback((file) => {
         if (!file) return;
-        
+
         setIsProcessing(true);
         const reader = new FileReader();
-        
-        reader.onload = (e) => {
-            const url = e.target.result;
-            setPreviewUrl(url);
-            setImageData(url);
-            setCurrentView('preview');
-            setIsProcessing(false);
+
+        reader.onload = async (e) => {
+            const url = e.target?.result;
+            if (!url) {
+                alert('讀取文件時發生錯誤，請重新選擇文件');
+                setIsProcessing(false);
+                return;
+            }
+            await updatePreviewFromDataUrl(url);
         };
-        
+
         reader.onerror = () => {
             alert('讀取文件時發生錯誤，請重新選擇文件');
             setIsProcessing(false);
         };
-        
+
         reader.readAsDataURL(file);
-    }, []);
+    }, [updatePreviewFromDataUrl]);
 
     // === 拍攝照片處理 ===
     const handleCameraCapture = useCallback(() => {
-        if (isMobileDevice) {
-            // 移動設備：使用 HTML5 File Input API
+        const cameraSupported = typeof navigator !== 'undefined'
+            && navigator.mediaDevices
+            && navigator.mediaDevices.getUserMedia;
+
+        if (!cameraSupported) {
             if (cameraInputRef.current) {
                 cameraInputRef.current.click();
-            }
-        } else {
-            // 桌面設備：使用 getUserMedia API
-            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                setIsProcessing(true);
-                navigator.mediaDevices.getUserMedia({ video: true })
-                    .then((mediaStream) => {
-                        streamRef.current = mediaStream;
-                        
-                        // 創建視頻元素用於拍照
-                        const video = document.createElement('video');
-                        video.srcObject = mediaStream;
-                        video.play();
-                        
-                        // 創建畫布用於拍照
-                        const canvas = canvasRef.current;
-                        const ctx = canvas.getContext('2d');
-                        
-                        video.addEventListener('loadedmetadata', () => {
-                            canvas.width = video.videoWidth;
-                            canvas.height = video.videoHeight;
-                            
-                            // 延遲拍照以確保攝像頭準備完成
-                            setTimeout(() => {
-                                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                                const dataUrl = canvas.toDataURL('image/png');
-                                
-                                setPreviewUrl(dataUrl);
-                                setImageData(dataUrl);
-                                setCurrentView('preview');
-                                setIsProcessing(false);
-                                
-                                // 停止視頻串流
-                                mediaStream.getTracks().forEach(track => track.stop());
-                                streamRef.current = null;
-                            }, 500);
-                        });
-                    })
-                    .catch((error) => {
-                        console.error('攝像頭訪問錯誤:', error);
-                        setIsProcessing(false);
-                        
-                        if (error.name === 'NotAllowedError') {
-                            alert('攝像頭權限被拒絕，請在瀏覽器設定中允許攝像頭權限');
-                        } else if (error.name === 'NotFoundError') {
-                            alert('未檢測到攝像頭設備，請確認設備已正確連接');
-                        } else {
-                            alert(`無法訪問攝像頭: ${error.message || '未知錯誤'}`);
-                        }
-                    });
             } else {
                 alert('您的瀏覽器不支持攝像頭功能，請使用較新版本的瀏覽器');
             }
+            return;
         }
-    }, [isMobileDevice]);
+
+        setShowCameraOverlay(true);
+    }, []);
 
     // === 上傳照片 ===
     const handleFileUpload = useCallback(() => {
@@ -160,57 +285,37 @@ function PhotoCapture() {
         }
     }, []);
 
-    // === 編輯照片 ===
-    const handleEditPhoto = useCallback(() => {
-        if (!previewImageRef.current) return;
-        
-        setCurrentView('editor');
-        
-        // 等待圖片加載完成後初始化裁切區域
-        setTimeout(() => {
-            if (editorImageRef.current) {
-                const img = editorImageRef.current;
-                const width = Math.min(img.offsetWidth, 300);
-                const height = Math.min(img.offsetHeight, 300);
-                const x = (img.offsetWidth - width) / 2;
-                const y = (img.offsetHeight - height) / 2;
-                
-                setCropArea({ x, y, width, height });
-            }
-        }, 100);
-    }, []);
-
-    // === 保存照片 ===
-    const handleSavePhoto = useCallback(() => {
-        setCurrentView('result');
-    }, []);
 
     // === 執行裁切 ===
-    const handleCropPhoto = useCallback(() => {
+    const handleCropPhoto = useCallback(async () => {
         if (!editorImageRef.current || !canvasRef.current) return;
-        
+
+        setIsProcessing(true);
         const img = editorImageRef.current;
         const canvas = canvasRef.current;
         const ctx = canvas.getContext('2d');
-        
+
+        if (!ctx) {
+            setIsProcessing(false);
+            alert('畫布初始化失敗，請重新嘗試');
+            return;
+        }
+
         // 設置畫布尺寸
         canvas.width = cropArea.width;
         canvas.height = cropArea.height;
-        
+
         // 繪製裁切後的圖片
         ctx.drawImage(
             img,
             cropArea.x, cropArea.y, cropArea.width, cropArea.height,
             0, 0, cropArea.width, cropArea.height
         );
-        
+
         // 獲取裁切後的圖片數據
         const croppedDataUrl = canvas.toDataURL('image/png');
-        setPreviewUrl(croppedDataUrl);
-        setImageData(croppedDataUrl);
-        
-        setCurrentView('preview');
-    }, [cropArea]);
+        await updatePreviewFromDataUrl(croppedDataUrl);
+    }, [cropArea, updatePreviewFromDataUrl]);
 
     // === 取消編輯 ===
     const handleCancelEdit = useCallback(() => {
@@ -223,25 +328,42 @@ function PhotoCapture() {
         setPreviewUrl(null);
         setImageData(null);
         setCropArea({ x: 0, y: 0, width: 300, height: 300 });
+        setShowAnalysisModal(false);
+        setShowCameraOverlay(false);
+        stopCameraStream();
         
         // 清理文件輸入
         if (fileInputRef.current) fileInputRef.current.value = '';
         if (cameraInputRef.current) cameraInputRef.current.value = '';
-    }, []);
+    }, [stopCameraStream]);
 
     // === 切換到分析頁面並傳遞照片 ===
-    const handleGoToAnalysis = useCallback(() => {
-        if (imageData) {
-            // 將照片數據保存到 localStorage
-            localStorage.setItem('spineAnalysisPhoto', imageData);
-            localStorage.setItem('spineAnalysisPhotoTimestamp', Date.now().toString());
-            
-            // 導航到脊椎分析頁面
-            navigate('/manager/analysis/spine');
-        } else {
+    const handleOpenAnalysisChoice = useCallback(() => {
+        if (!imageData) {
             alert('請先拍攝或選擇一張照片');
+            return;
         }
+        setShowAnalysisModal(true);
+    }, [imageData]);
+
+    const handleSelectAnalysis = useCallback((target) => {
+        if (!imageData) {
+            alert('請先拍攝或選擇一張照片');
+            setShowAnalysisModal(false);
+            return;
+        }
+
+        localStorage.setItem('spineAnalysisPhoto', imageData);
+        localStorage.setItem('spineAnalysisPhotoTimestamp', Date.now().toString());
+
+        const targetPath = target === 'tail' ? '/manager/analysis/tail' : '/manager/analysis/spine';
+        navigate(targetPath);
+        setShowAnalysisModal(false);
     }, [imageData, navigate]);
+
+    const handleCloseAnalysisChoice = useCallback(() => {
+        setShowAnalysisModal(false);
+    }, []);
 
     // === 裁切區域拖拽處理 ===
     const handleCropMouseDown = useCallback((e) => {
@@ -285,6 +407,41 @@ function PhotoCapture() {
     const handleCropMouseUp = useCallback(() => {
         setIsDragging(false);
     }, []);
+
+    const handleCaptureFromStream = useCallback(async () => {
+        if (!videoRef.current || !canvasRef.current) {
+            alert('攝像頭尚未準備完成，請稍後再試');
+            return;
+        }
+
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+            alert('畫布初始化失敗，請刷新頁面後再試');
+            return;
+        }
+
+        setIsProcessing(true);
+        try {
+            canvas.width = videoRef.current.videoWidth || MAX_IMAGE_DIMENSION;
+            canvas.height = videoRef.current.videoHeight || MAX_IMAGE_DIMENSION;
+            ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+            const dataUrl = canvas.toDataURL('image/png');
+            await updatePreviewFromDataUrl(dataUrl);
+            setShowCameraOverlay(false);
+            stopCameraStream();
+        } catch (error) {
+            console.error('拍照失敗:', error);
+            alert('拍照失敗，請重試');
+        } finally {
+            setIsProcessing(false);
+        }
+    }, [stopCameraStream, updatePreviewFromDataUrl]);
+
+    const handleCloseCameraOverlay = useCallback(() => {
+        setShowCameraOverlay(false);
+        stopCameraStream();
+    }, [stopCameraStream]);
 
     // === 添加拖拽事件監聽 ===
     useEffect(() => {
@@ -345,6 +502,7 @@ function PhotoCapture() {
                         alt="照片預覽" 
                         className="photo-preview-image"
                     />
+                    <ScaleIndicator className="scale-indicator--capture" />
                 </div>
             </div>
         </div>
@@ -375,6 +533,7 @@ function PhotoCapture() {
                             onMouseDown={handleCropMouseDown}
                             onTouchStart={handleCropMouseDown}
                         />
+                        <ScaleIndicator className="scale-indicator--capture" />
                     </div>
                 </div>
             </div>
@@ -392,6 +551,7 @@ function PhotoCapture() {
                         alt="最終結果" 
                         className="photo-result-image"
                     />
+                    <ScaleIndicator className="scale-indicator--capture" />
                 </div>
             </div>
         </div>
@@ -435,17 +595,9 @@ function PhotoCapture() {
             {/* 底部控制按鈕 */}
             {currentView === 'preview' && (
                 <div className="photo-bottom-menu">
-                    <button onClick={handleGoToAnalysis}>
+                    <button onClick={handleOpenAnalysisChoice}>
                         <FaPlus />
                         <span>開始分析</span>
-                    </button>
-                    <button onClick={handleEditPhoto}>
-                        <FaCrop />
-                        <span>編輯</span>
-                    </button>
-                    <button onClick={handleSavePhoto}>
-                        <FaSave />
-                        <span>保存</span>
                     </button>
                     <button onClick={handleNewPhoto}>
                         <FaRedo />
@@ -469,7 +621,7 @@ function PhotoCapture() {
 
             {currentView === 'result' && (
                 <div className="photo-bottom-menu">
-                    <button onClick={handleGoToAnalysis} >
+                    <button onClick={handleOpenAnalysisChoice} >
                         <FaPlus />
                         <span>開始分析</span>
                     </button>
@@ -477,6 +629,49 @@ function PhotoCapture() {
                         <FaRedo />
                         <span>重新拍攝</span>
                     </button>
+                </div>
+            )}
+
+            {showAnalysisModal && (
+                <div className="photo-analysis-modal" role="dialog" aria-modal="true">
+                    <div className="photo-analysis-modal__content">
+                        <h3>選擇分析項目</h3>
+                        <p>請選擇要進行的分析頁面：</p>
+                        <div className="photo-analysis-modal__actions">
+                            <button onClick={() => handleSelectAnalysis('spine')}>
+                                頸部分析
+                            </button>
+                            <button onClick={() => handleSelectAnalysis('tail')}>
+                                尾椎分析
+                            </button>
+                        </div>
+                        <button className="photo-analysis-modal__close" onClick={handleCloseAnalysisChoice}>
+                            取消
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {showCameraOverlay && (
+                <div className="photo-camera-overlay" role="dialog" aria-modal="true">
+                    <div className="photo-camera-overlay__frame">
+                        <video
+                            ref={videoRef}
+                            className="photo-camera-overlay__video"
+                            playsInline
+                            autoPlay
+                            muted
+                        />
+                        <ScaleIndicator className="scale-indicator--camera" />
+                        <div className="photo-camera-overlay__controls">
+                            <button onClick={handleCaptureFromStream}>
+                                拍照
+                            </button>
+                            <button onClick={handleCloseCameraOverlay}>
+                                取消
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>

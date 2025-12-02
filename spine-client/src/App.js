@@ -61,8 +61,14 @@ import ProductListPageSpine from './pages.spine/manager/ProductListPageSpine'; /
 import ProductAddPage from './pages.spine/manager/ProductAddPage';       // 新增商品
 import ProductEditPage from './pages.spine/manager/ProductEditPage';     // 編輯商品
 
+// === 枕頭商品管理頁面 ===
+import ProductPillowListPage from './pages.spine/manager/ProductPillowListPage';   // 枕頭商品列表
+import ProductPillowAddPage from './pages.spine/manager/ProductPillowAddPage';     // 新增枕頭商品
+import ProductPillowEditPage from './pages.spine/manager/ProductPillowEditPage';   // 編輯枕頭商品
+
 // === 脊椎分析頁面 ===
 import AnalysisSpine from './pages.spine/manager/AnalysisSpine';   // 脊椎分析
+import AnalysisTail from './pages.spine/manager/AnalysisTail';     // 尾椎分析
 import AnalysisSpineTest from './pages.spine/manager/AnalysisSpineTest';   // 脊椎分析測試版
 import PhotoCapture from './pages.spine/manager/PhotoCapture';     // 拍照上傳
 
@@ -128,6 +134,7 @@ const AppRouter = () => (
     <Route path="/manager/*" element={<AppRouterVerify element={ManagerLayout} node={"seller"} />}>
       {/* 脊椎分析 */}
       <Route path="analysis/spine" element={<AnalysisSpine />} />       {/* 脊椎分析 */}
+      <Route path="analysis/tail" element={<AnalysisTail />} />         {/* 尾椎分析 */}
       <Route path="photo/capture" element={<PhotoCapture />} />        {/* 拍照上傳 */}
       
       {/* 商品管理 */}
@@ -135,6 +142,11 @@ const AppRouter = () => (
       <Route path="product/add" element={<ProductAddPage />} />        {/* 新增商品 */}
       <Route path="product/edit/:id" element={<ProductEditPage />} />  {/* 編輯商品 */}
       <Route path="product-spine" element={<ProductListPageSpine />} />     {/* 商品列表脊椎版本 */}
+      
+      {/* 枕頭商品管理 */}
+      <Route path="product-pillow/list" element={<ProductPillowListPage />} />      {/* 枕頭商品列表 */}
+      <Route path="product-pillow/add" element={<ProductPillowAddPage />} />        {/* 新增枕頭商品 */}
+      <Route path="product-pillow/edit/:id" element={<ProductPillowEditPage />} />  {/* 編輯枕頭商品 */}
       
       {/* 分類管理 */}
       <Route path="product/category/list" element={<CategoryListPage />} />    {/* 分類列表 */}

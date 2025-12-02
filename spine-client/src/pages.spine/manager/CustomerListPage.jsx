@@ -5,7 +5,7 @@ import TopBtnBarCustomer from '../../components/manager/TopBtnBar/TopBtnBarCusto
 import {useNavigate} from 'react-router-dom';
 import {getCustomerList, deleteCustomer, searchCustomer} from '../../api/manager/customer';
 import PaginationBar from '../../components/tools/PaginationBar/PaginationBar'
-import userIcon from '../../assets/icon/cart.svg';
+import userIcon from '../../assets.spine/icon/user.png';
 import loadingGif from '../../assets/loading.gif';
 import styles from './CustomerListPage.module.css';
 

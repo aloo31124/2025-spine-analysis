@@ -73,6 +73,11 @@ function MenuLeft() {
                 >
                     我的商品
                 </button>
+                <button className={style.MenuLeftButton}
+                    onClick={e => navigate('/manager/product-pillow/list') }
+                >
+                    枕頭商品
+                </button>
                 <button className={style.MenuLeftButton}>
                     訂單管理
                 </button>

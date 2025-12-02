@@ -1,24 +1,39 @@
 import React, {useEffect, useState} from 'react';
 import { withLoading } from '../../utils/loading';
-import SearchBarProduct from '../../components/manager/SearchBar/SearchBarProduct';
-import TopBtnBarProduct from '../../components/manager/TopBtnBar/TopBtnBarProduct';
 import AnalysisResult from '../../components/manager/AnalysisResult/AnalysisResult';
+import ProductRecommendationModal from '../../components/manager/ProductRecommendation/ProductRecommendationModal';
 import {useNavigate, useLocation} from 'react-router-dom';
-import {getProductList, getProductCategoryList, deleteProduct, searchProduct} from '../../api/manager/product';
-import {addMultipleCustomerToProduct} from '../../api/manager/customerToProduct';
+import {getProductPillowList, searchProductPillow} from '../../api/manager/productPillow';
+import {addMultipleCustomerToProductPillow} from '../../api/manager/customerToProductPillow';
 import PaginationBar from '../../components/tools/PaginationBar/PaginationBar'
-import shoppingBag2Img from '../../assets/img/shoppingBag2.png';
 import loadingGif from '../../assets/loading.gif';
 import styles from './ProductListPage.module.css';
 
-function ProductListPage() {
+/**
+ * 枕頭商品列表頁面 (含客戶綁定功能)
+ * 用於從客戶頁面跳轉過來，選擇枕頭商品並綁定給客戶
+ */
+function ProductListPageSpine() {
     const navigate = useNavigate();
     const location = useLocation();
-    const [productList, setProductList] = useState([]);
-    const [categoryList, setCategoryList] = useState([]);
-    const [pagingParam, setPagingParam] = useState({ pageIndex: 1, pageSize: 5, sort: 'keyword', pageTotal:-1, dataTotal:-1 });
-    const [searchParam, setSearchParam] = useState({keyword:'', state:'', createDate:'', categoryList, priceMin:0, priceMax:0});
+    const [productPillowList, setProductPillowList] = useState([]);
+    const [pagingParam, setPagingParam] = useState({ pageIndex: 1, pageSize: 5, sort: 'name', pageTotal:-1, dataTotal:-1 });
+    const [searchParam, setSearchParam] = useState({ 
+        keyword: '', 
+        type: '',
+        stateList: [],  // 狀態多選
+        priceMin: '', priceMax: '',
+        shortHeightMin: '', shortHeightMax: '',
+        longHeightMin: '', longHeightMax: '',
+        shortCurvatureMin: '', shortCurvatureMax: '',
+        mediumCurvatureMin: '', mediumCurvatureMax: '',
+        longCurvatureMin: '', longCurvatureMax: ''
+    });
     const [isLoading, setIsLoading] = useState(false);
+    const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
+    
+    // 狀態選項
+    const stateOptions = ['草稿', '上架', '下架'];
     
     // 客戶相關狀態
     const [customerData, setCustomerData] = useState(null);
@@ -26,13 +41,15 @@ function ProductListPage() {
     const [showAnalysisResults, setShowAnalysisResults] = useState(false);
 
     // 購買相關狀態
-    const [selectedProducts, setSelectedProducts] = useState(new Map()); // Map<productId, {product, quantity, selected}>
+    const [selectedProducts, setSelectedProducts] = useState(new Map()); // Map<productPillowId, {productPillow, quantity, selected}>
     const [isPurchasing, setIsPurchasing] = useState(false);
 
-    // 初始時, 取得商品列表
+    // 推薦商品彈窗狀態
+    const [showRecommendationModal, setShowRecommendationModal] = useState(false);
+
+    // 初始時, 取得枕頭商品列表
     useEffect(() => {
-        fetchProductList();
-        fetchCategory();
+        fetchProductPillowList();
         
         // 檢查是否從客戶頁面跳轉過來
         if (location.state?.fromCustomerPage && location.state?.customerData) {
@@ -43,9 +60,9 @@ function ProductListPage() {
         }
     }, []);
 
-    const fetchProductList = async () => {
+    const fetchProductPillowList = async () => {
         await withLoading(
-            getProductList(searchParam, pagingParam),
+            getProductPillowList(searchParam, pagingParam),
             {
                 min: 0,
                 timeout: 5000,
@@ -54,34 +71,26 @@ function ProductListPage() {
                 onTimeout: () => alert('網路不穩, 請重新搜尋')
             }
         ).then(res => {
-            setProductList(res.data.result.productList);
-            setPagingParam(res.data.result.pagingParam);
+            setProductPillowList(res.data.result.productPillowList || []);
+            setPagingParam(res.data.result.pagingParam || pagingParam);
         }).catch(e => {
-            if (e.message !== 'timeout') console.log('取得商品列表發生錯誤', e);
+            if (e.message !== 'timeout') console.log('取得枕頭商品列表發生錯誤', e);
         });
-    }
-
-    const fetchCategory = async () => {
-        const res = await getProductCategoryList();
-        if(res?.status !== 200) {
-            alert("載入商品分類異常。");
-        }
-        setCategoryList(res.data.result.map(c => ({...c, isSelected: false})));
     }
 
 
     // 切換每頁顯示筆數
     const handlePageSizeChange = async (event) => {
         const newSize = parseInt(event.target.value, 10);
-        const res = await searchProduct(searchParam, { ...pagingParam, pageSize: newSize, pageIndex: 1 });
-        setProductList(res.data.searchResult.productList);
-        setPagingParam({ ...pagingParam, pageSize: newSize, pageIndex: 1 }); // 變更 pageSize 時，重置 pageIndex
+        const res = await searchProductPillow(searchParam, { ...pagingParam, pageSize: newSize, pageIndex: 1 });
+        setProductPillowList(res.data.searchResult?.productPillowList || []);
+        setPagingParam({ ...pagingParam, pageSize: newSize, pageIndex: 1 });
     };
     // 分頁切換處理
     const handlePageChange = async (pageIndex) => {
-        if (pageIndex < 1 || pageIndex > pageIndex) return;
+        if (pageIndex < 1 || pageIndex > pagingParam.pageTotal) return;
         await withLoading(
-            searchProduct(searchParam, {...pagingParam, pageIndex}),
+            searchProductPillow(searchParam, {...pagingParam, pageIndex}),
             {
                 min: 100,
                 timeout: 5000,
@@ -90,23 +99,23 @@ function ProductListPage() {
                 onTimeout: () => alert('網路不穩, 請重新搜尋')
             }
         ).then(res => {
-            setProductList(res.data.searchResult.productList);
+            setProductPillowList(res.data.searchResult?.productPillowList || []);
             setPagingParam({...pagingParam, pageIndex});
         }).catch(e => {
             if (e.message !== 'timeout') alert('網路不穩, 請重新搜尋');
         });
     };
 
-    // 編輯商品
-    const handleEditProduct = (product) => {
-        navigate(`/manager/product/edit/${product.id}`,{ state: { product, categoryList }});
+    // 編輯枕頭商品
+    const handleEditProductPillow = (productPillow) => {
+        navigate(`/manager/product-pillow/edit/${productPillow.id}`,{ state: { productPillow }});
     }
 
-    // 搜尋商品結果, 重新渲染商品
+    // 搜尋枕頭商品結果
     const handleSearchResult = async (_searchParam) => {
-        let _pagingParam = { ...pagingParam, pageIndex: 1 }; // 重置頁碼
+        let _pagingParam = { ...pagingParam, pageIndex: 1 };
         await withLoading(
-            searchProduct(_searchParam, _pagingParam),
+            searchProductPillow(_searchParam, _pagingParam),
             {
                 min: 0,
                 timeout: 5000,
@@ -116,24 +125,62 @@ function ProductListPage() {
             }
         ).then(res => {
             setSearchParam(_searchParam);
-            setProductList(res.data.searchResult.productList);
-            setPagingParam(res.data.searchResult.pagingParam);
+            setProductPillowList(res.data.searchResult?.productPillowList || []);
+            setPagingParam(res.data.searchResult?.pagingParam || _pagingParam);
         }).catch(e => {
             if (e.message !== 'timeout') alert('網路不穩, 請重新搜尋');
         });
     }
 
-    // 刪除商品
-    const handleDeleteProduct = (productId) => {
-        if(!window.confirm('確定要刪除此商品?')) return;
-        deleteProduct(productId).then((res) => {
-            alert('刪除商品成功');
-            const newProductList = productList.filter((product) => product.id !== productId);
-            setProductList(newProductList);
-        }).catch((error) => {
-            console.log('刪除商品發生錯誤', error);
+    // 處理狀態多選變更
+    const handleStateChange = (state) => {
+        const currentList = [...searchParam.stateList];
+        const index = currentList.indexOf(state);
+        if (index > -1) {
+            currentList.splice(index, 1);
+        } else {
+            currentList.push(state);
+        }
+        setSearchParam({ ...searchParam, stateList: currentList });
+    }
+
+    // 清除搜尋條件
+    const handleClearSearch = () => {
+        setSearchParam({
+            keyword: '', 
+            type: '',
+            stateList: [],
+            priceMin: '', priceMax: '',
+            shortHeightMin: '', shortHeightMax: '',
+            longHeightMin: '', longHeightMax: '',
+            shortCurvatureMin: '', shortCurvatureMax: '',
+            mediumCurvatureMin: '', mediumCurvatureMax: '',
+            longCurvatureMin: '', longCurvatureMax: ''
         });
     }
+
+    // 渲染範圍輸入元件
+    const renderRangeInput = (label, minKey, maxKey, unit = '') => (
+        <div className={styles.rangeInputGroup}>
+            <label>{label}：</label>
+            <input
+                type="number"
+                placeholder="最小"
+                value={searchParam[minKey]}
+                onChange={(e) => setSearchParam({ ...searchParam, [minKey]: e.target.value })}
+                className={styles.rangeInput}
+            />
+            <span>~</span>
+            <input
+                type="number"
+                placeholder="最大"
+                value={searchParam[maxKey]}
+                onChange={(e) => setSearchParam({ ...searchParam, [maxKey]: e.target.value })}
+                className={styles.rangeInput}
+            />
+            {unit && <span className={styles.unit}>{unit}</span>}
+        </div>
+    );
 
     // 處理客戶信箱輸入變更
     const handleCustomerEmailChange = (e) => {
@@ -150,27 +197,27 @@ function ProductListPage() {
         navigate(-1); // 返回上一頁
     }
 
-    // 處理商品選擇
-    const handleProductSelect = (product, checked) => {
+    // 處理枕頭商品選擇
+    const handleProductSelect = (productPillow, checked) => {
         const newSelectedProducts = new Map(selectedProducts);
         if (checked) {
-            newSelectedProducts.set(product.id, {
-                product: product,
+            newSelectedProducts.set(productPillow.id, {
+                productPillow: productPillow,
                 quantity: 1,
                 selected: true
             });
         } else {
-            newSelectedProducts.delete(product.id);
+            newSelectedProducts.delete(productPillow.id);
         }
         setSelectedProducts(newSelectedProducts);
     }
 
     // 處理數量變更
-    const handleQuantityChange = (productId, quantity) => {
+    const handleQuantityChange = (productPillowId, quantity) => {
         const newSelectedProducts = new Map(selectedProducts);
-        if (newSelectedProducts.has(productId)) {
-            const item = newSelectedProducts.get(productId);
-            newSelectedProducts.set(productId, {
+        if (newSelectedProducts.has(productPillowId)) {
+            const item = newSelectedProducts.get(productPillowId);
+            newSelectedProducts.set(productPillowId, {
                 ...item,
                 quantity: Math.max(1, parseInt(quantity) || 1)
             });
@@ -187,33 +234,33 @@ function ProductListPage() {
 
         const selectedItems = Array.from(selectedProducts.values()).filter(item => item.selected);
         if (selectedItems.length === 0) {
-            alert('請選擇要購買的商品');
+            alert('請選擇要購買的枕頭商品');
             return;
         }
 
-        if (!window.confirm(`確認為客戶 ${customerData.name} 購買 ${selectedItems.length} 項商品？`)) {
+        if (!window.confirm(`確認為客戶 ${customerData.name} 購買 ${selectedItems.length} 項枕頭商品？`)) {
             return;
         }
 
         setIsPurchasing(true);
         try {
             // 準備購買資料
-            const customerToProductList = selectedItems.map(item => ({
+            const customerToProductPillowList = selectedItems.map(item => ({
                 customerId: customerData.id,
-                productId: item.product.id,
+                productPillowId: item.productPillow.id,
                 quantity: item.quantity,
-                price: item.product.price,
+                price: item.productPillow.price,
                 purchaseDate: new Date().toISOString(),
-                notes: `客戶 ${customerData.name} 購買商品 ${item.product.name}`,
+                notes: `客戶 ${customerData.name} 購買枕頭商品 ${item.productPillow.name}`,
                 state: '正常'
             }));
 
             // 調用 API 批量新增購買紀錄
-            const response = await addMultipleCustomerToProduct(customerToProductList);
+            const response = await addMultipleCustomerToProductPillow(customerToProductPillowList);
             
             if (response.data.success) {
                 alert('購買成功！即將返回客戶管理頁面');
-                // 返回客戶管理頁面，並帶上購買成功的狀態
+                // 返回客戶管理頁面
                 navigate(`/manager/customer/edit/${customerData.id}`, { 
                     state: { 
                         customer: {...customerData}
@@ -235,7 +282,7 @@ function ProductListPage() {
         let total = 0;
         selectedProducts.forEach(item => {
             if (item.selected) {
-                total += (item.product.price || 0) * item.quantity;
+                total += (item.productPillow.price || 0) * item.quantity;
             }
         });
         return total;
@@ -263,10 +310,14 @@ function ProductListPage() {
             <thead>
                 <tr>
                     {customerData && <th>選擇</th>}
-                    <th>商品圖片</th>
-                    <th>商品名稱</th>
-                    <th>分類</th>
+                    <th>名稱</th>
+                    <th>類型</th>
                     <th>價格</th>
+                    <th>短高度</th>
+                    <th>長高度</th>
+                    <th>短弧度</th>
+                    <th>中弧度</th>
+                    <th>長弧度</th>
                     <th>狀態</th>
                     {customerData && <th>數量</th>}
                     <th>操作</th>
@@ -275,52 +326,48 @@ function ProductListPage() {
             <tbody>
                 {isLoading ? (
                     <tr>
-                        <td colSpan={customerData ? "8" : "6"} className={styles.loadingContainer}>
+                        <td colSpan={customerData ? "12" : "10"} className={styles.loadingContainer}>
                             <img src={loadingGif} alt="Loading..." />
                         </td>
                     </tr>
-                ) : productList.length === 0 ? (
+                ) : productPillowList.length === 0 ? (
                     <tr>
-                        <td colSpan={customerData ? "8" : "6"} className={styles.emptyState}>
+                        <td colSpan={customerData ? "12" : "10"} className={styles.emptyState}>
                             查無資料
                         </td>
                     </tr>
                 ) : (
-                    productList.map((product) => (
-                        <tr key={product.id}>
+                    productPillowList.map((productPillow) => (
+                        <tr key={productPillow.id}>
                             {customerData && (
                                 <td>
                                     <input
                                         type="checkbox"
-                                        checked={selectedProducts.has(product.id)}
-                                        onChange={(e) => handleProductSelect(product, e.target.checked)}
+                                        checked={selectedProducts.has(productPillow.id)}
+                                        onChange={(e) => handleProductSelect(productPillow, e.target.checked)}
                                         className={styles.productCheckbox}
                                     />
                                 </td>
                             )}
                             <td>
-                                <img 
-                                    className={styles.productImage}
-                                    src={product.imgList[0]?.imgUrl || shoppingBag2Img} 
-                                    alt={product.name}
-                                />
-                            </td>
-                            <td>
                                 <div className={styles.productName}>
-                                    {product.name}
+                                    {productPillow.name}
                                 </div>
                             </td>
-                            <td>
-                                {categoryList.find(c => c.id === product.categoryId)?.name || '未分類'}
-                            </td>
+                            <td>{productPillow.type || '-'}</td>
                             <td>
                                 <div className={styles.productPrice}>
-                                    NT$ {product.price?.toLocaleString()}
+                                    NT$ {productPillow.price?.toLocaleString()}
                                 </div>
                             </td>
+                            <td>{productPillow.shortHeight} cm</td>
+                            <td>{productPillow.longHeight} cm</td>
+                            <td>{productPillow.shortCurvature}°</td>
+                            <td>{productPillow.mediumCurvature}°</td>
+                            <td>{productPillow.longCurvature}°</td>
                             <td>
-                                <span className={getStatusClass(product.state)}>
-                                    {product.state}
+                                <span className={getStatusClass(productPillow.state)}>
+                                    {productPillow.state}
                                 </span>
                             </td>
                             {customerData && (
@@ -328,9 +375,9 @@ function ProductListPage() {
                                     <input
                                         type="number"
                                         min="1"
-                                        value={selectedProducts.get(product.id)?.quantity || 1}
-                                        onChange={(e) => handleQuantityChange(product.id, e.target.value)}
-                                        disabled={!selectedProducts.has(product.id)}
+                                        value={selectedProducts.get(productPillow.id)?.quantity || 1}
+                                        onChange={(e) => handleQuantityChange(productPillow.id, e.target.value)}
+                                        disabled={!selectedProducts.has(productPillow.id)}
                                         className={styles.quantityInput}
                                     />
                                 </td>
@@ -339,15 +386,9 @@ function ProductListPage() {
                                 <div className={styles.actionButtons}>
                                     <button 
                                         className={`${styles.actionButton} ${styles.edit}`}
-                                        onClick={() => handleEditProduct(product)}
+                                        onClick={() => handleEditProductPillow(productPillow)}
                                     >
                                         編輯
-                                    </button>
-                                    <button 
-                                        className={`${styles.actionButton} ${styles.delete}`}
-                                        onClick={() => handleDeleteProduct(product.id)}
-                                    >
-                                        刪除
                                     </button>
                                 </div>
                             </td>
@@ -365,54 +406,61 @@ function ProductListPage() {
                 <div className={styles.loadingContainer}>
                     <img src={loadingGif} alt="Loading..." />
                 </div>
-            ) : productList.length === 0 ? (
+            ) : productPillowList.length === 0 ? (
                 <div className={styles.emptyState}>
                     查無資料
                 </div>
             ) : (
-                productList.map((product) => (
-                    <div key={product.id} className={styles.productCard}>
+                productPillowList.map((productPillow) => (
+                    <div key={productPillow.id} className={styles.productCard}>
                         {customerData && (
                             <div className={styles.cardCheckbox}>
                                 <input
                                     type="checkbox"
-                                    checked={selectedProducts.has(product.id)}
-                                    onChange={(e) => handleProductSelect(product, e.target.checked)}
+                                    checked={selectedProducts.has(productPillow.id)}
+                                    onChange={(e) => handleProductSelect(productPillow, e.target.checked)}
                                 />
                                 <label>選擇商品</label>
                             </div>
                         )}
                         
                         <div className={styles.cardHeader}>
-                            <img 
-                                className={styles.cardImage}
-                                src={product.imgList[0]?.imgUrl || shoppingBag2Img} 
-                                alt={product.name}
-                            />
                             <div className={styles.cardTitle}>
-                                {product.name}
+                                {productPillow.name}
                             </div>
                         </div>
                         
                         <div className={styles.cardBody}>
                             <div className={styles.cardRow}>
-                                <span className={styles.cardLabel}>分類：</span>
-                                <span className={styles.cardValue}>
-                                    {categoryList.find(c => c.id === product.categoryId)?.name || '未分類'}
-                                </span>
+                                <span className={styles.cardLabel}>類型：</span>
+                                <span className={styles.cardValue}>{productPillow.type || '-'}</span>
                             </div>
                             
                             <div className={styles.cardRow}>
                                 <span className={styles.cardLabel}>價格：</span>
                                 <span className={`${styles.cardValue} ${styles.productPrice}`}>
-                                    NT$ {product.price?.toLocaleString()}
+                                    NT$ {productPillow.price?.toLocaleString()}
+                                </span>
+                            </div>
+
+                            <div className={styles.cardRow}>
+                                <span className={styles.cardLabel}>高度：</span>
+                                <span className={styles.cardValue}>
+                                    短 {productPillow.shortHeight}cm / 長 {productPillow.longHeight}cm
+                                </span>
+                            </div>
+
+                            <div className={styles.cardRow}>
+                                <span className={styles.cardLabel}>弧度：</span>
+                                <span className={styles.cardValue}>
+                                    短 {productPillow.shortCurvature}° / 中 {productPillow.mediumCurvature}° / 長 {productPillow.longCurvature}°
                                 </span>
                             </div>
                             
                             <div className={styles.cardRow}>
                                 <span className={styles.cardLabel}>狀態：</span>
-                                <span className={getStatusClass(product.state)}>
-                                    {product.state}
+                                <span className={getStatusClass(productPillow.state)}>
+                                    {productPillow.state}
                                 </span>
                             </div>
 
@@ -422,9 +470,9 @@ function ProductListPage() {
                                     <input
                                         type="number"
                                         min="1"
-                                        value={selectedProducts.get(product.id)?.quantity || 1}
-                                        onChange={(e) => handleQuantityChange(product.id, e.target.value)}
-                                        disabled={!selectedProducts.has(product.id)}
+                                        value={selectedProducts.get(productPillow.id)?.quantity || 1}
+                                        onChange={(e) => handleQuantityChange(productPillow.id, e.target.value)}
+                                        disabled={!selectedProducts.has(productPillow.id)}
                                         className={styles.quantityInput}
                                     />
                                 </div>
@@ -434,15 +482,9 @@ function ProductListPage() {
                         <div className={styles.cardActions}>
                             <button 
                                 className={`${styles.cardButton} ${styles.edit}`}
-                                onClick={() => handleEditProduct(product)}
+                                onClick={() => handleEditProductPillow(productPillow)}
                             >
                                 編輯
-                            </button>
-                            <button 
-                                className={`${styles.cardButton} ${styles.delete}`}
-                                onClick={() => handleDeleteProduct(product.id)}
-                            >
-                                刪除
                             </button>
                         </div>
                     </div>
@@ -475,7 +517,7 @@ function ProductListPage() {
                 </div>
             )}
 
-            <h2>客戶綁定</h2>
+            <h2>客戶綁定枕頭商品</h2>
             <div className={styles.customerBindingSection}>
                 <input 
                     type="text" 
@@ -497,13 +539,28 @@ function ProductListPage() {
             {/* 客戶分析結果區塊 */}
             {customerData && showAnalysisResults && customerData.analysisResults && customerData.analysisResults.length > 0 && (
                 <div className={styles.analysisResultsSection}>
-                    <h2>客戶分析結果</h2>
+                    <div className={styles.sectionHeader}>
+                        <h2>客戶分析結果</h2>
+                        <button 
+                            className={styles.recommendButton}
+                            onClick={() => setShowRecommendationModal(true)}
+                        >
+                            推薦商品
+                        </button>
+                    </div>
                     <AnalysisResult 
                         analysisResults={customerData.analysisResults}
-                        onDeleteResult={null} // 在商品頁面不允許刪除分析結果
+                        onDeleteResult={null}
                     />
                 </div>
             )}
+            
+            {/* 推薦商品彈窗 */}
+            <ProductRecommendationModal
+                isOpen={showRecommendationModal}
+                onClose={() => setShowRecommendationModal(false)}
+                analysisResults={customerData?.analysisResults || []}
+            />
             
             {/* 購買確認區域 */}
             {customerData && selectedProducts.size > 0 && (
@@ -516,11 +573,11 @@ function ProductListPage() {
                     </div>
                     <div className={styles.selectedItemsList}>
                         {Array.from(selectedProducts.values()).filter(item => item.selected).map(item => (
-                            <div key={item.product.id} className={styles.selectedItem}>
-                                <span className={styles.itemName}>{item.product.name}</span>
+                            <div key={item.productPillow.id} className={styles.selectedItem}>
+                                <span className={styles.itemName}>{item.productPillow.name}</span>
                                 <span className={styles.itemQuantity}>x {item.quantity}</span>
                                 <span className={styles.itemPrice}>
-                                    NT$ {((item.product.price || 0) * item.quantity).toLocaleString()}
+                                    NT$ {((item.productPillow.price || 0) * item.quantity).toLocaleString()}
                                 </span>
                             </div>
                         ))}
@@ -534,12 +591,67 @@ function ProductListPage() {
                     </button>
                 </div>
             )}
-            
-            <SearchBarProduct 
-                getSearchParam={handleSearchResult}
-                categoryList={categoryList}
-                pagingParam={pagingParam}
-            />
+
+            {/* 搜尋區域 */}
+            <div className={styles.searchBar}>
+                <input
+                    type="text"
+                    placeholder="搜尋枕頭商品名稱..."
+                    value={searchParam.keyword}
+                    onChange={(e) => setSearchParam({ ...searchParam, keyword: e.target.value })}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter') handleSearchResult(searchParam);
+                    }}
+                />
+                <input
+                    type="text"
+                    placeholder="搜尋類型..."
+                    value={searchParam.type}
+                    onChange={(e) => setSearchParam({ ...searchParam, type: e.target.value })}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter') handleSearchResult(searchParam);
+                    }}
+                    className={styles.typeInput}
+                />
+                <button onClick={() => handleSearchResult(searchParam)}>搜尋</button>
+                <button 
+                    onClick={() => setShowAdvancedSearch(!showAdvancedSearch)}
+                    className={styles.advancedToggle}
+                >
+                    {showAdvancedSearch ? '收起進階' : '進階搜尋'}
+                </button>
+                <button onClick={handleClearSearch} className={styles.clearButton}>清除</button>
+            </div>
+
+            {/* 進階搜尋區域 */}
+            {showAdvancedSearch && (
+                <div className={styles.advancedSearchBar}>
+                    {/* 狀態多選 */}
+                    <div className={styles.stateCheckboxGroup}>
+                        <label>狀態：</label>
+                        {stateOptions.map((state) => (
+                            <label key={state} className={styles.checkboxLabel}>
+                                <input
+                                    type="checkbox"
+                                    checked={searchParam.stateList.includes(state)}
+                                    onChange={() => handleStateChange(state)}
+                                />
+                                {state}
+                            </label>
+                        ))}
+                    </div>
+
+                    {/* 範圍搜尋 */}
+                    <div className={styles.rangeSearchGrid}>
+                        {renderRangeInput('價格', 'priceMin', 'priceMax', '元')}
+                        {renderRangeInput('短高度', 'shortHeightMin', 'shortHeightMax', 'cm')}
+                        {renderRangeInput('長高度', 'longHeightMin', 'longHeightMax', 'cm')}
+                        {renderRangeInput('短弧度', 'shortCurvatureMin', 'shortCurvatureMax', '°')}
+                        {renderRangeInput('中弧度', 'mediumCurvatureMin', 'mediumCurvatureMax', '°')}
+                        {renderRangeInput('長弧度', 'longCurvatureMin', 'longCurvatureMax', '°')}
+                    </div>
+                </div>
+            )}
             
             {/* 桌面版表格 */}
             {renderDesktopTable()}
@@ -556,4 +668,4 @@ function ProductListPage() {
     );
 }
 
-export default ProductListPage;
+export default ProductListPageSpine;

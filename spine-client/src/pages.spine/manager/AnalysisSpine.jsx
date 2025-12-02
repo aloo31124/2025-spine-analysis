@@ -4,6 +4,8 @@ import './AnalysisSpine.css';
 import neckPatientImage from '../../assets.spine/images/病患側面.png';
 import { addCustomerAnalysisResult } from '../../api/manager/customerAnalysisResult';
 import { getCustomerList } from '../../api/manager/customer';
+import ScaleIndicator from '../../components/ScaleIndicator';
+import { formatPxCmText } from '../../utils/scaleConversion';
 
 function AnalysisSpine() {
     const navigate = useNavigate();
@@ -176,23 +178,6 @@ function AnalysisSpine() {
         }
     };
 
-    // 重置
-    const handleReset = () => {
-        setCurrentScale(1);
-        applyScale(1);
-        initPoints();
-        setCurrentPointIndex(0);
-        setIsCalculated(false);
-        setShowSaveOptions(false);
-        setShowCustomerModal(false);
-    };
-
-    // 切換回原始圖片
-    const handleUseOriginalImage = () => {
-        setBackgroundImage(neckPatientImage);
-        handleReset();
-    };
-
     // 導航到拍照頁面
     const handleGoToPhotoCapture = () => {
         navigate('/manager/photo/capture');
@@ -214,7 +199,7 @@ function AnalysisSpine() {
         for (let i = 0; i < points.length; i++) {
             for (let j = i + 1; j < points.length; j++) {
                 const distance = calculateDistance(points[i], points[j]);
-                results.push(`點${i + 1} 到 點${j + 1}: ${distance.toFixed(2)}px`);
+                results.push(`點${i + 1} 到 點${j + 1}: ${formatPxCmText(distance)}`);
             }
         }
         
@@ -340,21 +325,6 @@ function AnalysisSpine() {
                 end: intersection6
             };
             newLines.push(line56);
-
-            // 7. 計算角度756（點7-點5-點6的夾角）
-            const angle756 = calculateAngle756(intersection7, points[4], intersection6);
-            
-            // 8. 計算線75和線56的距離
-            const distance75 = calculateDistance(intersection7, points[4]);
-            const distance56 = calculateDistance(points[4], intersection6);
-            
-            // 顯示計算結果
-            const results = [
-                `角度756 (點7-點5-點6): ${angle756.toFixed(1)}°`,
-                `線75距離: ${distance75.toFixed(2)}px`,
-                `線56距離: ${distance56.toFixed(2)}px`
-            ];
-            alert("計算結果:\n" + results.join('\n'));
         }
 
         setLines(newLines);
@@ -466,7 +436,7 @@ function AnalysisSpine() {
             navigate('/manager/customer/add');
         } catch (error) {
             console.error('處理新建客戶錯誤:', error);
-            alert('處理新建客戶失敗');
+            alert('處理新建客戶失敗', error);
         }
     };
 
@@ -518,6 +488,28 @@ function AnalysisSpine() {
         setShowCustomerModal(false);
     };
 
+    
+    
+    const getContainerStyle = () => {
+        const style = {
+            backgroundImage: `url(${backgroundImage})`
+        };
+
+        if (backgroundImage === neckPatientImage) {
+            return {
+                ...style,
+                backgroundPosition: 'center top',
+                backgroundSize: 'auto 135%'
+            };
+        }
+
+        return {
+            ...style,
+            backgroundPosition: 'center',
+            backgroundSize: 'cover'
+        };
+    };
+
     return (
         <div className="analysis-spine">
             <div className="analysis-content">
@@ -539,7 +531,7 @@ function AnalysisSpine() {
                     <div 
                         className="neck-container" 
                         ref={neckContainerRef}
-                        style={{ backgroundImage: `url(${backgroundImage})` }}
+                        style={getContainerStyle()}
                     >
                         {/* 渲染點位 */}
                         {points.map((point, index) => (
@@ -622,6 +614,8 @@ function AnalysisSpine() {
                                 {point.id}
                             </div>
                         ))}
+
+                        <ScaleIndicator />
                     </div>
                 </div>
             </div>
@@ -667,21 +661,9 @@ function AnalysisSpine() {
                     </button>
                 )}
                 <span>&nbsp;&nbsp;&nbsp;</span>
-                <button onClick={handleReset} className="action-btn">
-                    重置
-                </button>
-                <span>&nbsp;&nbsp;&nbsp;</span>
                 <button onClick={handleGoToPhotoCapture} className="action-btn">
                     拍攝新照片
                 </button>
-                {backgroundImage !== neckPatientImage && (
-                    <>
-                        <span>&nbsp;&nbsp;&nbsp;</span>
-                        <button onClick={handleUseOriginalImage} className="action-btn">
-                            使用原始圖片
-                        </button>
-                    </>
-                )}
             </div>
 
             {/* 保存選項對話框 */}

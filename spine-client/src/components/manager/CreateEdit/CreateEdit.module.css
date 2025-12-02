@@ -403,5 +403,40 @@
     }
 }
 
+/* 區塊標題與按鈕容器 */
+.SectionHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.SectionHeader h2 {
+    margin: 0;
+}
+
+/* 推薦商品按鈕 */
+.RecommendButton {
+    background-color: #ff9800;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    font-weight: 500;
+}
+
+.RecommendButton:hover {
+    background-color: #f57c00;
+}
+
+.RecommendButton:active {
+    background-color: #e65100;
+}
+
+
 
 
