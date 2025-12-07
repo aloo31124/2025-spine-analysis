@@ -14,6 +14,18 @@ exports.getRevenueLineChartData = async (req, res) => {
 	}
 };
 
+exports.getSalesLineChartData = async (req, res) => {
+	console.log(`${ERROR_HEADER} getSalesLineChartData start`, req.body);
+	try {
+		const { timeRange = 'day', productPillowId = 'all' } = req.body || {};
+		const result = await reportSpineService.getSalesLineChartData({ timeRange, productPillowId });
+		res.status(200).json({ result });
+	} catch (error) {
+		console.error(`${ERROR_HEADER} getSalesLineChartData error:`, error);
+		res.status(500).json({ result: '500', message: error.message });
+	}
+};
+
 exports.getProductPillowOptions = async (req, res) => {
 	console.log(`${ERROR_HEADER} getProductPillowOptions start`);
 	try {

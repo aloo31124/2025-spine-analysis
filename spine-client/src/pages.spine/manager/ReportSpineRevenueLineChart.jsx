@@ -1,7 +1,13 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Chart from 'chart.js/auto';
 import styles from './ReportSpineRevenueLineChart.module.css';
 import { getProductPillowOptions, getRevenueLineChartData } from '../../api/manager/reportSpine';
+
+const REPORT_TABS = [
+	{ key: 'revenue', label: '營收折線圖', path: '/manager/report/revenue-line-chart' },
+	{ key: 'sales', label: '銷量折線圖', path: '/manager/report/sales-line-chart' }
+];
 
 const TIME_RANGE_OPTIONS = [
 	{ value: 'day', label: '近 100 天 (日)' },
@@ -20,6 +26,8 @@ const TIME_RANGE_META = {
 const DEFAULT_CHART_STATE = { labels: [], data: [], summary: {} };
 
 const ReportSpineRevenueLineChart = () => {
+	const navigate = useNavigate();
+	const activeTab = 'revenue';
 	const [timeRange, setTimeRange] = useState('day');
 	const [productPillowId, setProductPillowId] = useState('all');
 	const [productOptions, setProductOptions] = useState([{ id: 'all', name: '全部商品' }]);
@@ -180,35 +188,49 @@ const ReportSpineRevenueLineChart = () => {
 
 	return (
 		<section className={styles.page}>
-			<div className={styles.headerRow}>
-				<div className={styles.titleGroup}>
-					<span className={styles.subtitle}>Revenue Intelligence</span>
-					<h2 className={styles.title}>營收折線圖</h2>
-					<span className={styles.summaryHint}>{timeRangeDescription}</span>
+			<div className={styles.panel}>
+				<div className={styles.tabBar}>
+					{REPORT_TABS.map(tab => (
+						<button
+							key={tab.key}
+							type="button"
+							className={`${styles.tabButton} ${tab.key === activeTab ? styles.tabButtonActive : ''}`}
+							onClick={() => tab.key !== activeTab && navigate(tab.path)}
+						>
+							{tab.label}
+						</button>
+					))}
 				</div>
-				<div className={styles.filterGroup}>
-					<select
-						className={styles.select}
-						value={timeRange}
-						onChange={event => setTimeRange(event.target.value)}
-					>
-						{TIME_RANGE_OPTIONS.map(option => (
-							<option key={option.value} value={option.value}>
-								{option.label}
-							</option>
-						))}
-					</select>
-					<select
-						className={styles.select}
-						value={productPillowId}
-						onChange={event => setProductPillowId(event.target.value)}
-					>
-						{productOptions.map(option => (
-							<option key={option.id} value={option.id}>
-								{option.name || '未命名商品'}
-							</option>
-						))}
-					</select>
+				<div className={styles.headerRow}>
+					<div className={styles.titleGroup}>
+						<span className={styles.subtitle}>Revenue Intelligence</span>
+						<h2 className={styles.title}>營收折線圖</h2>
+						<span className={styles.summaryHint}>{timeRangeDescription}</span>
+					</div>
+					<div className={styles.filterGroup}>
+						<select
+							className={styles.select}
+							value={timeRange}
+							onChange={event => setTimeRange(event.target.value)}
+						>
+							{TIME_RANGE_OPTIONS.map(option => (
+								<option key={option.value} value={option.value}>
+									{option.label}
+								</option>
+							))}
+						</select>
+						<select
+							className={styles.select}
+							value={productPillowId}
+							onChange={event => setProductPillowId(event.target.value)}
+						>
+							{productOptions.map(option => (
+								<option key={option.id} value={option.id}>
+									{option.name || '未命名商品'}
+								</option>
+							))}
+						</select>
+					</div>
 				</div>
 			</div>
 

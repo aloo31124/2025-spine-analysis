@@ -37,6 +37,37 @@ export const getRevenueLineChartData = async (timeRange = 'day', productPillowId
 };
 
 /**
+ * 取得銷量折線圖資料
+ * @param {string} timeRange - 區間 ('day', 'week', 'month', 'quarter')
+ * @param {string} productPillowId - 商品 ID ('all' 或特定 ID)
+ */
+export const getSalesLineChartData = async (timeRange = 'day', productPillowId = 'all') => {
+    const token = localStorage.getItem('jwt');
+    if (!token) {
+        throw new Error('���n�J');
+    }
+
+    try {
+        const response = await axios.post(
+            `${BASE_URL}/sales-line-chart`,
+            {
+                timeRange,
+                productPillowId
+            },
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            }
+        );
+        return response?.data?.result;
+    } catch (error) {
+        console.error('[reportSpine.js] getSalesLineChartData error:', error);
+        throw error;
+    }
+};
+
+/**
  * ���o�ӫ~�ﶵ�C���]�Ω�U�Կ��^
  * @returns {Promise} API�^��
  */

@@ -86,6 +86,7 @@ import CustomerListPage from './pages.spine/manager/CustomerListPage';
 import CustomerAddPage from './pages.spine/manager/CustomerAddPage';
 import CustomerEditPage from './pages.spine/manager/CustomerEditPage';
 import ReportSpineRevenueLineChart from './pages.spine/manager/ReportSpineRevenueLineChart';
+import ReportSpineSalesLineChart from './pages.spine/manager/ReportSpineSalesLineChart';
 
 
 /**
@@ -166,6 +167,7 @@ const AppRouter = () => (
 
       {/* 營收報表 */}
       <Route path="report/revenue-line-chart" element={<ReportSpineRevenueLineChart />} />
+      <Route path="report/sales-line-chart" element={<ReportSpineSalesLineChart />} />
       
       {/* 系統管理 */}
       <Route path="system" element={<SystemPage />} />

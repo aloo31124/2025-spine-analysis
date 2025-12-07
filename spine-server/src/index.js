@@ -162,6 +162,7 @@ app.post('/api/manager/customer-to-product-pillow/search', customerToProductPill
 app.get('/api/manager/customer-to-product-pillow/stats/:customerId', customerToProductPillowApiController.getCustomerPurchaseStats);
 // 後台管理 報表 api
 app.post('/api/manager/report-spine/revenue-line-chart', reportSpineApiController.getRevenueLineChartData);
+app.post('/api/manager/report-spine/sales-line-chart', reportSpineApiController.getSalesLineChartData);
 app.get('/api/manager/report-spine/product-options', reportSpineApiController.getProductPillowOptions);
 // 購物 api
 app.post('/api/shop/product/list', shopApiController.searchProductList);

@@ -10,21 +10,42 @@ const RANGE_CONFIG = {
 };
 
 exports.getRevenueLineChartData = async ({ timeRange = DEFAULT_TIME_RANGE, productPillowId = 'all' }) => {
-	const rangeKey = RANGE_CONFIG[timeRange] ? timeRange : DEFAULT_TIME_RANGE;
-	const { buckets, startDateISO, endDateISO } = buildBuckets(rangeKey);
+	const { labels, data, timeRange: resolvedRange, filters, dateRange } = await buildLineChartDataset({
+		timeRange,
+		productPillowId,
+		metricFn: record => (Number(record.price) || 0) * (Number(record.quantity) || 1)
+	});
 
-	const records = await ReportSpineModel.fetchRevenueRecords({ startDateISO, endDateISO });
-	const chartData = aggregateRevenue(records, buckets, productPillowId);
+	const roundedData = data.map(roundToTwo);
+	return {
+		labels,
+		data: roundedData,
+		timeRange: resolvedRange,
+		filters,
+		summary: {
+			totalRevenue: roundToTwo(roundedData.reduce((sum, value) => sum + value, 0)),
+			startDate: dateRange.startDate,
+			endDate: dateRange.endDate
+		}
+	};
+};
+
+exports.getSalesLineChartData = async ({ timeRange = DEFAULT_TIME_RANGE, productPillowId = 'all' }) => {
+	const { labels, data, timeRange: resolvedRange, filters, dateRange } = await buildLineChartDataset({
+		timeRange,
+		productPillowId,
+		metricFn: record => Number(record.quantity) || 0
+	});
 
 	return {
-		labels: buckets.map(bucket => bucket.label),
-		data: chartData,
-		timeRange: rangeKey,
-		filters: { productPillowId },
+		labels,
+		data,
+		timeRange: resolvedRange,
+		filters,
 		summary: {
-			totalRevenue: roundToTwo(chartData.reduce((sum, value) => sum + value, 0)),
-			startDate: startDateISO,
-			endDate: endDateISO
+			totalSales: data.reduce((sum, value) => sum + value, 0),
+			startDate: dateRange.startDate,
+			endDate: dateRange.endDate
 		}
 	};
 };
@@ -32,6 +53,21 @@ exports.getRevenueLineChartData = async ({ timeRange = DEFAULT_TIME_RANGE, produ
 exports.getProductPillowOptions = async () => {
 	return ReportSpineModel.fetchProductPillowOptions();
 };
+
+async function buildLineChartDataset({ timeRange, productPillowId, metricFn }) {
+	const rangeKey = RANGE_CONFIG[timeRange] ? timeRange : DEFAULT_TIME_RANGE;
+	const { buckets, startDateISO, endDateISO } = buildBuckets(rangeKey);
+	const records = await ReportSpineModel.fetchPurchaseRecords({ startDateISO, endDateISO });
+	const data = aggregateMetric(records, buckets, productPillowId, metricFn);
+
+	return {
+		labels: buckets.map(bucket => bucket.label),
+		data,
+		timeRange: rangeKey,
+		filters: { productPillowId },
+		dateRange: { startDate: startDateISO, endDate: endDateISO }
+	};
+}
 
 function buildBuckets(rangeKey) {
 	const now = new Date();
@@ -113,7 +149,7 @@ function finalizeBucketRange(buckets) {
 	};
 }
 
-function aggregateRevenue(records, buckets, productPillowId) {
+function aggregateMetric(records, buckets, productPillowId, metricFn) {
 	const totals = new Array(buckets.length).fill(0);
 
 	records.forEach(record => {
@@ -135,12 +171,10 @@ function aggregateRevenue(records, buckets, productPillowId) {
 			return;
 		}
 
-		const price = Number(record.price) || 0;
-		const quantity = Number(record.quantity) || 1;
-		totals[bucketIndex] += price * quantity;
+		totals[bucketIndex] += metricFn(record) || 0;
 	});
 
-	return totals.map(value => roundToTwo(value));
+	return totals;
 }
 
 function startOfDay(date) {

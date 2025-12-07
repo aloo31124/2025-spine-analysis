@@ -14,12 +14,62 @@
     border: 1px solid #e9ecef;
 }
 
+.tabBar {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.tabButton {
+    padding: 8px 18px;
+    border-radius: 999px;
+    border: 1px solid #dee2e6;
+    background: #f8f9fa;
+    color: #6c757d;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.tabButton:hover {
+    background: #e9ecef;
+}
+
+.tabButtonActive {
+    border-color: #007bff;
+    background: #007bff;
+    color: white;
+    box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
+}
+
 .headerRow {
     display: flex;
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
     gap: 15px;
+}
+
+.titleGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.titleGroup h2,
+.title {
+    margin: 0;
+    font-size: 22px;
+    color: #212529;
+}
+
+.titleGroup span,
+.subtitle {
+    color: #6c757d;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
 }
 
 .titleGroup h2 {
@@ -131,12 +181,13 @@
         padding: 16px;
     }
 
-    .titleGroup h2 {
+    .titleGroup h2,
+    .title {
         font-size: 20px;
     }
 
     .filterGroup {
-        width: 100%;
+        width: 80%;
         flex-direction: column;
     }
 
