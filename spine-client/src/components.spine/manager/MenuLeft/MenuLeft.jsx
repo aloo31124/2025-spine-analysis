@@ -66,6 +66,11 @@ function MenuLeft({ isOpen, isHidden, onClose }) {
                     枕頭商品
                 </button>
                 <button className={style.MenuLeftButton}
+                    onClick={e => navigate('/') }
+                >
+                    營收管理
+                </button>
+                <button className={style.MenuLeftButton}
                     onClick={e => navigate('/manager/payment/list') }
                 >
                     方案管理
