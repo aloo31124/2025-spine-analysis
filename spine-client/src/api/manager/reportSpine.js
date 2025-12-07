@@ -5,15 +5,15 @@ const CONTEXT = 'api/manager/report-spine';
 const BASE_URL = HOST + CONTEXT;
 
 /**
- * ¨ú±oÀç¦¬§é½u¹Ï¸ê®Æ
- * @param {string} timeRange - ®É¶¡½d³ò ('day', 'week', 'month', 'quarter')
- * @param {string} productPillowId - °Ó«~ID ('all' ©Î¯S©wID)
- * @returns {Promise} API¦^À³
+ * ï¿½ï¿½ï¿½oï¿½ç¦¬ï¿½ï¿½uï¿½Ï¸ï¿½ï¿½
+ * @param {string} timeRange - ï¿½É¶ï¿½ï¿½dï¿½ï¿½ ('day', 'week', 'month', 'quarter')
+ * @param {string} productPillowId - ï¿½Ó«~ID ('all' ï¿½Î¯Sï¿½wID)
+ * @returns {Promise} APIï¿½^ï¿½ï¿½
  */
 export const getRevenueLineChartData = async (timeRange = 'day', productPillowId = 'all') => {
     const token = localStorage.getItem('jwt');
     if (!token) {
-        throw new Error('¥¼µn¤J');
+        throw new Error('ï¿½ï¿½ï¿½nï¿½J');
     }
 
     try {
@@ -29,7 +29,7 @@ export const getRevenueLineChartData = async (timeRange = 'day', productPillowId
                 }
             }
         );
-        return response;
+        return response?.data?.result;
     } catch (error) {
         console.error('[reportSpine.js] getRevenueLineChartData error:', error);
         throw error;
@@ -37,13 +37,13 @@ export const getRevenueLineChartData = async (timeRange = 'day', productPillowId
 };
 
 /**
- * ¨ú±o°Ó«~¿ï¶µ¦Cªí¡]¥Î©ó¤U©Ô¿ï³æ¡^
- * @returns {Promise} API¦^À³
+ * ï¿½ï¿½ï¿½oï¿½Ó«~ï¿½ï¶µï¿½Cï¿½ï¿½ï¿½]ï¿½Î©ï¿½Uï¿½Ô¿ï¿½ï¿½^
+ * @returns {Promise} APIï¿½^ï¿½ï¿½
  */
 export const getProductPillowOptions = async () => {
     const token = localStorage.getItem('jwt');
     if (!token) {
-        throw new Error('¥¼µn¤J');
+        throw new Error('ï¿½ï¿½ï¿½nï¿½J');
     }
 
     try {
@@ -55,7 +55,7 @@ export const getProductPillowOptions = async () => {
                 }
             }
         );
-        return response;
+        return response?.data?.result;
     } catch (error) {
         console.error('[reportSpine.js] getProductPillowOptions error:', error);
         throw error;

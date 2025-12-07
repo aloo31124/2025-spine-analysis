@@ -85,6 +85,7 @@ import PaymentFormPage from './pages/manager/PaymentFormPage';
 import CustomerListPage from './pages.spine/manager/CustomerListPage';
 import CustomerAddPage from './pages.spine/manager/CustomerAddPage';
 import CustomerEditPage from './pages.spine/manager/CustomerEditPage';
+import ReportSpineRevenueLineChart from './pages.spine/manager/ReportSpineRevenueLineChart';
 
 
 /**
@@ -162,6 +163,9 @@ const AppRouter = () => (
       <Route path="payment/list" element={<PaymentListPage />} />
       <Route path="payment/add" element={<PaymentFormPage />} />
       <Route path="payment/edit/:id" element={<PaymentFormPage />} />
+
+      {/* 營收報表 */}
+      <Route path="report/revenue-line-chart" element={<ReportSpineRevenueLineChart />} />
       
       {/* 系統管理 */}
       <Route path="system" element={<SystemPage />} />
