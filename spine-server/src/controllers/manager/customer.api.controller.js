@@ -15,7 +15,8 @@ exports.getCustomerList = async (req, res) => {
     try {
         console.log("[getCustomerList] start ");
         const {searchParam, pagingParam} = req.body;
-        const result = await customerService.searchCustomer(searchParam, pagingParam);
+        const payload = authService.verifyJwt(req);
+        const result = await customerService.searchCustomer(searchParam, pagingParam, payload?.userId);
         res.status(200).json({ result });
     } catch (error) {
         console.error("[getCustomerList] error :", error);
@@ -77,7 +78,8 @@ exports.deleteCustomer = async (req, res) => {
 exports.searchCustomer = async (req, res) => {
     console.log("[searchCustomer] start : searchParam =", req.body.searchParam, "pagingParam =", req.body.pagingParam);
     try {
-        const searchResult = await customerService.searchCustomer(req.body.searchParam, req.body.pagingParam);
+        const payload = authService.verifyJwt(req);
+        const searchResult = await customerService.searchCustomer(req.body.searchParam, req.body.pagingParam, payload?.userId);
         res.status(200).json({ result: '200', searchResult });
     } catch (error) {
         console.error("[searchCustomer] error :", error);

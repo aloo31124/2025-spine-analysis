@@ -85,7 +85,11 @@ import PaymentFormPage from './pages/manager/PaymentFormPage';
 import CustomerListPage from './pages.spine/manager/CustomerListPage';
 import CustomerAddPage from './pages.spine/manager/CustomerAddPage';
 import CustomerEditPage from './pages.spine/manager/CustomerEditPage';
+import ReportSpineRevenueLineChart from './pages.spine/manager/ReportSpineRevenueLineChart';
+import ReportSpineSalesLineChart from './pages.spine/manager/ReportSpineSalesLineChart';
 
+// 分權設定頁
+import RoleManagementPage from './pages.spine/manager/RoleManagementPage';
 
 /**
  * 路由配置器 - 管理整個應用的頁面導航
@@ -133,9 +137,9 @@ const AppRouter = () => (
     {/* === 管理者路由群組 (賣家權限) === */}
     <Route path="/manager/*" element={<AppRouterVerify element={ManagerLayout} node={"seller"} />}>
       {/* 脊椎分析 */}
-      <Route path="analysis/spine" element={<AnalysisSpine />} />       {/* 脊椎分析 */}
-      <Route path="analysis/tail" element={<AnalysisTail />} />         {/* 尾椎分析 */}
-      <Route path="photo/capture" element={<PhotoCapture />} />        {/* 拍照上傳 */}
+      <Route path="analysis/spine" element={<AppRouterVerify element={AnalysisSpine} node="analysis-spine" />} />
+      <Route path="analysis/tail" element={<AppRouterVerify element={AnalysisTail} node="analysis-tail" />} />
+      <Route path="photo/capture" element={<AppRouterVerify element={PhotoCapture} node="photo-capture" />} />
       
       {/* 商品管理 */}
       <Route path="product/list" element={<ProductListPage />} />      {/* 商品列表 */}
@@ -144,9 +148,9 @@ const AppRouter = () => (
       <Route path="product-spine" element={<ProductListPageSpine />} />     {/* 商品列表脊椎版本 */}
       
       {/* 枕頭商品管理 */}
-      <Route path="product-pillow/list" element={<ProductPillowListPage />} />      {/* 枕頭商品列表 */}
-      <Route path="product-pillow/add" element={<ProductPillowAddPage />} />        {/* 新增枕頭商品 */}
-      <Route path="product-pillow/edit/:id" element={<ProductPillowEditPage />} />  {/* 編輯枕頭商品 */}
+      <Route path="product-pillow/list" element={<AppRouterVerify element={ProductPillowListPage} node="product-pillow" />} />
+      <Route path="product-pillow/add" element={<AppRouterVerify element={ProductPillowAddPage} node="product-pillow" />} />
+      <Route path="product-pillow/edit/:id" element={<AppRouterVerify element={ProductPillowEditPage} node="product-pillow" />} />
       
       {/* 分類管理 */}
       <Route path="product/category/list" element={<CategoryListPage />} />    {/* 分類列表 */}
@@ -154,17 +158,24 @@ const AppRouter = () => (
       <Route path="product/category/edit/:id" element={<CategoryEditPage />} /> {/* 編輯分類 */}
 
       {/* 客戶管理 */}
-      <Route path="customer/list" element={<CustomerListPage />} />
-      <Route path="customer/add" element={<CustomerAddPage />} />
-      <Route path="customer/edit/:id" element={<CustomerEditPage />} />
+      <Route path="customer/list" element={<AppRouterVerify element={CustomerListPage} node="customer" />} />
+      <Route path="customer/add" element={<AppRouterVerify element={CustomerAddPage} node="customer" />} />
+      <Route path="customer/edit/:id" element={<AppRouterVerify element={CustomerEditPage} node="customer" />} />
 
       {/* 方案管理 */}
-      <Route path="payment/list" element={<PaymentListPage />} />
-      <Route path="payment/add" element={<PaymentFormPage />} />
-      <Route path="payment/edit/:id" element={<PaymentFormPage />} />
+      <Route path="payment/list" element={<AppRouterVerify element={PaymentListPage} node="payment" />} />
+      <Route path="payment/add" element={<AppRouterVerify element={PaymentFormPage} node="payment" />} />
+      <Route path="payment/edit/:id" element={<AppRouterVerify element={PaymentFormPage} node="payment" />} />
+
+      {/* 營收報表 */}
+      <Route path="report/revenue-line-chart" element={<AppRouterVerify element={ReportSpineRevenueLineChart} node="revenue" />} />
+      <Route path="report/sales-line-chart" element={<AppRouterVerify element={ReportSpineSalesLineChart} node="revenue" />} />
+      
+      {/* 分權設定 */}
+      <Route path="role-management" element={<AppRouterVerify element={RoleManagementPage} node="role-management" />} />
       
       {/* 系統管理 */}
-      <Route path="system" element={<SystemPage />} />
+      <Route path="system" element={<AppRouterVerify element={SystemPage} node="system" />} />
     </Route>
   </Routes>
 );

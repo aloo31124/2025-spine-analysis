@@ -27,7 +27,7 @@ exports.getCustomerList = async () => {
 }
 
 /* 搜尋客戶 */
-exports.searchCustomer = async (searchParam, pagingParam) => {
+exports.searchCustomer = async (searchParam, pagingParam, userId = null) => {
     try {
         console.log("[searchCustomer] start :");
         // 取得所有客戶, 篩選條件
@@ -37,6 +37,7 @@ exports.searchCustomer = async (searchParam, pagingParam) => {
             && (state ? customer.state === state : true) 
             && (phone ? customer.phone && customer.phone.includes(phone) : true) 
             && (email ? customer.email && customer.email.includes(email) : true) 
+            && (userId ? customer.userId === userId : true)
         ); 
 
         let customerList = _customerList;
