@@ -53,3 +53,75 @@ exports.joinUserRole = async (email, role) => {
     }
 }
 
+/* 刪除使用者角色對應關係 */
+exports.deleteUserToRole = async (id) => {
+    console.log("[deleteUserToRole] 開始 id :", id);
+    try {
+        return await UserToRole.delete(id);
+    } catch (error) {
+        console.log("[deleteUserToRole] 失敗", error);
+        throw new Error("[deleteUserToRole] 刪除失敗");
+    }
+};
+
+/* 根據 email 查找用戶並新增 StoreManager 角色 */
+exports.addStoreManagerByEmail = async (email) => {
+    console.log("[addStoreManagerByEmail] 開始 email :", email);
+    try {
+        // 1. 根據 email 查找用戶
+        const user = await User.findByMail(email);
+        if (!user) {
+            throw new Error("找不到該用戶");
+        }
+
+        // 2. 檢查是否已經是 StoreManager
+        const existingRole = await UserToRole.findByUserIdAndRole(user.id, 'StoreManager');
+        if (existingRole) {
+            throw new Error("該用戶已經是店長");
+        }
+
+        // 3. 新增 StoreManager 角色
+        const newRole = await UserToRole.add({ userId: user.id, role: 'StoreManager' });
+        
+        return {
+            ...newRole,
+            email: user.mail,
+            userName: user.account
+        };
+    } catch (error) {
+        console.log("[addStoreManagerByEmail] 失敗", error);
+        throw error;
+    }
+};
+
+/* 取得所有店長列表 */
+exports.getStoreManagerList = async () => {
+    console.log("[getStoreManagerList] 開始");
+    try {
+        const pagingParam = { pageIndex: 1, pageSize: 1000, sort: "asc", pageTotal:-1, dataTotal:-1 };
+        
+        // 取得所有用戶
+        const userList = (await User.search({}, pagingParam)).userList;
+        
+        // 取得所有 StoreManager 角色
+        const userToRoleList = (await UserToRole.search({role: 'StoreManager'}, pagingParam)).userToRoleList;
+        
+        // 合併資料
+        return userToRoleList.map((userToRole) => {
+            const user = userList.find((user) => user.id === userToRole.userId);
+            if(!user) return null;
+            return {
+                id: userToRole.id,
+                userId: userToRole.userId,
+                role: userToRole.role,
+                email: user.mail,
+                account: user.account
+            }
+        }).filter((item) => item !== null);
+    } catch (error) {
+        console.error("[getStoreManagerList] Error:", error);
+        throw error;
+    }
+}
+
+

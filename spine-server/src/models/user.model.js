@@ -103,6 +103,34 @@ class User {
         const updatedSnapshot = await userRef.get();
         return { id: userRef.id, ...updatedSnapshot.data() };
     }
+
+    /* 搜尋使用者 */
+    static async search(searchParam, pagingParam) {
+        const { email, account } = searchParam;
+        let { pageIndex, pageSize, sort, pageTotal, dataTotal } = pagingParam;
+        
+        let query = db.collection(COLLECTION_NAME);
+        const snapshot = await query.get();
+        let userList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        
+        // 篩選條件
+        userList = userList.filter(user => 
+            (email ? user.mail && user.mail.includes(email) : true)
+            && (account ? user.account && user.account.includes(account) : true)
+        );
+        
+        // 排序
+        if (sort) {
+            userList = userList.sort((a, b) => a[sort] > b[sort] ? 1 : -1);
+        }
+        
+        // 分頁
+        dataTotal = userList.length;
+        pageTotal = Math.ceil(userList.length / pageSize);
+        userList = userList.slice((pageIndex - 1) * pageSize, pageIndex * pageSize);
+        
+        return { userList, pagingParam: { ...pagingParam, pageTotal, dataTotal } };
+    }
 }
 
 module.exports = User;
