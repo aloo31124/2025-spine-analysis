@@ -6,7 +6,12 @@ const BASE_URL = HOST + CONTEXT;
 
 /* get 客戶列表 */
 export const getCustomerList = async (searchParam, pagingParam) => {
-    return axios.post(`${BASE_URL}/list`, {searchParam, pagingParam});
+    const token = localStorage.getItem('jwt');
+    return axios.post(`${BASE_URL}/list`, {searchParam, pagingParam}, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
 }
 
 /* get 客戶詳細 */
@@ -35,12 +40,22 @@ export const updateCustomer = async (updateCustomer) => {
 
 /* delete 刪除客戶 */
 export const deleteCustomer = async (id) => {
-    return axios.delete(`${BASE_URL}/delete/${id}`);
+    const token = localStorage.getItem('jwt');
+    return axios.delete(`${BASE_URL}/delete/${id}`, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
 }
 
 /* 搜尋客戶 */
 export const searchCustomer = async (searchParam, pagingParam) => {
-    return axios.post(`${BASE_URL}/search`, {searchParam, pagingParam});
+    const token = localStorage.getItem('jwt');
+    return axios.post(`${BASE_URL}/search`, {searchParam, pagingParam}, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
 }
 
 /* 匯入客戶 */

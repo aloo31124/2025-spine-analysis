@@ -23,6 +23,7 @@ const customerAnalysisResultApiController = require('./controllers/manager/custo
 const customerToProductApiController = require('./controllers/manager/customerToProduct.api.controller');
 const customerToProductPillowApiController = require('./controllers/manager/customerToProductPillow.api.controller');
 const productPillowApiController = require('./controllers/manager/productPillow.api.controller');
+const reportSpineApiController = require('./controllers/manager/reportSpine.api.controller');
 //const productImgApiController = require('./controllers/manager/productImg.api.controller')
 const shopApiController = require('./controllers/shop/shop.api.controller');
 const shopPayLogisticsApiController = require('./controllers/shop/shopPayLogistics.api.controller')
@@ -86,6 +87,9 @@ app.get('/api/account/owner/:email', accountApiController.getOwnerByEmail);
 app.post('/api/account/owner/add', accountApiController.postUserToOwner);
 app.post('/api/account/role/add', accountApiController.postUserToRole);
 app.get('/api/account/role/:userId', accountApiController.getUserRoleByUserId);
+app.delete('/api/account/role/delete/:id', accountApiController.deleteUserToRole);
+app.post('/api/account/role/store-manager/add', accountApiController.addStoreManagerByEmail);
+app.get('/api/account/role/store-manager/list', accountApiController.getStoreManagerList);
 app.get('/api/account/payment/userId/:userId', accountApiController.getUserPaymentByUserId);
 app.get('/api/account/payment/paymentId/:paymentId', accountApiController.getPaymentByPaymentid);
 app.post('/api/account/payment/search', accountApiController.searchPayment);
@@ -159,6 +163,10 @@ app.patch('/api/manager/customer-to-product-pillow/edit', customerToProductPillo
 app.delete('/api/manager/customer-to-product-pillow/delete/:id', customerToProductPillowApiController.deleteCustomerToProductPillow);
 app.post('/api/manager/customer-to-product-pillow/search', customerToProductPillowApiController.searchCustomerToProductPillow);
 app.get('/api/manager/customer-to-product-pillow/stats/:customerId', customerToProductPillowApiController.getCustomerPurchaseStats);
+// 後台管理 報表 api
+app.post('/api/manager/report-spine/revenue-line-chart', reportSpineApiController.getRevenueLineChartData);
+app.post('/api/manager/report-spine/sales-line-chart', reportSpineApiController.getSalesLineChartData);
+app.get('/api/manager/report-spine/product-options', reportSpineApiController.getProductPillowOptions);
 // 購物 api
 app.post('/api/shop/product/list', shopApiController.searchProductList);
 app.get('/api/shop/product/category/list', shopApiController.searchProductCategory);

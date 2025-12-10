@@ -58,6 +58,45 @@ exports.getUserRoleByUserId = async (req, res) => {
     }
 };
 
+/* 刪除使用者角色對應關係 */
+exports.deleteUserToRole = async (req, res) => {
+    console.log("[deleteUserToRole] 開始", req.params.id);
+    try {
+        const result = await userToRoleService.deleteUserToRole(req.params.id);
+        console.log("[deleteUserToRole] 成功 : ", result);
+        res.status(200).send({result, message: '角色刪除成功'});
+    } catch (error) {
+        console.log("[deleteUserToRole] 失敗", error);
+        res.status(500).json({ error: "[deleteUserToRole] 失敗" });
+    }
+};
+
+/* 根據 email 新增店長角色 */
+exports.addStoreManagerByEmail = async (req, res) => {
+    console.log("[addStoreManagerByEmail] 開始", req.body);
+    try {
+        const result = await userToRoleService.addStoreManagerByEmail(req.body.email);
+        console.log("[addStoreManagerByEmail] 成功 : ", result);
+        res.status(200).send({result, message: '店長新增成功'});
+    } catch (error) {
+        console.log("[addStoreManagerByEmail] 失敗", error);
+        res.status(500).json({ error: error.message || "[addStoreManagerByEmail] 失敗" });
+    }
+};
+
+/* 取得所有店長列表 */
+exports.getStoreManagerList = async (req, res) => {
+    console.log("[getStoreManagerList] 開始");
+    try {
+        const result = await userToRoleService.getStoreManagerList();
+        console.log("[getStoreManagerList] 成功 : ", result);
+        res.status(200).send({result});
+    } catch (error) {
+        console.log("[getStoreManagerList] 失敗", error);
+        res.status(500).json({ error: "[getStoreManagerList] 失敗" });
+    }
+};
+
 
 
 /* 搜尋 使用者對應購買方案, 依照 userId */
