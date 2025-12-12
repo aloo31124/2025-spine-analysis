@@ -45,6 +45,7 @@ function AnalysisTail() {
     useEffect(() => {
         const storedPhoto = localStorage.getItem('spineAnalysisPhoto');
         const photoTimestamp = localStorage.getItem('spineAnalysisPhotoTimestamp');
+        const storedPoints = localStorage.getItem('spineAnalysisPoints');
 
         if (storedPhoto && photoTimestamp) {
             const now = Date.now();
@@ -53,6 +54,18 @@ function AnalysisTail() {
 
             if (now - timestamp < maxAge) {
                 setBackgroundImage(storedPhoto);
+                
+                // 如果有存儲的點位數據，使用它來初始化點位
+                if (storedPoints) {
+                    try {
+                        const relativePoints = JSON.parse(storedPoints);
+                        initPointsFromRelative(relativePoints);
+                        localStorage.removeItem('spineAnalysisPoints');
+                    } catch (error) {
+                        console.error('解析點位數據失敗:', error);
+                    }
+                }
+                
                 localStorage.removeItem('spineAnalysisPhoto');
                 localStorage.removeItem('spineAnalysisPhotoTimestamp');
             }
@@ -66,6 +79,25 @@ function AnalysisTail() {
         if (!container) return;
 
         const newPoints = initialPointPositions.map((pos, index) => ({
+            id: index,
+            x: pos.x * container.offsetWidth,
+            y: pos.y * container.offsetHeight,
+            isDraggable: index === 0
+        }));
+
+        setPoints(newPoints);
+        setCurrentPointIndex(0);
+        setCalculationResults([]);
+        setIsCalculated(false);
+        setLines([]);
+    };
+
+    // 從相對位置初始化點位（用於從 PhotoCaptureDrag 接收數據）
+    const initPointsFromRelative = (relativePoints) => {
+        const container = tailContainerRef.current;
+        if (!container) return;
+
+        const newPoints = relativePoints.map((pos, index) => ({
             id: index,
             x: pos.x * container.offsetWidth,
             y: pos.y * container.offsetHeight,
