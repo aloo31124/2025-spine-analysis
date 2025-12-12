@@ -65,24 +65,7 @@ function AnalysisTail() {
         const container = tailContainerRef.current;
         if (!container) return;
 
-        // 嘗試從 localStorage 讀取點位
-        const storedPoints = localStorage.getItem('spineAnalysisPoints');
-        let pointPositions = initialPointPositions;
-        
-        if (storedPoints) {
-            try {
-                const parsedPoints = JSON.parse(storedPoints);
-                if (parsedPoints && Array.isArray(parsedPoints) && parsedPoints.length === 3) {
-                    pointPositions = parsedPoints;
-                    // 清除已使用的點位資料
-                    localStorage.removeItem('spineAnalysisPoints');
-                }
-            } catch (error) {
-                console.error('解析點位資料失敗:', error);
-            }
-        }
-
-        const newPoints = pointPositions.map((pos, index) => ({
+        const newPoints = initialPointPositions.map((pos, index) => ({
             id: index,
             x: pos.x * container.offsetWidth,
             y: pos.y * container.offsetHeight,
