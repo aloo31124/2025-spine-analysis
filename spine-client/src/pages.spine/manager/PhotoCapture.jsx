@@ -47,6 +47,7 @@ function PhotoCapture() {
     const [isMobileDevice, setIsMobileDevice] = useState(false);
     const [showAnalysisModal, setShowAnalysisModal] = useState(false);
     const [showCameraOverlay, setShowCameraOverlay] = useState(false);
+    const [showPointDragModal, setShowPointDragModal] = useState(false);
     
     // === 編輯相關狀態 ===
     const [cropArea, setCropArea] = useState({ x: 0, y: 0, width: 300, height: 300 });
@@ -365,6 +366,20 @@ function PhotoCapture() {
         setShowAnalysisModal(false);
     }, []);
 
+    // === 攝影點位拖曳功能 ===
+    const handleOpenPointDrag = useCallback(() => {
+        setShowPointDragModal(true);
+    }, []);
+
+    const handleSelectPointDrag = useCallback((analysisType) => {
+        setShowPointDragModal(false);
+        navigate('/manager/camera/point-drag', { state: { analysisType } });
+    }, [navigate]);
+
+    const handleClosePointDragModal = useCallback(() => {
+        setShowPointDragModal(false);
+    }, []);
+
     // === 裁切區域拖拽處理 ===
     const handleCropMouseDown = useCallback((e) => {
         e.preventDefault();
@@ -481,6 +496,12 @@ function PhotoCapture() {
                 <button onClick={handleFileUpload} >
                     <FaUpload />
                     <span>上傳照片</span>
+                </button>
+                <br />
+                <br />
+                <button onClick={handleOpenPointDrag} >
+                    <FaCamera />
+                    <span>攝影點位拖曳</span>
                 </button>
                 
                 <div className="device-info-display">
@@ -646,6 +667,26 @@ function PhotoCapture() {
                             </button>
                         </div>
                         <button className="photo-analysis-modal__close" onClick={handleCloseAnalysisChoice}>
+                            取消
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {showPointDragModal && (
+                <div className="photo-analysis-modal" role="dialog" aria-modal="true">
+                    <div className="photo-analysis-modal__content">
+                        <h3>選擇分析類型</h3>
+                        <p>請選擇要進行的點位拖曳分析：</p>
+                        <div className="photo-analysis-modal__actions">
+                            <button onClick={() => handleSelectPointDrag('spine')}>
+                                頸部分析
+                            </button>
+                            <button onClick={() => handleSelectPointDrag('tail')}>
+                                尾椎分析
+                            </button>
+                        </div>
+                        <button className="photo-analysis-modal__close" onClick={handleClosePointDragModal}>
                             取消
                         </button>
                     </div>
