@@ -23,6 +23,7 @@ const customerAnalysisResultApiController = require('./controllers/manager/custo
 const customerToProductApiController = require('./controllers/manager/customerToProduct.api.controller');
 const customerToProductPillowApiController = require('./controllers/manager/customerToProductPillow.api.controller');
 const productPillowApiController = require('./controllers/manager/productPillow.api.controller');
+const productMattressApiController = require('./controllers/manager/productMattress.api.controller');
 const reportSpineApiController = require('./controllers/manager/reportSpine.api.controller');
 //const productImgApiController = require('./controllers/manager/productImg.api.controller')
 const shopApiController = require('./controllers/shop/shop.api.controller');
@@ -118,6 +119,14 @@ app.patch('/api/manager/product-pillow/edit', productPillowApiController.updateP
 app.delete('/api/manager/product-pillow/delete/:id', productPillowApiController.deleteProductPillow);
 app.post('/api/manager/product-pillow/search', productPillowApiController.searchProductPillow);
 app.post('/api/manager/product-pillow/import', productPillowApiController.importProductPillow);
+// 後台管理 床墊商品 api
+app.post('/api/manager/product-mattress/list', productMattressApiController.getProductMattressList);
+app.get('/api/manager/product-mattress/:id', productMattressApiController.getProductMattress);
+app.post('/api/manager/product-mattress/add', productMattressApiController.postProductMattress);
+app.patch('/api/manager/product-mattress/edit', productMattressApiController.updateProductMattress);
+app.delete('/api/manager/product-mattress/delete/:id', productMattressApiController.deleteProductMattress);
+app.post('/api/manager/product-mattress/search', productMattressApiController.searchProductMattress);
+app.post('/api/manager/product-mattress/import', productMattressApiController.importProductMattress);
 // 後台管理 商品分類 api
 app.get('/api/manager/product/category/list', productCategoryApiController.getProductCategoryList);
 app.get('/api/manager/product/category/:id', productCategoryApiController.getProductCategory);

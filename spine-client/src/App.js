@@ -66,11 +66,17 @@ import ProductPillowListPage from './pages.spine/manager/ProductPillowListPage';
 import ProductPillowAddPage from './pages.spine/manager/ProductPillowAddPage';     // 新增枕頭商品
 import ProductPillowEditPage from './pages.spine/manager/ProductPillowEditPage';   // 編輯枕頭商品
 
+// === 床墊商品管理頁面 ===
+import ProductMattressListPage from './pages.spine/manager/ProductMattressListPage';   // 床墊商品列表
+import ProductMattressAddPage from './pages.spine/manager/ProductMattressAddPage';     // 新增床墊商品
+import ProductMattressEditPage from './pages.spine/manager/ProductMattressEditPage';   // 編輯床墊商品
+
 // === 脊椎分析頁面 ===
 import AnalysisSpine from './pages.spine/manager/AnalysisSpine';   // 脊椎分析
 import AnalysisTail from './pages.spine/manager/AnalysisTail';     // 尾椎分析
 import AnalysisSpineTest from './pages.spine/manager/AnalysisSpineTest';   // 脊椎分析測試版
 import PhotoCapture from './pages.spine/manager/PhotoCapture';     // 拍照上傳
+import PhotoCaptureDrag from './pages.spine/manager/PhotoCaptureDrag';  // 攝影點位拖曳
 
 // === 分類管理頁面 ===
 import CategoryListPage from './pages.spine/manager/CategoryListPage';   // 分類列表
@@ -140,6 +146,7 @@ const AppRouter = () => (
       <Route path="analysis/spine" element={<AppRouterVerify element={AnalysisSpine} node="analysis-spine" />} />
       <Route path="analysis/tail" element={<AppRouterVerify element={AnalysisTail} node="analysis-tail" />} />
       <Route path="photo/capture" element={<AppRouterVerify element={PhotoCapture} node="photo-capture" />} />
+      <Route path="photo/capture-drag" element={<AppRouterVerify element={PhotoCaptureDrag} node="photo-capture" />} />
       
       {/* 商品管理 */}
       <Route path="product/list" element={<ProductListPage />} />      {/* 商品列表 */}
@@ -151,6 +158,11 @@ const AppRouter = () => (
       <Route path="product-pillow/list" element={<AppRouterVerify element={ProductPillowListPage} node="product-pillow" />} />
       <Route path="product-pillow/add" element={<AppRouterVerify element={ProductPillowAddPage} node="product-pillow" />} />
       <Route path="product-pillow/edit/:id" element={<AppRouterVerify element={ProductPillowEditPage} node="product-pillow" />} />
+      
+      {/* 床墊商品管理 */}
+      <Route path="product-mattress/list" element={<AppRouterVerify element={ProductMattressListPage} node="product-mattress" />} />
+      <Route path="product-mattress/add" element={<AppRouterVerify element={ProductMattressAddPage} node="product-mattress" />} />
+      <Route path="product-mattress/edit/:id" element={<AppRouterVerify element={ProductMattressEditPage} node="product-mattress" />} />
       
       {/* 分類管理 */}
       <Route path="product/category/list" element={<CategoryListPage />} />    {/* 分類列表 */}
