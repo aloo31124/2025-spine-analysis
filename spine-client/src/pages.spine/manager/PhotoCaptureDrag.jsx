@@ -217,10 +217,18 @@ function PhotoCaptureDrag() {
                     attempts += 1;
                 }
 
-                resolve(optimizedDataUrl);
+                // 返回優化後的圖片數據和實際尺寸
+                resolve({
+                    dataUrl: optimizedDataUrl,
+                    width: canvas.width,
+                    height: canvas.height
+                });
             };
 
-            img.onerror = () => reject(new Error('圖片載入失敗'));
+            img.onerror = () => {
+                reject(new Error('圖片載入失敗'));
+            };
+
             img.src = dataUrl;
         });
     }, []);
@@ -381,7 +389,12 @@ function PhotoCaptureDrag() {
             canvas.height = videoHeight;
             ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
             const dataUrl = canvas.toDataURL('image/png');
-            const optimizedDataUrl = await optimizeImageData(dataUrl);
+            const optimizedResult = await optimizeImageData(dataUrl);
+            
+            // 使用優化後的圖片數據和尺寸
+            const optimizedDataUrl = optimizedResult.dataUrl;
+            const finalImageWidth = optimizedResult.width;
+            const finalImageHeight = optimizedResult.height;
             
             // 保存拍攝的照片
             setCapturedImage(optimizedDataUrl);
@@ -398,6 +411,7 @@ function PhotoCaptureDrag() {
             const containerHeight = containerRect.height;
             
             // 計算視頻在容器中的實際顯示尺寸（考慮 object-fit: contain）
+            // 注意：這裡仍使用視頻尺寸計算，因為點位是在視頻流上標記的
             const videoAspect = videoWidth / videoHeight;
             const containerAspect = containerWidth / containerHeight;
             
@@ -434,12 +448,13 @@ function PhotoCaptureDrag() {
             stopCameraStream();
             
             // 使用 React Router state 直接传递数据到分析页面
+            // 重要：使用優化後的實際圖片尺寸，而非原始視頻尺寸
             const analysisData = {
                 photo: optimizedDataUrl,
                 points: relativePoints,
                 imageSize: {
-                    width: videoWidth,
-                    height: videoHeight
+                    width: finalImageWidth,
+                    height: finalImageHeight
                 },
                 timestamp: Date.now()
             };
