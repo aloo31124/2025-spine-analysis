@@ -492,35 +492,38 @@ function PhotoCaptureDrag() {
                         
                         <ScaleIndicator className="scale-indicator--camera" />
                         
-                        {/* 點位控制 */}
-                        <div className="photo-camera-overlay__point-controls">
-                            <button 
-                                onClick={handlePrevPoint} 
-                                disabled={currentPointIndex === 0}
-                                className="point-nav-btn"
-                            >
-                                上一個點
-                            </button>
-                            <span className="current-point-info">
-                                點 {currentPointIndex + 1} / {points.length}
-                            </span>
-                            <button 
-                                onClick={handleNextPoint} 
-                                disabled={currentPointIndex === points.length - 1}
-                                className="point-nav-btn"
-                            >
-                                下一個點
-                            </button>
-                        </div>
-                        
-                        {/* 拍照控制 */}
-                        <div className="photo-camera-overlay__controls">
+                        {/* 拍照控制區域 */}
+                        <div className="photo-camera-overlay__bottom-controls">
+                            {/* 點位控制 */}
+                            <div className="photo-camera-overlay__point-controls">
+                                <button 
+                                    onClick={handlePrevPoint} 
+                                    disabled={currentPointIndex === 0}
+                                    className="point-nav-btn"
+                                >
+                                    上一個點
+                                </button>
+                                <span className="current-point-info">
+                                    點 {currentPointIndex + 1} / {points.length}
+                                </span>
+                                <button 
+                                    onClick={handleNextPoint} 
+                                    disabled={currentPointIndex === points.length - 1}
+                                    className="point-nav-btn"
+                                >
+                                    下一個點
+                                </button>
+                            </div>
+                            
+                            {/* 拍照控制 */}
+                            <div className="photo-camera-overlay__controls">
                             <button onClick={handleCaptureFromStream} className="capture-btn">
                                 拍照
                             </button>
                             <button onClick={handleCloseCameraOverlay} className="cancel-btn">
                                 取消
                             </button>
+                        </div>
                         </div>
                     </div>
                 </div>

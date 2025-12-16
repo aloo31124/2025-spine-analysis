@@ -346,14 +346,9 @@
 }
 
 .photo-camera-overlay__controls {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 24px;
     display: flex;
     justify-content: center;
     gap: 16px;
-    padding: 0 24px;
 }
 
 .photo-camera-overlay__controls button {
@@ -567,19 +562,28 @@
     z-index: 3;
 }
 
+/* PhotoCaptureDrag - 底部控制區域 */
+.photo-camera-overlay__bottom-controls {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 20px;
+    z-index: 11;
+}
+
 /* PhotoCaptureDrag - 點位控制樣式 */
 .photo-camera-overlay__point-controls {
-    position: absolute;
-    top: 10px;
-    left: 50%;
-    transform: translateX(-50%);
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 15px;
     background: rgba(0, 0, 0, 0.6);
     padding: 10px 20px;
     border-radius: 25px;
-    z-index: 11;
     backdrop-filter: blur(5px);
 }
 
