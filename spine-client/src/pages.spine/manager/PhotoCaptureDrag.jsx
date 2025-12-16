@@ -373,8 +373,12 @@ function PhotoCaptureDrag() {
 
         setIsProcessing(true);
         try {
-            canvas.width = videoRef.current.videoWidth || MAX_IMAGE_DIMENSION;
-            canvas.height = videoRef.current.videoHeight || MAX_IMAGE_DIMENSION;
+            // 獲取視頻的實際尺寸
+            const videoWidth = videoRef.current.videoWidth || MAX_IMAGE_DIMENSION;
+            const videoHeight = videoRef.current.videoHeight || MAX_IMAGE_DIMENSION;
+            
+            canvas.width = videoWidth;
+            canvas.height = videoHeight;
             ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
             const dataUrl = canvas.toDataURL('image/png');
             const optimizedDataUrl = await optimizeImageData(dataUrl);
@@ -384,11 +388,48 @@ function PhotoCaptureDrag() {
             
             // 計算點位相對於容器的比例位置
             const container = cameraContainerRef.current;
-            const relativePoints = points.map(point => ({
-                x: point.x / container.offsetWidth,
-                y: point.y / container.offsetHeight,
-                id: point.id
-            }));
+            if (!container) {
+                throw new Error('相機容器未找到');
+            }
+            
+            // 獲取容器的顯示尺寸
+            const containerRect = container.getBoundingClientRect();
+            const containerWidth = containerRect.width;
+            const containerHeight = containerRect.height;
+            
+            // 計算視頻在容器中的實際顯示尺寸（考慮 object-fit: contain）
+            const videoAspect = videoWidth / videoHeight;
+            const containerAspect = containerWidth / containerHeight;
+            
+            let displayWidth, displayHeight, offsetX, offsetY;
+            
+            if (containerAspect > videoAspect) {
+                // 容器更寬，視頻以高度為準
+                displayHeight = containerHeight;
+                displayWidth = displayHeight * videoAspect;
+                offsetX = (containerWidth - displayWidth) / 2;
+                offsetY = 0;
+            } else {
+                // 容器更高，視頻以寬度為準
+                displayWidth = containerWidth;
+                displayHeight = displayWidth / videoAspect;
+                offsetX = 0;
+                offsetY = (containerHeight - displayHeight) / 2;
+            }
+            
+            // 將點位從容器坐標轉換為視頻內部的相對位置（0-1 範圍）
+            const relativePoints = points.map(point => {
+                // 減去偏移量，得到視頻內的坐標
+                const videoX = point.x - offsetX;
+                const videoY = point.y - offsetY;
+                
+                // 轉換為 0-1 範圍的相對位置
+                return {
+                    x: Math.max(0, Math.min(1, videoX / displayWidth)),
+                    y: Math.max(0, Math.min(1, videoY / displayHeight)),
+                    id: point.id
+                };
+            });
             
             // 將照片和點位信息保存到 localStorage
             localStorage.setItem('spineAnalysisPhoto', optimizedDataUrl);
@@ -435,7 +476,7 @@ function PhotoCaptureDrag() {
                         {points.length > 0 && points.map((point, index) => (
                             <div
                                 key={point.id}
-                                className={`draggable-point ${point.isDraggable ? 'active' : ''}`}
+                                className={`point ${point.isDraggable ? 'draggable' : ''}`}
                                 style={{
                                     position: 'absolute',
                                     left: `${point.x}px`,
@@ -445,41 +486,44 @@ function PhotoCaptureDrag() {
                                 onMouseDown={(e) => handleMouseDown(e, index)}
                                 onTouchStart={(e) => handleMouseDown(e, index)}
                             >
-                                <span className="point-label">{index + 1}</span>
+                                {index + 1}
                             </div>
                         ))}
                         
                         <ScaleIndicator className="scale-indicator--camera" />
                         
-                        {/* 點位控制 */}
-                        <div className="photo-camera-overlay__point-controls">
-                            <button 
-                                onClick={handlePrevPoint} 
-                                disabled={currentPointIndex === 0}
-                                className="point-nav-btn"
-                            >
-                                上一個點
-                            </button>
-                            <span className="current-point-info">
-                                點 {currentPointIndex + 1} / {points.length}
-                            </span>
-                            <button 
-                                onClick={handleNextPoint} 
-                                disabled={currentPointIndex === points.length - 1}
-                                className="point-nav-btn"
-                            >
-                                下一個點
-                            </button>
-                        </div>
-                        
-                        {/* 拍照控制 */}
-                        <div className="photo-camera-overlay__controls">
+                        {/* 拍照控制區域 */}
+                        <div className="photo-camera-overlay__bottom-controls">
+                            {/* 點位控制 */}
+                            <div className="photo-camera-overlay__point-controls">
+                                <button 
+                                    onClick={handlePrevPoint} 
+                                    disabled={currentPointIndex === 0}
+                                    className="point-nav-btn"
+                                >
+                                    上一個點
+                                </button>
+                                <span className="current-point-info">
+                                    點 {currentPointIndex + 1} / {points.length}
+                                </span>
+                                <button 
+                                    onClick={handleNextPoint} 
+                                    disabled={currentPointIndex === points.length - 1}
+                                    className="point-nav-btn"
+                                >
+                                    下一個點
+                                </button>
+                            </div>
+                            
+                            {/* 拍照控制 */}
+                            <div className="photo-camera-overlay__controls">
                             <button onClick={handleCaptureFromStream} className="capture-btn">
                                 拍照
                             </button>
                             <button onClick={handleCloseCameraOverlay} className="cancel-btn">
                                 取消
                             </button>
+                        </div>
                         </div>
                     </div>
                 </div>
