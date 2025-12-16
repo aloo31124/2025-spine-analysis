@@ -431,16 +431,22 @@ function PhotoCaptureDrag() {
                 };
             });
             
-            // 將照片和點位信息保存到 localStorage
-            localStorage.setItem('spineAnalysisPhoto', optimizedDataUrl);
-            localStorage.setItem('spineAnalysisPhotoTimestamp', Date.now().toString());
-            localStorage.setItem('spineAnalysisPoints', JSON.stringify(relativePoints));
-            
             stopCameraStream();
             
-            // 導向對應的分析頁面
+            // 使用 React Router state 直接传递数据到分析页面
+            const analysisData = {
+                photo: optimizedDataUrl,
+                points: relativePoints,
+                imageSize: {
+                    width: videoWidth,
+                    height: videoHeight
+                },
+                timestamp: Date.now()
+            };
+            
+            // 导向对应的分析页面，通过 state 传递数据
             const targetPath = analysisType === 'tail' ? '/manager/analysis/tail' : '/manager/analysis/spine';
-            navigate(targetPath);
+            navigate(targetPath, { state: analysisData });
         } catch (error) {
             console.error('拍照失敗:', error);
             alert('拍照失敗，請重試');
