@@ -38,6 +38,7 @@ function AnalysisTail() {
     const [showSaveOptions, setShowSaveOptions] = useState(false);
     const [showCustomerModal, setShowCustomerModal] = useState(false);
     const [customerList, setCustomerList] = useState([]);
+    const [showBlankScreen, setShowBlankScreen] = useState(false);
 
     useEffect(() => {
         initPoints();
@@ -409,6 +410,14 @@ function AnalysisTail() {
     };
 
     const getContainerStyle = () => {
+        // 如果顯示空白畫面，返回白色背景
+        if (showBlankScreen) {
+            return {
+                backgroundColor: 'white',
+                backgroundImage: 'none'
+            };
+        }
+
         const style = {
             backgroundImage: `url(${backgroundImage})`
         };
@@ -426,6 +435,11 @@ function AnalysisTail() {
             backgroundPosition: 'center',
             backgroundSize: 'cover'
         };
+    };
+
+    // 切換空白畫面
+    const handleToggleBlankScreen = () => {
+        setShowBlankScreen(!showBlankScreen);
     };
 
     const getMeasurementLineStyle = (start, end) => {
@@ -531,6 +545,9 @@ function AnalysisTail() {
                 <span>&nbsp;&nbsp;&nbsp;</span>
                 <button onClick={handleGoToPhotoCapture} className="action-btn">
                     拍攝新照片
+                </button>                <span>&nbsp;&nbsp;&nbsp;</span>
+                <button onClick={handleToggleBlankScreen} className="action-btn">
+                    {showBlankScreen ? '還原圖片' : '切換空白畫面'}
                 </button>
             </div>
 

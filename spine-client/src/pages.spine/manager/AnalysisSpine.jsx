@@ -45,6 +45,7 @@ function AnalysisSpine() {
     const [customerList, setCustomerList] = useState([]);
     const [selectedCustomer, setSelectedCustomer] = useState(null);
     const [isCalculated, setIsCalculated] = useState(false);
+    const [showBlankScreen, setShowBlankScreen] = useState(false);
 
     // 初始化點位
     useEffect(() => {
@@ -548,6 +549,14 @@ function AnalysisSpine() {
     
     
     const getContainerStyle = () => {
+        // 如果顯示空白畫面，返回白色背景
+        if (showBlankScreen) {
+            return {
+                backgroundColor: 'white',
+                backgroundImage: 'none'
+            };
+        }
+
         const style = {
             backgroundImage: `url(${backgroundImage})`
         };
@@ -565,6 +574,11 @@ function AnalysisSpine() {
             backgroundPosition: 'center',
             backgroundSize: 'cover'
         };
+    };
+
+    // 切換空白畫面
+    const handleToggleBlankScreen = () => {
+        setShowBlankScreen(!showBlankScreen);
     };
 
     return (
@@ -720,6 +734,9 @@ function AnalysisSpine() {
                 <span>&nbsp;&nbsp;&nbsp;</span>
                 <button onClick={handleGoToPhotoCapture} className="action-btn">
                     拍攝新照片
+                </button>                <span>&nbsp;&nbsp;&nbsp;</span>
+                <button onClick={handleToggleBlankScreen} className="action-btn">
+                    {showBlankScreen ? '還原圖片' : '切換空白畫面'}
                 </button>
             </div>
 
