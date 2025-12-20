@@ -14,8 +14,8 @@ RUN npm ci
 # 複製前端原始碼
 COPY spine-client/ ./
 
-# 設定生產環境變數（可在建置時覆寫）
-ARG REACT_APP_BASE_URL=/api/
+# 設定生產環境變數（Docker 部署時前端與後端在同一域名，使用根路徑）
+ARG REACT_APP_BASE_URL=/
 ENV REACT_APP_BASE_URL=${REACT_APP_BASE_URL}
 
 # 建置前端

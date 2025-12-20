@@ -9,8 +9,8 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        # 設定前端 API 基礎路徑
-        REACT_APP_BASE_URL: /api/
+        # 設定前端 API 基礎路徑（Docker 部署時前後端同域，使用根路徑）
+        REACT_APP_BASE_URL: /
     ports:
       - "8080:8080"
     environment:
