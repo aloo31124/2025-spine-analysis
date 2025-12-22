@@ -6,6 +6,7 @@ import { addCustomerAnalysisResult } from '../../api/manager/customerAnalysisRes
 import { getCustomerList } from '../../api/manager/customer';
 import ScaleIndicator from '../../components/ScaleIndicator';
 import { formatPxCmText } from '../../utils/scaleConversion';
+import { formatDistanceWithMode } from '../../utils/screenConversion';
 
 function AnalysisSpine() {
     const navigate = useNavigate();
@@ -257,7 +258,13 @@ function AnalysisSpine() {
         for (let i = 0; i < points.length; i++) {
             for (let j = i + 1; j < points.length; j++) {
                 const distance = calculateDistance(points[i], points[j]);
-                results.push(`點${i + 1} 到 點${j + 1}: ${formatPxCmText(distance)}`);
+                // 使用共用的格式化函數，根據是否為空白畫面模式選擇轉換方式
+                const formattedDistance = formatDistanceWithMode(
+                    distance,
+                    showBlankScreen,  // 空白畫面模式使用螢幕實際 DPI 轉換
+                    formatPxCmText    // 正常模式使用比例尺邏輯
+                );
+                results.push(`點${i + 1} 到 點${j + 1}: ${formattedDistance}`);
             }
         }
         
@@ -586,6 +593,23 @@ function AnalysisSpine() {
             <div className="analysis-content">
                 <div className="neck-container-wrapper" ref={neckContainerWrapperRef}>
                     <div className="neck-calculation-results">
+                        {/* 空白畫面模式提示訊息 */}
+                        {showBlankScreen && (
+                            <div className="blank-screen-notice" style={{
+                                padding: '15px',
+                                margin: '10px 0',
+                                backgroundColor: '#fff3cd',
+                                border: '2px solid #ffc107',
+                                borderRadius: '8px',
+                                color: '#856404',
+                                fontSize: '14px',
+                                fontWeight: 'bold',
+                                textAlign: 'center',
+                                lineHeight: '1.6'
+                            }}>
+                                目前為空白畫面模式，距離計算將依照螢幕實際尺寸(公分)進行。請受測者身體緊貼於螢幕，確保測量準確。
+                            </div>
+                        )}
                         {calculationResults.length > 0 && (
                             <div className="calculation-results-content">
                                 <h3>計算結果</h3>
@@ -686,7 +710,7 @@ function AnalysisSpine() {
                             </div>
                         ))}
 
-                        <ScaleIndicator />
+                        {!showBlankScreen && <ScaleIndicator />}
                     </div>
                 </div>
             </div>

@@ -6,6 +6,7 @@ import { addCustomerAnalysisResult } from '../../api/manager/customerAnalysisRes
 import { getCustomerList } from '../../api/manager/customer';
 import ScaleIndicator from '../../components/ScaleIndicator';
 import { convertPxToCm, formatPxCmText } from '../../utils/scaleConversion';
+import { formatDistanceWithMode } from '../../utils/screenConversion';
 
 function AnalysisTail() {
     const navigate = useNavigate();
@@ -306,11 +307,18 @@ function AnalysisTail() {
             }
         ]);
 
+        // 使用共用的格式化函數，根據是否為空白畫面模式選擇轉換方式
+        const formatDistance = (pxDistance) => formatDistanceWithMode(
+            pxDistance,
+            showBlankScreen,  // 空白畫面模式使用螢幕實際 DPI 轉換
+            formatPxCmText    // 正常模式使用比例尺邏輯
+        );
+
         setCalculationResults([
             '=== 尾椎量測結果 ===',
-            `點 1-2 距離：${formatPxCmText(metrics.distance12)}`,
-            `點 2-3 距離：${formatPxCmText(metrics.distance23)}`,
-            `點 1-3 距離：${formatPxCmText(metrics.distance13)}`,
+            `點 1-2 距離：${formatDistance(metrics.distance12)}`,
+            `點 2-3 距離：${formatDistance(metrics.distance23)}`,
+            `點 1-3 距離：${formatDistance(metrics.distance13)}`,
             `∠123 夾角：${metrics.angle123.toFixed(2)}°`
         ]);
         setIsCalculated(true);
@@ -464,6 +472,23 @@ function AnalysisTail() {
             <div className="analysis-content">
                 <div className="neck-container-wrapper" ref={tailContainerWrapperRef}>
                     <div className="neck-calculation-results">
+                        {/* 空白畫面模式提示訊息 */}
+                        {showBlankScreen && (
+                            <div className="blank-screen-notice" style={{
+                                padding: '15px',
+                                margin: '10px 0',
+                                backgroundColor: '#fff3cd',
+                                border: '2px solid #ffc107',
+                                borderRadius: '8px',
+                                color: '#856404',
+                                fontSize: '14px',
+                                fontWeight: 'bold',
+                                textAlign: 'center',
+                                lineHeight: '1.6'
+                            }}>
+                                目前為空白畫面模式，距離計算將依照螢幕實際尺寸(公分)進行。請受測者身體緊貼於螢幕，確保測量準確。
+                            </div>
+                        )}
                         {calculationResults.length > 0 && (
                             <div className="calculation-results-content">
                                 <h3>尾椎計算結果</h3>
@@ -511,7 +536,7 @@ function AnalysisTail() {
                             />
                         )}
 
-                        <ScaleIndicator />
+                        {!showBlankScreen && <ScaleIndicator />}
                     </div>
                 </div>
             </div>
