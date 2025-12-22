@@ -501,12 +501,14 @@ function PhotoCapture() {
                     <FaUpload />
                     <span>上傳照片</span>
                 </button>
+                { /* // 隱藏該功能。
                 <br />
                 <br />
                 <button onClick={handleOpenDragMode} >
                     <FaCamera />
                     <span>攝影點位拖曳</span>
                 </button>
+                */}
                 
                 <div className="device-info-display">
                     {deviceInfo}
