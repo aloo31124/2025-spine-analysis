@@ -5,6 +5,7 @@
 // 引入套件
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 const swaggerJsDoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 const functions = require('firebase-functions');
@@ -37,12 +38,18 @@ const productImgApiController = require('./controllers/manager/productImgFireSto
 
 // 設定 express app 相關設定
 const app = express();
-const PORT = 8083;
+// 使用環境變數 PORT（Cloud Run 會自動設定），預設為 8083
+const PORT = process.env.PORT || 8083;
 app.use(cors());
 
 // 設定 Express 支援 JSON 和 URL Encoded 資料
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // 文件上傳
+
+// 健康檢查端點（Cloud Run 需要）
+app.get('/api/health', (req, res) => {
+    res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+});
 
 
 
@@ -196,14 +203,26 @@ app.post('/api/manager/payment/search', paymentApiController.searchPayment);
 app.get('/api/manager/payment/export', paymentApiController.exportPayment);
 app.post('/api/manager/payment/import', paymentApiController.importPayment);
 
-// 處理找無路由
-app.use((req, res) => {
-    res.status(404).send("404 Not Found, 找無此路由 :( ");
+// ========================================
+// Docker 部署: 提供前端靜態檔案服務
+// ========================================
+const publicPath = path.join(__dirname, '..', 'public');
+app.use(express.static(publicPath));
+
+// 處理找無 API 路由 (僅針對 /api 路徑)
+app.use('/api', (req, res) => {
+    res.status(404).json({ error: '404 Not Found', message: '找無此 API 路由' });
+});
+
+// SPA Fallback: 所有非 API 請求導向 React 前端
+app.get('*', (req, res) => {
+    res.sendFile(path.join(publicPath, 'index.html'));
 });
 
 // 啟動伺服器
-app.listen(PORT, () => {
-    console.log(`新商城伺服器啟動 http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`[頸椎分析系統]伺服器啟動 http://0.0.0.0:${PORT}`);
+    console.log(`環境: ${process.env.NODE_ENV || 'development'}`);
 })
 
 exports.api = functions.https.onRequest(app);

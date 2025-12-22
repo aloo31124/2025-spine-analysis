@@ -217,10 +217,18 @@ function PhotoCaptureDrag() {
                     attempts += 1;
                 }
 
-                resolve(optimizedDataUrl);
+                // 返回優化後的圖片數據和實際尺寸
+                resolve({
+                    dataUrl: optimizedDataUrl,
+                    width: canvas.width,
+                    height: canvas.height
+                });
             };
 
-            img.onerror = () => reject(new Error('圖片載入失敗'));
+            img.onerror = () => {
+                reject(new Error('圖片載入失敗'));
+            };
+
             img.src = dataUrl;
         });
     }, []);
@@ -381,7 +389,12 @@ function PhotoCaptureDrag() {
             canvas.height = videoHeight;
             ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
             const dataUrl = canvas.toDataURL('image/png');
-            const optimizedDataUrl = await optimizeImageData(dataUrl);
+            const optimizedResult = await optimizeImageData(dataUrl);
+            
+            // 使用優化後的圖片數據和尺寸
+            const optimizedDataUrl = optimizedResult.dataUrl;
+            const finalImageWidth = optimizedResult.width;
+            const finalImageHeight = optimizedResult.height;
             
             // 保存拍攝的照片
             setCapturedImage(optimizedDataUrl);
@@ -398,6 +411,7 @@ function PhotoCaptureDrag() {
             const containerHeight = containerRect.height;
             
             // 計算視頻在容器中的實際顯示尺寸（考慮 object-fit: contain）
+            // 注意：這裡仍使用視頻尺寸計算，因為點位是在視頻流上標記的
             const videoAspect = videoWidth / videoHeight;
             const containerAspect = containerWidth / containerHeight;
             
@@ -431,16 +445,23 @@ function PhotoCaptureDrag() {
                 };
             });
             
-            // 將照片和點位信息保存到 localStorage
-            localStorage.setItem('spineAnalysisPhoto', optimizedDataUrl);
-            localStorage.setItem('spineAnalysisPhotoTimestamp', Date.now().toString());
-            localStorage.setItem('spineAnalysisPoints', JSON.stringify(relativePoints));
-            
             stopCameraStream();
             
-            // 導向對應的分析頁面
+            // 使用 React Router state 直接传递数据到分析页面
+            // 重要：使用優化後的實際圖片尺寸，而非原始視頻尺寸
+            const analysisData = {
+                photo: optimizedDataUrl,
+                points: relativePoints,
+                imageSize: {
+                    width: finalImageWidth,
+                    height: finalImageHeight
+                },
+                timestamp: Date.now()
+            };
+            
+            // 导向对应的分析页面，通过 state 传递数据
             const targetPath = analysisType === 'tail' ? '/manager/analysis/tail' : '/manager/analysis/spine';
-            navigate(targetPath);
+            navigate(targetPath, { state: analysisData });
         } catch (error) {
             console.error('拍照失敗:', error);
             alert('拍照失敗，請重試');
@@ -517,13 +538,13 @@ function PhotoCaptureDrag() {
                             
                             {/* 拍照控制 */}
                             <div className="photo-camera-overlay__controls">
-                            <button onClick={handleCaptureFromStream} className="capture-btn">
-                                拍照
-                            </button>
-                            <button onClick={handleCloseCameraOverlay} className="cancel-btn">
-                                取消
-                            </button>
-                        </div>
+                                <button onClick={handleCaptureFromStream} className="capture-btn">
+                                    拍照
+                                </button>
+                                <button onClick={handleCloseCameraOverlay} className="cancel-btn">
+                                    取消
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

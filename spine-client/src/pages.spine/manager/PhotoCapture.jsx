@@ -501,12 +501,14 @@ function PhotoCapture() {
                     <FaUpload />
                     <span>上傳照片</span>
                 </button>
+                { /* // 隱藏該功能。
                 <br />
                 <br />
                 <button onClick={handleOpenDragMode} >
                     <FaCamera />
                     <span>攝影點位拖曳</span>
                 </button>
+                */}
                 
                 <div className="device-info-display">
                     {deviceInfo}
@@ -688,13 +690,16 @@ function PhotoCapture() {
                             muted
                         />
                         <ScaleIndicator className="scale-indicator--camera" />
-                        <div className="photo-camera-overlay__controls">
-                            <button onClick={handleCaptureFromStream}>
-                                拍照
-                            </button>
-                            <button onClick={handleCloseCameraOverlay}>
-                                取消
-                            </button>
+                        {/* 拍照控制區域 */}
+                        <div className="photo-camera-overlay__bottom-controls">
+                            <div className="photo-camera-overlay__controls">
+                                <button onClick={handleCaptureFromStream}>
+                                    拍照
+                                </button>
+                                <button onClick={handleCloseCameraOverlay}>
+                                    取消
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

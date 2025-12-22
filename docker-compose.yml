@@ -1,0 +1,30 @@
+# Docker Compose 設定檔 - 用於本地開發與測試
+# 使用方式: docker-compose up --build
+
+version: '3.8'
+
+services:
+  spine-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # 設定前端 API 基礎路徑（Docker 部署時前後端同域，使用根路徑）
+        REACT_APP_BASE_URL: /
+    ports:
+      - "8080:8080"
+    environment:
+      - NODE_ENV=production
+      - PORT=8080
+      # Firestore 相關環境變數 (請根據需要設定)
+      # - GOOGLE_APPLICATION_CREDENTIALS=/app/credentials.json
+    # 如需掛載 Firestore 金鑰，取消下方註解
+    # volumes:
+    #   - ./spine-server/src/firestroekey.json:/app/credentials.json:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:8080/api/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
