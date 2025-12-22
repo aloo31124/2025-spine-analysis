@@ -538,13 +538,13 @@ function PhotoCaptureDrag() {
                             
                             {/* 拍照控制 */}
                             <div className="photo-camera-overlay__controls">
-                            <button onClick={handleCaptureFromStream} className="capture-btn">
-                                拍照
-                            </button>
-                            <button onClick={handleCloseCameraOverlay} className="cancel-btn">
-                                取消
-                            </button>
-                        </div>
+                                <button onClick={handleCaptureFromStream} className="capture-btn">
+                                    拍照
+                                </button>
+                                <button onClick={handleCloseCameraOverlay} className="cancel-btn">
+                                    取消
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

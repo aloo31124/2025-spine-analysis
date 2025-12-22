@@ -688,13 +688,16 @@ function PhotoCapture() {
                             muted
                         />
                         <ScaleIndicator className="scale-indicator--camera" />
-                        <div className="photo-camera-overlay__controls">
-                            <button onClick={handleCaptureFromStream}>
-                                拍照
-                            </button>
-                            <button onClick={handleCloseCameraOverlay}>
-                                取消
-                            </button>
+                        {/* 拍照控制區域 */}
+                        <div className="photo-camera-overlay__bottom-controls">
+                            <div className="photo-camera-overlay__controls">
+                                <button onClick={handleCaptureFromStream}>
+                                    拍照
+                                </button>
+                                <button onClick={handleCloseCameraOverlay}>
+                                    取消
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
