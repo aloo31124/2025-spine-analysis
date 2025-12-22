@@ -1,14 +1,16 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import './AnalysisSpine.css';
 import neckPatientImage from '../../assets.spine/images/病患側面.png';
 import { addCustomerAnalysisResult } from '../../api/manager/customerAnalysisResult';
 import { getCustomerList } from '../../api/manager/customer';
 import ScaleIndicator from '../../components/ScaleIndicator';
 import { convertPxToCm, formatPxCmText } from '../../utils/scaleConversion';
+import { formatDistanceWithMode } from '../../utils/screenConversion';
 
 function AnalysisTail() {
     const navigate = useNavigate();
+    const location = useLocation();
     const tailContainerRef = useRef(null);
     const tailContainerWrapperRef = useRef(null);
 
@@ -37,27 +39,32 @@ function AnalysisTail() {
     const [showSaveOptions, setShowSaveOptions] = useState(false);
     const [showCustomerModal, setShowCustomerModal] = useState(false);
     const [customerList, setCustomerList] = useState([]);
+    const [showBlankScreen, setShowBlankScreen] = useState(false);
+    
+    // 比例尺縮放因子狀態（預設為 1.0）
+    const [scaleFactorState, setScaleFactorState] = useState(1.0);
 
     useEffect(() => {
         initPoints();
     }, []);
 
+    // 從 React Router state 接收拍照頁面傳來的數據
     useEffect(() => {
-        const storedPhoto = localStorage.getItem('spineAnalysisPhoto');
-        const photoTimestamp = localStorage.getItem('spineAnalysisPhotoTimestamp');
-
-        if (storedPhoto && photoTimestamp) {
-            const now = Date.now();
-            const timestamp = parseInt(photoTimestamp, 10);
-            const maxAge = 24 * 60 * 60 * 1000;
-
-            if (now - timestamp < maxAge) {
-                setBackgroundImage(storedPhoto);
-                localStorage.removeItem('spineAnalysisPhoto');
-                localStorage.removeItem('spineAnalysisPhotoTimestamp');
+        const analysisData = location.state;
+        
+        if (analysisData && analysisData.photo && analysisData.points) {
+            // 使用傳遞過來的照片
+            setBackgroundImage(analysisData.photo);
+            
+            // 使用傳遞過來的點位數據初始化
+            if (analysisData.points && Array.isArray(analysisData.points) && analysisData.points.length > 0) {
+                // 等待容器渲染完成後再初始化點位
+                setTimeout(() => {
+                    initPointsFromRelative(analysisData.points, analysisData.imageSize);
+                }, 100);
             }
         }
-    }, []);
+    }, [location.state]);
 
     
 
@@ -79,6 +86,64 @@ function AnalysisTail() {
         setLines([]);
     };
 
+    // 從相對位置初始化點位（用於從 PhotoCaptureDrag 接收數據）
+    const initPointsFromRelative = (relativePoints, imageSize) => {
+        const container = tailContainerRef.current;
+        if (!container) return;
+
+        // 如果没有图片尺寸信息，使用简单的转换（向后兼容）
+        if (!imageSize || !imageSize.width || !imageSize.height) {
+            const newPoints = relativePoints.map((pos, index) => ({
+                id: index,
+                x: pos.x * container.offsetWidth,
+                y: pos.y * container.offsetHeight,
+                isDraggable: index === 0
+            }));
+            setPoints(newPoints);
+            setCurrentPointIndex(0);
+            setCalculationResults([]);
+            setIsCalculated(false);
+            setLines([]);
+            return;
+        }
+
+        // 计算图片在容器中的实际显示尺寸（考虑 object-fit: contain）
+        const containerWidth = container.offsetWidth;
+        const containerHeight = container.offsetHeight;
+        const imageAspect = imageSize.width / imageSize.height;
+        const containerAspect = containerWidth / containerHeight;
+        
+        let displayWidth, displayHeight, offsetX, offsetY;
+        
+        if (containerAspect > imageAspect) {
+            // 容器更宽，图片以高度为准
+            displayHeight = containerHeight;
+            displayWidth = displayHeight * imageAspect;
+            offsetX = (containerWidth - displayWidth) / 2;
+            offsetY = 0;
+        } else {
+            // 容器更高，图片以宽度为准
+            displayWidth = containerWidth;
+            displayHeight = displayWidth / imageAspect;
+            offsetX = 0;
+            offsetY = (containerHeight - displayHeight) / 2;
+        }
+
+        // 将相对位置（0-1）转换为容器内的绝对位置
+        const newPoints = relativePoints.map((pos, index) => ({
+            id: index,
+            x: pos.x * displayWidth + offsetX,
+            y: pos.y * displayHeight + offsetY,
+            isDraggable: index === 0
+        }));
+
+        setPoints(newPoints);
+        setCurrentPointIndex(0);
+        setCalculationResults([]);
+        setIsCalculated(false);
+        setLines([]);
+    };
+
     const setDraggablePoint = (index) => {
         setPoints(prevPoints =>
             prevPoints.map((point, i) => ({
@@ -89,10 +154,15 @@ function AnalysisTail() {
         setCurrentPointIndex(index);
     };
 
+    // 開始拖拽（點擊任意點位即可切換並拖曳）
     const handleMouseDown = (event, pointIndex) => {
-        if (points[pointIndex] && !points[pointIndex].isDraggable) return;
-
         event.preventDefault();
+        
+        // 點擊任意點位時，先將該點位設為當前可拖曳的點位
+        if (points[pointIndex] && !points[pointIndex].isDraggable) {
+            setDraggablePoint(pointIndex);
+        }
+
         setIsDragging(true);
 
         const clientX = event.touches ? event.touches[0].clientX : event.clientX;
@@ -191,7 +261,10 @@ function AnalysisTail() {
         return Math.sqrt(dx * dx + dy * dy);
     };
 
-    const buildTailMetrics = () => {
+    // 建立尾椎量測指標
+    // scaleFactor 參數為可選，如果沒有傳入則使用狀態中的值
+    const buildTailMetrics = (scaleFactor) => {
+        const currentScaleFactor = scaleFactor !== undefined ? scaleFactor : scaleFactorState;
         if (points.length < 3) return null;
         const [p1, p2, p3] = points;
         
@@ -215,19 +288,22 @@ function AnalysisTail() {
 
         return {
             distance12,
-            distance12Cm: convertPxToCm(distance12),
+            distance12Cm: convertPxToCm(distance12, currentScaleFactor),
             distance23,
-            distance23Cm: convertPxToCm(distance23),
+            distance23Cm: convertPxToCm(distance23, currentScaleFactor),
             distance13,
-            distance13Cm: convertPxToCm(distance13),
+            distance13Cm: convertPxToCm(distance13, currentScaleFactor),
             angle123
         };
     };
 
-    const handleCalculate = () => {
+    // 處理計算逻輯
+    // scaleFactor 參數為可選，如果沒有傳入則使用狀態中的值
+    const handleCalculate = (scaleFactor) => {
+        const currentScaleFactor = scaleFactor !== undefined ? scaleFactor : scaleFactorState;
         if (points.length < 3) return;
 
-        const metrics = buildTailMetrics();
+        const metrics = buildTailMetrics(currentScaleFactor);
         if (!metrics) return;
 
         setLines([
@@ -245,14 +321,30 @@ function AnalysisTail() {
             }
         ]);
 
+        // 使用共用的格式化函數，根據是否為空白畫面模式選擇轉換方式
+        const formatDistance = (pxDistance) => formatDistanceWithMode(
+            pxDistance,
+            showBlankScreen,  // 空白畫面模式使用螢幕實際 DPI 轉換
+            (px) => formatPxCmText(px, currentScaleFactor)  // 傳入縮放因子到格式化函數
+        );
+
         setCalculationResults([
             '=== 尾椎量測結果 ===',
-            `點 1-2 距離：${formatPxCmText(metrics.distance12)}`,
-            `點 2-3 距離：${formatPxCmText(metrics.distance23)}`,
-            `點 1-3 距離：${formatPxCmText(metrics.distance13)}`,
+            `點 1-2 距離：${formatDistance(metrics.distance12)}`,
+            `點 2-3 距離：${formatDistance(metrics.distance23)}`,
+            `點 1-3 距離：${formatDistance(metrics.distance13)}`,
             `∠123 夾角：${metrics.angle123.toFixed(2)}°`
         ]);
         setIsCalculated(true);
+    };
+    
+    // 處理比例尺縮放因子改變
+    const handleScaleFactorChange = (newScaleFactor) => {
+        setScaleFactorState(newScaleFactor);
+        // 如果已經計算過，則重新計算所有距離
+        if (isCalculated) {
+            handleCalculate(newScaleFactor);
+        }
     };
 
     const handleSaveResult = () => {
@@ -349,6 +441,14 @@ function AnalysisTail() {
     };
 
     const getContainerStyle = () => {
+        // 如果顯示空白畫面，返回白色背景
+        if (showBlankScreen) {
+            return {
+                backgroundColor: 'white',
+                backgroundImage: 'none'
+            };
+        }
+
         const style = {
             backgroundImage: `url(${backgroundImage})`
         };
@@ -366,6 +466,14 @@ function AnalysisTail() {
             backgroundPosition: 'center',
             backgroundSize: 'cover'
         };
+    };
+
+    // 切換空白畫面
+    const handleToggleBlankScreen = () => {
+        if(!showBlankScreen) {
+            alert('切換為空白畫面模式，距離計算將依照螢幕實際尺寸(公分)進行。請受測者身體緊貼於螢幕，確保測量準確。');
+        }
+        setShowBlankScreen(!showBlankScreen);
     };
 
     const getMeasurementLineStyle = (start, end) => {
@@ -437,25 +545,20 @@ function AnalysisTail() {
                             />
                         )}
 
-                        <ScaleIndicator />
+                        {!showBlankScreen && (
+                            <ScaleIndicator 
+                                scaleFactor={scaleFactorState}
+                                onScaleFactorChange={handleScaleFactorChange}
+                            />
+                        )}
                     </div>
                 </div>
             </div>
 
+            {/* 縮放控制按鈕（點位切換已改為直接點擊點位標記） */}
             <div className="menu-bottom-second">
                 <button onClick={handleZoomIn} disabled={currentScale >= maxScale}>+</button>
                 <button onClick={handleZoomOut} disabled={currentScale <= minScale}>-</button>
-                <span>&nbsp;&nbsp;&nbsp;</span>
-                <button onClick={handlePrevPoint} disabled={currentPointIndex === 0}>
-                    &lt;
-                </button>
-                <button
-                    onClick={handleNextPoint}
-                    disabled={currentPointIndex === points.length - 1}
-                    className="control-btn"
-                >
-                    &gt;
-                </button>
             </div>
 
             <div className="menu-bottom">
@@ -471,6 +574,9 @@ function AnalysisTail() {
                 <span>&nbsp;&nbsp;&nbsp;</span>
                 <button onClick={handleGoToPhotoCapture} className="action-btn">
                     拍攝新照片
+                </button>                <span>&nbsp;&nbsp;&nbsp;</span>
+                <button onClick={handleToggleBlankScreen} className="action-btn">
+                    {showBlankScreen ? '還原圖片' : '切換空白畫面'}
                 </button>
             </div>
 

@@ -1,14 +1,16 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import './AnalysisSpine.css';
 import neckPatientImage from '../../assets.spine/images/病患側面.png';
 import { addCustomerAnalysisResult } from '../../api/manager/customerAnalysisResult';
 import { getCustomerList } from '../../api/manager/customer';
 import ScaleIndicator from '../../components/ScaleIndicator';
 import { formatPxCmText } from '../../utils/scaleConversion';
+import { formatDistanceWithMode } from '../../utils/screenConversion';
 
 function AnalysisSpine() {
     const navigate = useNavigate();
+    const location = useLocation();
     const neckContainerRef = useRef(null);
     const neckContainerWrapperRef = useRef(null);
     
@@ -44,31 +46,33 @@ function AnalysisSpine() {
     const [customerList, setCustomerList] = useState([]);
     const [selectedCustomer, setSelectedCustomer] = useState(null);
     const [isCalculated, setIsCalculated] = useState(false);
+    const [showBlankScreen, setShowBlankScreen] = useState(false);
+    
+    // 比例尺縮放因子狀態（預設為 1.0）
+    const [scaleFactorState, setScaleFactorState] = useState(1.0);
 
     // 初始化點位
     useEffect(() => {
         initPoints();
     }, []);
 
-    // 檢查是否有來自拍照頁面的圖片
+    // 從 React Router state 接收拍照頁面傳來的數據
     useEffect(() => {
-        const storedPhoto = localStorage.getItem('spineAnalysisPhoto');
-        const photoTimestamp = localStorage.getItem('spineAnalysisPhotoTimestamp');
+        const analysisData = location.state;
         
-        if (storedPhoto && photoTimestamp) {
-            // 檢查照片是否是最近的（避免使用過期的照片）
-            const now = Date.now();
-            const timestamp = parseInt(photoTimestamp);
-            const maxAge = 24 * 60 * 60 * 1000; // 24小時
+        if (analysisData && analysisData.photo && analysisData.points) {
+            // 使用傳遞過來的照片
+            setBackgroundImage(analysisData.photo);
             
-            if (now - timestamp < maxAge) {
-                setBackgroundImage(storedPhoto);
-                // 清除已使用的照片數據
-                localStorage.removeItem('spineAnalysisPhoto');
-                localStorage.removeItem('spineAnalysisPhotoTimestamp');
+            // 使用傳遞過來的點位數據初始化
+            if (analysisData.points && Array.isArray(analysisData.points) && analysisData.points.length > 0) {
+                // 等待容器渲染完成後再初始化點位
+                setTimeout(() => {
+                    initPointsFromRelative(analysisData.points, analysisData.imageSize);
+                }, 100);
             }
         }
-    }, []);
+    }, [location.state]);
 
     const initPoints = () => {
         const container = neckContainerRef.current;
@@ -78,6 +82,64 @@ function AnalysisSpine() {
             id: index,
             x: pos.x * container.offsetWidth,
             y: pos.y * container.offsetHeight,
+            isDraggable: index === 0
+        }));
+        
+        setPoints(newPoints);
+        setCurrentPointIndex(0);
+        setLines([]);
+        setIntersectionPoints([]);
+        setCalculationResults([]);
+    };
+
+    // 從相對位置初始化點位（用於從 PhotoCaptureDrag 接收數據）
+    const initPointsFromRelative = (relativePoints, imageSize) => {
+        const container = neckContainerRef.current;
+        if (!container) return;
+
+        // 如果没有图片尺寸信息，使用简单的转换（向后兼容）
+        if (!imageSize || !imageSize.width || !imageSize.height) {
+            const newPoints = relativePoints.map((pos, index) => ({
+                id: index,
+                x: pos.x * container.offsetWidth,
+                y: pos.y * container.offsetHeight,
+                isDraggable: index === 0
+            }));
+            setPoints(newPoints);
+            setCurrentPointIndex(0);
+            setLines([]);
+            setIntersectionPoints([]);
+            setCalculationResults([]);
+            return;
+        }
+
+        // 计算图片在容器中的实际显示尺寸（考虑 object-fit: contain）
+        const containerWidth = container.offsetWidth;
+        const containerHeight = container.offsetHeight;
+        const imageAspect = imageSize.width / imageSize.height;
+        const containerAspect = containerWidth / containerHeight;
+        
+        let displayWidth, displayHeight, offsetX, offsetY;
+        
+        if (containerAspect > imageAspect) {
+            // 容器更宽，图片以高度为准
+            displayHeight = containerHeight;
+            displayWidth = displayHeight * imageAspect;
+            offsetX = (containerWidth - displayWidth) / 2;
+            offsetY = 0;
+        } else {
+            // 容器更高，图片以宽度为准
+            displayWidth = containerWidth;
+            displayHeight = displayWidth / imageAspect;
+            offsetX = 0;
+            offsetY = (containerHeight - displayHeight) / 2;
+        }
+
+        // 将相对位置（0-1）转换为容器内的绝对位置
+        const newPoints = relativePoints.map((pos, index) => ({
+            id: index,
+            x: pos.x * displayWidth + offsetX,
+            y: pos.y * displayHeight + offsetY,
             isDraggable: index === 0
         }));
         
@@ -99,11 +161,15 @@ function AnalysisSpine() {
         setCurrentPointIndex(index);
     };
 
-    // 開始拖拽
+    // 開始拖拽（點擊任意點位即可切換並拖曳）
     const handleMouseDown = (e, pointIndex) => {
-        if (points[pointIndex] && !points[pointIndex].isDraggable) return;
-        
         e.preventDefault();
+        
+        // 點擊任意點位時，先將該點位設為當前可拖曳的點位
+        if (points[pointIndex] && !points[pointIndex].isDraggable) {
+            setDraggablePoint(pointIndex);
+        }
+        
         setIsDragging(true);
         
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -189,9 +255,20 @@ function AnalysisSpine() {
         calculateAllDistancesAndAngles();
         setIsCalculated(true);
     };
+    
+    // 處理比例尺縮放因子改變
+    const handleScaleFactorChange = (newScaleFactor) => {
+        setScaleFactorState(newScaleFactor);
+        // 如果已經計算過，則重新計算所有距離
+        if (isCalculated) {
+            calculateAllDistancesAndAngles(newScaleFactor);
+        }
+    };
 
     // 計算所有點之間的距離和角度
-    const calculateAllDistancesAndAngles = () => {
+    // scaleFactor 參數為可選，如果沒有傳入則使用狀態中的值
+    const calculateAllDistancesAndAngles = (scaleFactor) => {
+        const currentScaleFactor = scaleFactor !== undefined ? scaleFactor : scaleFactorState;
         const results = [];
         
         // 計算所有點之間的距離
@@ -199,7 +276,13 @@ function AnalysisSpine() {
         for (let i = 0; i < points.length; i++) {
             for (let j = i + 1; j < points.length; j++) {
                 const distance = calculateDistance(points[i], points[j]);
-                results.push(`點${i + 1} 到 點${j + 1}: ${formatPxCmText(distance)}`);
+                // 使用共用的格式化函數，根據是否為空白畫面模式選擇轉換方式
+                const formattedDistance = formatDistanceWithMode(
+                    distance,
+                    showBlankScreen,  // 空白畫面模式使用螢幕實際 DPI 轉換
+                    (px) => formatPxCmText(px, currentScaleFactor)  // 傳入縮放因子到格式化函數
+                );
+                results.push(`點${i + 1} 到 點${j + 1}: ${formattedDistance}`);
             }
         }
         
@@ -491,6 +574,14 @@ function AnalysisSpine() {
     
     
     const getContainerStyle = () => {
+        // 如果顯示空白畫面，返回白色背景
+        if (showBlankScreen) {
+            return {
+                backgroundColor: 'white',
+                backgroundImage: 'none'
+            };
+        }
+
         const style = {
             backgroundImage: `url(${backgroundImage})`
         };
@@ -508,6 +599,14 @@ function AnalysisSpine() {
             backgroundPosition: 'center',
             backgroundSize: 'cover'
         };
+    };
+
+    // 切換空白畫面
+    const handleToggleBlankScreen = () => {
+        if(!showBlankScreen) {
+            alert('切換為空白畫面模式，距離計算將依照螢幕實際尺寸(公分)進行。請受測者身體緊貼於螢幕，確保測量準確。');
+        }
+        setShowBlankScreen(!showBlankScreen);
     };
 
     return (
@@ -615,12 +714,17 @@ function AnalysisSpine() {
                             </div>
                         ))}
 
-                        <ScaleIndicator />
+                        {!showBlankScreen && (
+                            <ScaleIndicator 
+                                scaleFactor={scaleFactorState}
+                                onScaleFactorChange={handleScaleFactorChange}
+                            />
+                        )}
                     </div>
                 </div>
             </div>
 
-            {/* 控制按鈕 */}
+            {/* 縮放控制按鈕（點位切換已改為直接點擊點位標記） */}
             <div className="menu-bottom-second">
                 <button 
                     onClick={handleZoomIn}
@@ -633,20 +737,6 @@ function AnalysisSpine() {
                     disabled={currentScale <= minScale}
                 >
                     -
-                </button>
-                <span>&nbsp;&nbsp;&nbsp;</span>
-                <button 
-                    onClick={handlePrevPoint}
-                    disabled={currentPointIndex === 0}
-                >
-                    &lt;
-                </button>
-                <button 
-                    onClick={handleNextPoint}
-                    disabled={currentPointIndex === points.length - 1}
-                    className="control-btn"
-                >
-                    &gt;
                 </button>
             </div>
 
@@ -663,6 +753,9 @@ function AnalysisSpine() {
                 <span>&nbsp;&nbsp;&nbsp;</span>
                 <button onClick={handleGoToPhotoCapture} className="action-btn">
                     拍攝新照片
+                </button>                <span>&nbsp;&nbsp;&nbsp;</span>
+                <button onClick={handleToggleBlankScreen} className="action-btn">
+                    {showBlankScreen ? '還原圖片' : '切換空白畫面'}
                 </button>
             </div>
 

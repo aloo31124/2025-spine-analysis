@@ -346,14 +346,9 @@
 }
 
 .photo-camera-overlay__controls {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 24px;
     display: flex;
     justify-content: center;
     gap: 16px;
-    padding: 0 24px;
 }
 
 .photo-camera-overlay__controls button {
@@ -565,4 +560,124 @@
     top: 5px;
     left: 2px;
     z-index: 3;
+}
+
+/* PhotoCaptureDrag - 底部控制區域 */
+.photo-camera-overlay__bottom-controls {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 20px;
+    z-index: 11;
+}
+
+/* PhotoCaptureDrag - 點位控制樣式 */
+.photo-camera-overlay__point-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    background: rgba(0, 0, 0, 0.6);
+    padding: 10px 20px;
+    border-radius: 25px;
+    backdrop-filter: blur(5px);
+}
+
+.photo-camera-overlay__point-controls .point-nav-btn {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 80px;
+    font-weight: 500;
+}
+
+.photo-camera-overlay__point-controls .point-nav-btn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.05);
+}
+
+.photo-camera-overlay__point-controls .point-nav-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.photo-camera-overlay__point-controls .current-point-info {
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    min-width: 80px;
+    text-align: center;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* 相機覆蓋層調整 */
+.photo-camera-overlay__frame {
+    position: relative;
+}
+
+.photo-camera-overlay__controls .capture-btn {
+    background: #27ae60;
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 25px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+}
+
+.photo-camera-overlay__controls .capture-btn:hover {
+    background: #229954;
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(39, 174, 96, 0.4);
+}
+
+.photo-camera-overlay__controls .cancel-btn {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 25px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+}
+
+.photo-camera-overlay__controls .cancel-btn:hover {
+    background: #c0392b;
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
+}
+
+/* 響應式調整 */
+@media (max-width: 768px) {
+    .photo-camera-overlay__point-controls {
+        top: 60px;
+        padding: 8px 15px;
+        gap: 10px;
+    }
+    
+    .photo-camera-overlay__point-controls .point-nav-btn {
+        padding: 6px 12px;
+        font-size: 12px;
+        min-width: 60px;
+    }
+    
+    .photo-camera-overlay__point-controls .current-point-info {
+        font-size: 14px;
+        min-width: 60px;
+    }
 }

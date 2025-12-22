@@ -65,7 +65,6 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
     const fetchPurchasedProducts = async (customerId) => {
         try {
             const response = await getCustomerToProductPillowByCustomerId(customerId);
-            debugger;
             if (response?.data?.records) {
                 setPurchasedProducts(response.data.records);
                 

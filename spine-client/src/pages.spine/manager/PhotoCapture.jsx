@@ -346,6 +346,25 @@ function PhotoCapture() {
         setShowAnalysisModal(true);
     }, [imageData]);
 
+    // === 開啟攝影點位拖曳選擇 ===
+    const [showDragModeModal, setShowDragModeModal] = useState(false);
+    
+    const handleOpenDragMode = useCallback(() => {
+        setShowDragModeModal(true);
+    }, []);
+
+    const handleSelectDragMode = useCallback((target) => {
+        const targetPath = target === 'tail' 
+            ? '/manager/photo/capture-drag?type=tail' 
+            : '/manager/photo/capture-drag?type=spine';
+        navigate(targetPath);
+        setShowDragModeModal(false);
+    }, [navigate]);
+
+    const handleCloseDragModeModal = useCallback(() => {
+        setShowDragModeModal(false);
+    }, []);
+
     const handleSelectAnalysis = useCallback((target) => {
         if (!imageData) {
             alert('請先拍攝或選擇一張照片');
@@ -482,6 +501,14 @@ function PhotoCapture() {
                     <FaUpload />
                     <span>上傳照片</span>
                 </button>
+                { /* // 隱藏該功能。
+                <br />
+                <br />
+                <button onClick={handleOpenDragMode} >
+                    <FaCamera />
+                    <span>攝影點位拖曳</span>
+                </button>
+                */}
                 
                 <div className="device-info-display">
                     {deviceInfo}
@@ -663,14 +690,37 @@ function PhotoCapture() {
                             muted
                         />
                         <ScaleIndicator className="scale-indicator--camera" />
-                        <div className="photo-camera-overlay__controls">
-                            <button onClick={handleCaptureFromStream}>
-                                拍照
+                        {/* 拍照控制區域 */}
+                        <div className="photo-camera-overlay__bottom-controls">
+                            <div className="photo-camera-overlay__controls">
+                                <button onClick={handleCaptureFromStream}>
+                                    拍照
+                                </button>
+                                <button onClick={handleCloseCameraOverlay}>
+                                    取消
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {showDragModeModal && (
+                <div className="photo-analysis-modal" role="dialog" aria-modal="true">
+                    <div className="photo-analysis-modal__content">
+                        <h3>選擇分析類型</h3>
+                        <p>請選擇要進行的分析項目：</p>
+                        <div className="photo-analysis-modal__actions">
+                            <button onClick={() => handleSelectDragMode('spine')}>
+                                頸部分析
                             </button>
-                            <button onClick={handleCloseCameraOverlay}>
-                                取消
+                            <button onClick={() => handleSelectDragMode('tail')}>
+                                尾椎分析
                             </button>
                         </div>
+                        <button className="photo-analysis-modal__close" onClick={handleCloseDragModeModal}>
+                            取消
+                        </button>
                     </div>
                 </div>
             )}
