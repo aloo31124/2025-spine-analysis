@@ -158,11 +158,15 @@ function AnalysisSpine() {
         setCurrentPointIndex(index);
     };
 
-    // 開始拖拽
+    // 開始拖拽（點擊任意點位即可切換並拖曳）
     const handleMouseDown = (e, pointIndex) => {
-        if (points[pointIndex] && !points[pointIndex].isDraggable) return;
-        
         e.preventDefault();
+        
+        // 點擊任意點位時，先將該點位設為當前可拖曳的點位
+        if (points[pointIndex] && !points[pointIndex].isDraggable) {
+            setDraggablePoint(pointIndex);
+        }
+        
         setIsDragging(true);
         
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -715,7 +719,7 @@ function AnalysisSpine() {
                 </div>
             </div>
 
-            {/* 控制按鈕 */}
+            {/* 縮放控制按鈕（點位切換已改為直接點擊點位標記） */}
             <div className="menu-bottom-second">
                 <button 
                     onClick={handleZoomIn}
@@ -728,20 +732,6 @@ function AnalysisSpine() {
                     disabled={currentScale <= minScale}
                 >
                     -
-                </button>
-                <span>&nbsp;&nbsp;&nbsp;</span>
-                <button 
-                    onClick={handlePrevPoint}
-                    disabled={currentPointIndex === 0}
-                >
-                    &lt;
-                </button>
-                <button 
-                    onClick={handleNextPoint}
-                    disabled={currentPointIndex === points.length - 1}
-                    className="control-btn"
-                >
-                    &gt;
                 </button>
             </div>
 
