@@ -40,6 +40,9 @@ function AnalysisTail() {
     const [showCustomerModal, setShowCustomerModal] = useState(false);
     const [customerList, setCustomerList] = useState([]);
     const [showBlankScreen, setShowBlankScreen] = useState(false);
+    
+    // 比例尺縮放因子狀態（預設為 1.0）
+    const [scaleFactorState, setScaleFactorState] = useState(1.0);
 
     useEffect(() => {
         initPoints();
@@ -258,7 +261,10 @@ function AnalysisTail() {
         return Math.sqrt(dx * dx + dy * dy);
     };
 
-    const buildTailMetrics = () => {
+    // 建立尾椎量測指標
+    // scaleFactor 參數為可選，如果沒有傳入則使用狀態中的值
+    const buildTailMetrics = (scaleFactor) => {
+        const currentScaleFactor = scaleFactor !== undefined ? scaleFactor : scaleFactorState;
         if (points.length < 3) return null;
         const [p1, p2, p3] = points;
         
@@ -282,19 +288,22 @@ function AnalysisTail() {
 
         return {
             distance12,
-            distance12Cm: convertPxToCm(distance12),
+            distance12Cm: convertPxToCm(distance12, currentScaleFactor),
             distance23,
-            distance23Cm: convertPxToCm(distance23),
+            distance23Cm: convertPxToCm(distance23, currentScaleFactor),
             distance13,
-            distance13Cm: convertPxToCm(distance13),
+            distance13Cm: convertPxToCm(distance13, currentScaleFactor),
             angle123
         };
     };
 
-    const handleCalculate = () => {
+    // 處理計算逻輯
+    // scaleFactor 參數為可選，如果沒有傳入則使用狀態中的值
+    const handleCalculate = (scaleFactor) => {
+        const currentScaleFactor = scaleFactor !== undefined ? scaleFactor : scaleFactorState;
         if (points.length < 3) return;
 
-        const metrics = buildTailMetrics();
+        const metrics = buildTailMetrics(currentScaleFactor);
         if (!metrics) return;
 
         setLines([
@@ -316,7 +325,7 @@ function AnalysisTail() {
         const formatDistance = (pxDistance) => formatDistanceWithMode(
             pxDistance,
             showBlankScreen,  // 空白畫面模式使用螢幕實際 DPI 轉換
-            formatPxCmText    // 正常模式使用比例尺邏輯
+            (px) => formatPxCmText(px, currentScaleFactor)  // 傳入縮放因子到格式化函數
         );
 
         setCalculationResults([
@@ -327,6 +336,15 @@ function AnalysisTail() {
             `∠123 夾角：${metrics.angle123.toFixed(2)}°`
         ]);
         setIsCalculated(true);
+    };
+    
+    // 處理比例尺縮放因子改變
+    const handleScaleFactorChange = (newScaleFactor) => {
+        setScaleFactorState(newScaleFactor);
+        // 如果已經計算過，則重新計算所有距離
+        if (isCalculated) {
+            handleCalculate(newScaleFactor);
+        }
     };
 
     const handleSaveResult = () => {
@@ -527,7 +545,12 @@ function AnalysisTail() {
                             />
                         )}
 
-                        {!showBlankScreen && <ScaleIndicator />}
+                        {!showBlankScreen && (
+                            <ScaleIndicator 
+                                scaleFactor={scaleFactorState}
+                                onScaleFactorChange={handleScaleFactorChange}
+                            />
+                        )}
                     </div>
                 </div>
             </div>

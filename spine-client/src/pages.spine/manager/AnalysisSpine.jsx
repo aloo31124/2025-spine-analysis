@@ -47,6 +47,9 @@ function AnalysisSpine() {
     const [selectedCustomer, setSelectedCustomer] = useState(null);
     const [isCalculated, setIsCalculated] = useState(false);
     const [showBlankScreen, setShowBlankScreen] = useState(false);
+    
+    // 比例尺縮放因子狀態（預設為 1.0）
+    const [scaleFactorState, setScaleFactorState] = useState(1.0);
 
     // 初始化點位
     useEffect(() => {
@@ -252,9 +255,20 @@ function AnalysisSpine() {
         calculateAllDistancesAndAngles();
         setIsCalculated(true);
     };
+    
+    // 處理比例尺縮放因子改變
+    const handleScaleFactorChange = (newScaleFactor) => {
+        setScaleFactorState(newScaleFactor);
+        // 如果已經計算過，則重新計算所有距離
+        if (isCalculated) {
+            calculateAllDistancesAndAngles(newScaleFactor);
+        }
+    };
 
     // 計算所有點之間的距離和角度
-    const calculateAllDistancesAndAngles = () => {
+    // scaleFactor 參數為可選，如果沒有傳入則使用狀態中的值
+    const calculateAllDistancesAndAngles = (scaleFactor) => {
+        const currentScaleFactor = scaleFactor !== undefined ? scaleFactor : scaleFactorState;
         const results = [];
         
         // 計算所有點之間的距離
@@ -266,7 +280,7 @@ function AnalysisSpine() {
                 const formattedDistance = formatDistanceWithMode(
                     distance,
                     showBlankScreen,  // 空白畫面模式使用螢幕實際 DPI 轉換
-                    formatPxCmText    // 正常模式使用比例尺邏輯
+                    (px) => formatPxCmText(px, currentScaleFactor)  // 傳入縮放因子到格式化函數
                 );
                 results.push(`點${i + 1} 到 點${j + 1}: ${formattedDistance}`);
             }
@@ -700,7 +714,12 @@ function AnalysisSpine() {
                             </div>
                         ))}
 
-                        {!showBlankScreen && <ScaleIndicator />}
+                        {!showBlankScreen && (
+                            <ScaleIndicator 
+                                scaleFactor={scaleFactorState}
+                                onScaleFactorChange={handleScaleFactorChange}
+                            />
+                        )}
                     </div>
                 </div>
             </div>
