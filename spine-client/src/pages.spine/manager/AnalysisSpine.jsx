@@ -589,6 +589,9 @@ function AnalysisSpine() {
 
     // 切換空白畫面
     const handleToggleBlankScreen = () => {
+        if(!showBlankScreen) {
+            alert('切換為空白畫面模式，距離計算將依照螢幕實際尺寸(公分)進行。請受測者身體緊貼於螢幕，確保測量準確。');
+        }
         setShowBlankScreen(!showBlankScreen);
     };
 
@@ -597,23 +600,6 @@ function AnalysisSpine() {
             <div className="analysis-content">
                 <div className="neck-container-wrapper" ref={neckContainerWrapperRef}>
                     <div className="neck-calculation-results">
-                        {/* 空白畫面模式提示訊息 */}
-                        {showBlankScreen && (
-                            <div className="blank-screen-notice" style={{
-                                padding: '15px',
-                                margin: '10px 0',
-                                backgroundColor: '#fff3cd',
-                                border: '2px solid #ffc107',
-                                borderRadius: '8px',
-                                color: '#856404',
-                                fontSize: '14px',
-                                fontWeight: 'bold',
-                                textAlign: 'center',
-                                lineHeight: '1.6'
-                            }}>
-                                目前為空白畫面模式，距離計算將依照螢幕實際尺寸(公分)進行。請受測者身體緊貼於螢幕，確保測量準確。
-                            </div>
-                        )}
                         {calculationResults.length > 0 && (
                             <div className="calculation-results-content">
                                 <h3>計算結果</h3>
