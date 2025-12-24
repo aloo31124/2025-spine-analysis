@@ -59,7 +59,7 @@ gcloud auth configure-docker
 
 # 3. 建置映像檔
 docker build -t gcr.io/$PROJECT_ID/spine-analysis:latest \
-  --build-arg REACT_APP_BASE_URL=/api/ .
+  --build-arg REACT_APP_BASE_URL=/
 
 # 4. 推送映像檔到 Container Registry
 docker push gcr.io/$PROJECT_ID/spine-analysis:latest
@@ -79,6 +79,7 @@ gcloud run deploy spine-analysis \
 ```bash
 # 使用 Cloud Build 建置並部署
 gcloud builds submit --config cloudbuild.yaml \
+gcloud builds submit --config [cloudbuild.yaml](http://_vscodecontentref_/5) --substitutions=COMMIT_SHA=latest
   --substitutions=_REGION=us-central1
 ```
 
