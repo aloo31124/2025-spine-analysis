@@ -5,7 +5,7 @@ import AnalysisResult from '../AnalysisResult/AnalysisResult';
 import ProductRecommendationModal from '../ProductRecommendation/ProductRecommendationModal';
 import { getCustomerToProductPillowByCustomerId } from '../../../api/manager/customerToProductPillow';
 
-function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCustomer, handleAddCustomer, onRefreshAnalysisResults}) {
+function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCustomer, handleAddCustomer, onRefreshAnalysisResults, isAnalysisLoading = false}) {
     const navigate = useNavigate();
     const location = useLocation();
     
@@ -185,7 +185,6 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
             <div className={style.CreateEditProductContainer}>
                 
                 <div className={style.SectionHeader}>
-                    <h2>分析結果</h2>
                     {analysisResults && analysisResults.length > 0 && (
                         <button 
                             className={style.RecommendButton}
@@ -198,6 +197,7 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
                 <AnalysisResult 
                     analysisResults={analysisResults} 
                     onDeleteResult={handleDeleteAnalysisResult}
+                    isLoading={isAnalysisLoading}
                 />
                 
                 {/* 推薦商品彈窗 */}

@@ -14,6 +14,8 @@ function CustomerEditPage() {
     const [customerParam, setCustomerParam] = useState({});
     // 分析結果列表
     const [analysisResults, setAnalysisResults] = useState([]);
+    // 分析結果載入狀態
+    const [isAnalysisLoading, setIsAnalysisLoading] = useState(false);
     // 路由
     const navigate = useNavigate();
 
@@ -59,6 +61,7 @@ function CustomerEditPage() {
 
     /* 取得客戶分析結果 */
     const fetchCustomerAnalysisResults = async () => {
+        setIsAnalysisLoading(true);
         try {
             const response = await getCustomerAnalysisResultsByCustomerId(id);
             if (response.status === 200) {
@@ -66,6 +69,8 @@ function CustomerEditPage() {
             }
         } catch (error) {
             console.error("取得分析結果錯誤:", error);
+        } finally {
+            setIsAnalysisLoading(false);
         }
     };
 
@@ -87,6 +92,7 @@ function CustomerEditPage() {
                 analysisResults={analysisResults}
                 handleUpdateCustomer={handleUpdateCustomer}
                 onRefreshAnalysisResults={fetchCustomerAnalysisResults}
+                isAnalysisLoading={isAnalysisLoading}
                 typePage='EDIT'
             />
         </div>

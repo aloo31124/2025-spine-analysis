@@ -2,10 +2,17 @@ import React, { useState } from 'react';
 import style from '../CreateEdit/CreateEdit.module.css';
 import { deleteCustomerAnalysisResult, clearPendingAnalysisData } from '../../../api/manager/customerAnalysisResult';
 
-function AnalysisResult({ analysisResults, onDeleteResult }) {
-    // 控制分析結果的展開/收合狀態
+function AnalysisResult({ analysisResults, onDeleteResult, isLoading = false }) {
+    // 控制分析結果區塊的展開/收合狀態
+    const [isSectionExpanded, setIsSectionExpanded] = useState(true);
+    // 控制每筆分析結果的展開/收合狀態
     const [expandedResults, setExpandedResults] = useState({});
     const [deletingResults, setDeletingResults] = useState({});
+
+    /* 切換整個分析結果區塊的展開/收合 */
+    const toggleSectionExpansion = () => {
+        setIsSectionExpanded(prev => !prev);
+    };
 
     const getAnalysisTypeLabel = (analysisType) => {
         switch (analysisType) {
@@ -121,9 +128,28 @@ function AnalysisResult({ analysisResults, onDeleteResult }) {
     };
 
     return (
-        <div className={style.CreateEditProductRow}>
-            {analysisResults && analysisResults.length > 0 ? (
-                <div className={style.AnalysisResultsContainer}>
+        <div className={style.AnalysisResultSection}>
+            {/* 區塊標題與收合/展開按鈕 */}
+            <div className={style.AnalysisSectionHeader} onClick={toggleSectionExpansion}>
+                <span className={style.ExpandIcon}>{isSectionExpanded ? '▼' : '▶'}</span>
+                <span className={style.SectionTitle}>
+                    分析結果 {analysisResults && analysisResults.length > 0 ? `(${analysisResults.length})` : ''}
+                </span>
+            </div>
+            
+            {/* Loading 動畫 */}
+            {isLoading && (
+                <div className={style.LoadingContainer}>
+                    <div className={style.LoadingSpinner}></div>
+                    <p className={style.LoadingText}>載入分析結果中...</p>
+                </div>
+            )}
+            
+            {/* 分析結果內容 (非 loading 且展開時顯示) */}
+            {!isLoading && isSectionExpanded && (
+                <div className={style.CreateEditProductRow}>
+                    {analysisResults && analysisResults.length > 0 ? (
+                        <div className={style.AnalysisResultsContainer}>
                     {analysisResults.map((result, index) => {
                         const typeLabel = getAnalysisTypeLabel(result.analysisType);
                         const formattedDate = formatAnalysisDate(result);
@@ -188,7 +214,8 @@ function AnalysisResult({ analysisResults, onDeleteResult }) {
                                                 </div>
                                             </div>
                                         )}
-                                        {result.backgroundImage && (
+                                        {/* TODO: 暫時註解圖片顯示，待日後確認圖片顯示方式後再行處理 */}
+                                        {/* {result.backgroundImage && (
                                             <div className={style.ImagePreview}>
                                                 <h5>分析圖片:</h5>
                                                 <img 
@@ -197,16 +224,18 @@ function AnalysisResult({ analysisResults, onDeleteResult }) {
                                                     className={style.ResultImage}
                                                 />
                                             </div>
-                                        )}
+                                        )} */}
                                     </div>
                                 )}
                             </div>
                         );
                     })}
-                </div>
-            ) : (
-                <div className={style.NoResults}>
-                    <p>暫無分析結果</p>
+                        </div>
+                    ) : (
+                        <div className={style.NoResults}>
+                            <p>暫無分析結果</p>
+                        </div>
+                    )}
                 </div>
             )}
         </div>
