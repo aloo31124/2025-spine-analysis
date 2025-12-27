@@ -57,7 +57,7 @@ import ShoppingOrder from './pages.spine/account/ShoppingOrder';   // 購物訂�
 
 // === 商品管理頁面 ===
 import ProductListPage from './pages.spine/manager/ProductListPage';     // 商品列表
-import ProductListPageSpine from './pages.spine/manager/ProductListPageSpine'; // 商品列表脊椎版本
+import ProductPillowRecommendationList from './pages.spine/manager/ProductPillowRecommendationList'; // 枕頭商品推薦列表
 import ProductAddPage from './pages.spine/manager/ProductAddPage';       // 新增商品
 import ProductEditPage from './pages.spine/manager/ProductEditPage';     // 編輯商品
 
@@ -152,7 +152,7 @@ const AppRouter = () => (
       <Route path="product/list" element={<ProductListPage />} />      {/* 商品列表 */}
       <Route path="product/add" element={<ProductAddPage />} />        {/* 新增商品 */}
       <Route path="product/edit/:id" element={<ProductEditPage />} />  {/* 編輯商品 */}
-      <Route path="product-spine" element={<ProductListPageSpine />} />     {/* 商品列表脊椎版本 */}
+      <Route path="product-pillow-recommendation" element={<ProductPillowRecommendationList />} />     {/* 枕頭商品推薦列表 */}
       
       {/* 枕頭商品管理 */}
       <Route path="product-pillow/list" element={<AppRouterVerify element={ProductPillowListPage} node="product-pillow" />} />

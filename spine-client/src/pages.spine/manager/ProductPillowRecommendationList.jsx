@@ -10,10 +10,10 @@ import loadingGif from '../../assets/loading.gif';
 import styles from './ProductListPage.module.css';
 
 /**
- * 枕頭商品列表頁面 (含客戶綁定功能)
+ * 枕頭商品推薦列表頁面 (含客戶綁定功能)
  * 用於從客戶頁面跳轉過來，選擇枕頭商品並綁定給客戶
  */
-function ProductListPageSpine() {
+function ProductPillowRecommendationList() {
     const navigate = useNavigate();
     const location = useLocation();
     const [productPillowList, setProductPillowList] = useState([]);
@@ -668,4 +668,4 @@ function ProductListPageSpine() {
     );
 }
 
-export default ProductListPageSpine;
+export default ProductPillowRecommendationList;
