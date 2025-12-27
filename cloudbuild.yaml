@@ -1,8 +1,36 @@
-# Cloud Build 設定檔 - 用於 GCP Cloud Run 自動部署
-# 此檔案用於 Cloud Build 觸發器，自動建置並部署到 Cloud Run
+# Cloud Build 設定檔 - 用於 GCP Cloud Run + Firebase Hosting 自動部署
+# 此檔案用於 Cloud Build 觸發器，自動建置並部署到 Cloud Run 和 Firebase Hosting
 
 steps:
-  # 步驟 1: 建置 Docker 映像檔
+  # ========================================
+  # 步驟 1: 建置前端 React 應用程式 (用於 Firebase Hosting)
+  # ========================================
+  - name: 'node:20-alpine' 
+    entrypoint: npm
+    args: ['ci']
+    dir: 'spine-client'
+
+  - name: 'node:20-alpine'
+    entrypoint: npm
+    args: ['run', 'build']
+    dir: 'spine-client'
+    # 不設定 REACT_APP_BASE_URL，讓 React 使用 .env.production 的設定
+
+  # ========================================
+  # 步驟 2: 部署前端到 Firebase Hosting (使用 Google Cloud 認證)
+  # ========================================
+  - name: 'node:20'
+    entrypoint: bash
+    args:
+      - '-c'
+      - |
+        npm install -g firebase-tools
+        firebase deploy --only hosting --project $PROJECT_ID
+    dir: 'spine-client'
+
+  # ========================================
+  # 步驟 3: 建置 Docker 映像檔 (後端 + 前端整合版)
+  # ========================================
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'build'
@@ -14,7 +42,9 @@ steps:
       - 'REACT_APP_BASE_URL=/'
       - '.'
 
-  # 步驟 2: 推送映像檔到 Container Registry
+  # ========================================
+  # 步驟 4: 推送映像檔到 Container Registry
+  # ========================================
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'push'
@@ -25,7 +55,9 @@ steps:
       - 'push'
       - 'gcr.io/$PROJECT_ID/spine-analysis:latest'
 
-  # 步驟 3: 部署到 Cloud Run
+  # ========================================
+  # 步驟 5: 部署到 Cloud Run
+  # ========================================
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: gcloud
     args:
