@@ -180,7 +180,7 @@ function ProductRecommendationModal({ isOpen, onClose, analysisResults }) {
         <div className={styles.modalOverlay} onClick={onClose}>
             <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
                 <div className={styles.modalHeader}>
-                    <h2>推薦商品</h2>
+                    <h2>推薦床墊</h2>
                     <button className={styles.closeButton} onClick={onClose}>×</button>
                 </div>
                 

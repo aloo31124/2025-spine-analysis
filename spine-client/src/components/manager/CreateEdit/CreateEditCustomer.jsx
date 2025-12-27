@@ -20,6 +20,7 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
     const [gender, setGender] = useState('');
     const [state, setState] = useState("正常");
     const [notes, setNotes] = useState('');
+    const [age, setAge] = useState('');
     
     // 購買商品相關狀態
     const [purchasedProducts, setPurchasedProducts] = useState([]);
@@ -41,6 +42,7 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
             setGender(customer.gender || '');
             setState(customer.state || '正常');
             setNotes(customer.notes || '');
+            setAge(customer.age || '');
             
             // 載入客戶的購買商品
             if (customer.id) {
@@ -110,7 +112,7 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
             alert('請填寫必要欄位：姓名、電子郵件、電話');
             return;
         }
-        handleAddCustomer({name, email, phone, address, birthday, gender, state, notes});
+        handleAddCustomer({name, email, phone, address, birthday, gender, state, notes, age});
     }
 
     /* 編輯客戶, 更新編輯客戶 */
@@ -120,7 +122,7 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
             alert('請填寫必要欄位：姓名、電子郵件、電話');
             return;
         }
-        handleUpdateCustomer({name, email, phone, address, birthday, gender, state, notes});
+        handleUpdateCustomer({name, email, phone, address, birthday, gender, state, notes, age});
     }
 
     /* 處理分析結果刪除 */
@@ -144,11 +146,12 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
             gender,
             state,
             notes,
+            age,
             analysisResults
         };
         
-        // 跳轉到商品列表頁面，並傳遞客戶資料
-        navigate('/manager/product-spine', { 
+        // 跳轉到枕頭商品推薦列表頁面，並傳遞客戶資料
+        navigate('/manager/product-pillow-recommendation', { 
             state: { 
                 customerData,
                 fromCustomerPage: true
@@ -301,6 +304,17 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
 
             <div className={style.CreateEditProductContainer}>
                 <h2>個人資訊</h2>
+                <div className={style.CreateEditProductRow}>
+                    <label>年齡:</label>
+                    <input
+                        type="number"
+                        placeholder="請輸入年齡"
+                        value={age}
+                        onChange={e => setAge(e.target.value)}
+                        min="0"
+                        max="150"
+                    />
+                </div>
                 <div className={style.CreateEditProductRow}>
                     <label>生日:</label>
                     <input

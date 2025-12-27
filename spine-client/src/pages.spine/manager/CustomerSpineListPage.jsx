@@ -129,6 +129,7 @@ function CustomerSpineListPage() {
                 <tr>
                     <th>頭像</th>
                     <th>姓名</th>
+                    <th>年齡</th>
                     <th>電子郵件</th>
                     <th>電話</th>
                     <th>狀態</th>
@@ -138,13 +139,13 @@ function CustomerSpineListPage() {
             <tbody>
                 {isLoading ? (
                     <tr>
-                        <td colSpan="6" className={styles.loadingContainer}>
+                        <td colSpan="7" className={styles.loadingContainer}>
                             <img src={loadingGif} alt="Loading..." />
                         </td>
                     </tr>
                 ) : customerList.length === 0 ? (
                     <tr>
-                        <td colSpan="6" className={styles.emptyState}>
+                        <td colSpan="7" className={styles.emptyState}>
                             查無資料
                         </td>
                     </tr>
@@ -161,6 +162,11 @@ function CustomerSpineListPage() {
                             <td>
                                 <div className={styles.customerName}>
                                     {customer.name}
+                                </div>
+                            </td>
+                            <td>
+                                <div className={styles.customerAge}>
+                                    {customer.age || '-'}
                                 </div>
                             </td>
                             <td>
@@ -232,6 +238,13 @@ function CustomerSpineListPage() {
                         </div>
                         
                         <div className={styles.cardBody}>
+                            <div className={styles.cardRow}>
+                                <span className={styles.cardLabel}>年齡：</span>
+                                <span className={styles.cardValue}>
+                                    {customer.age || '-'}
+                                </span>
+                            </div>
+                            
                             <div className={styles.cardRow}>
                                 <span className={styles.cardLabel}>電子郵件：</span>
                                 <span className={styles.cardValue}>

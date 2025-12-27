@@ -7,7 +7,7 @@ const Fuse = require('fuse.js');
 const COLLECTION_NAME = 'Customer';
 
 class Customer {
-    constructor( id, name, email, phone, address, birthday, gender, state, notes, userId, createDate, updateDate ) {
+    constructor( id, name, email, phone, address, birthday, gender, state, notes, userId, createDate, updateDate, age ) {
         this.id = id || "";
         this.name = name || "";
         this.email = email || "";
@@ -20,6 +20,7 @@ class Customer {
         this.userId = userId || "";
         this.createDate = createDate || new Date().toISOString();
         this.updateDate = updateDate || new Date().toISOString();
+        this.age = age || null;
     }
 
     /** 匯入 所有 客戶資訊 進入空表, 不卡控, 使用於備份還原。 */
@@ -47,7 +48,8 @@ class Customer {
                     customerData.notes || "",
                     customerData.userId || "",
                     customerData.createDate || new Date().toISOString(),
-                    customerData.updateDate || new Date().toISOString()
+                    customerData.updateDate || new Date().toISOString(),
+                    customerData.age || null
                 );
                 const docRef = db.collection(COLLECTION_NAME).doc(customer.id.replace(/"/g, ''));
                 batch.set(docRef, {
@@ -61,7 +63,8 @@ class Customer {
                     notes: customer.notes.replace(/"/g, '') || "",
                     userId: customer.userId.replace(/"/g, '') || "",
                     createDate: customer.createDate,
-                    updateDate: customer.updateDate
+                    updateDate: customer.updateDate,
+                    age: customer.age || null
                 });
             });
 

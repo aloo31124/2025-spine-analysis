@@ -33,6 +33,7 @@ function CustomerEditPage() {
                 const gender = customer.gender || '';
                 const state = customer.state || "正常";
                 const notes = customer.notes || '';
+                const age = customer.age || '';
                 
                 setCustomerParam({
                     id,
@@ -43,7 +44,8 @@ function CustomerEditPage() {
                     birthday,
                     gender,
                     state,
-                    notes
+                    notes,
+                    age
                 });
                 
                 // 取得客戶分析結果
