@@ -7,9 +7,9 @@ import {getCustomerList, deleteCustomer, searchCustomer} from '../../api/manager
 import PaginationBar from '../../components/tools/PaginationBar/PaginationBar'
 import userIcon from '../../assets.spine/icon/user.png';
 import loadingGif from '../../assets/loading.gif';
-import styles from './CustomerListPage.module.css';
+import styles from './CustomerSpineListPage.module.css';
 
-function CustomerListPage() {
+function CustomerSpineListPage() {
     const navigate = useNavigate();
     const [customerList, setCustomerList] = useState([]);
     const [pagingParam, setPagingParam] = useState({ pageIndex: 1, pageSize: 5, sort: 'keyword', pageTotal:-1, dataTotal:-1 });
@@ -292,4 +292,4 @@ function CustomerListPage() {
     );
 }
 
-export default CustomerListPage;
+export default CustomerSpineListPage;

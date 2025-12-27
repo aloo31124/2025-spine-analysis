@@ -88,7 +88,7 @@ import PaymentListPage from './pages/manager/PaymentListPage';
 import PaymentFormPage from './pages/manager/PaymentFormPage';
 
 // 客戶管理頁
-import CustomerListPage from './pages.spine/manager/CustomerListPage';
+import CustomerSpineListPage from './pages.spine/manager/CustomerSpineListPage';
 import CustomerAddPage from './pages.spine/manager/CustomerAddPage';
 import CustomerEditPage from './pages.spine/manager/CustomerEditPage';
 import ReportSpineRevenueLineChart from './pages.spine/manager/ReportSpineRevenueLineChart';
@@ -170,7 +170,7 @@ const AppRouter = () => (
       <Route path="product/category/edit/:id" element={<CategoryEditPage />} /> {/* 編輯分類 */}
 
       {/* 客戶管理 */}
-      <Route path="customer/list" element={<AppRouterVerify element={CustomerListPage} node="customer" />} />
+      <Route path="customer/list" element={<AppRouterVerify element={CustomerSpineListPage} node="customer" />} />
       <Route path="customer/add" element={<AppRouterVerify element={CustomerAddPage} node="customer" />} />
       <Route path="customer/edit/:id" element={<AppRouterVerify element={CustomerEditPage} node="customer" />} />
 
