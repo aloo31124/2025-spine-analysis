@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import style from './CreateEdit.module.css';
+import { PILLOW_MODEL_OPTIONS } from '../../../utils/pillowModelOptions';
 
 /**
  * 枕頭商品新增/編輯組件
@@ -99,16 +100,22 @@ function CreateEditProductPillow({ typePage, productPillow,
                 </div>
             </div>
 
-            {/* 枕頭類型 */}
+            {/* 枕頭型號 */}
             <div className={style.CreateEditProductContainer}>
-                <h2>枕頭類型</h2>
+                <h2>枕頭型號</h2>
                 <div className={style.CreateEditProductRow}>
-                    <input
-                        type="text"
-                        placeholder="枕頭類型 (例如: 記憶棉、乳膠...)"
+                    <select
                         value={type}
                         onChange={e => setType(e.target.value)}
-                    />
+                        style={{ width: '100%', padding: '8px', fontSize: '14px' }}
+                    >
+                        <option value="">請選擇枕頭型號</option>
+                        {PILLOW_MODEL_OPTIONS.map((option) => (
+                            <option key={option.value} value={option.value}>
+                                {option.label}
+                            </option>
+                        ))}
+                    </select>
                 </div>
             </div>
 

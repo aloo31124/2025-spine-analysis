@@ -5,6 +5,7 @@ import { getProductPillowList, deleteProductPillow, searchProductPillow } from '
 import PaginationBar from '../../components/tools/PaginationBar/PaginationBar';
 import loadingGif from '../../assets/loading.gif';
 import styles from './ProductListPage.module.css';
+import { PILLOW_MODEL_OPTIONS } from '../../utils/pillowModelOptions';
 
 /**
  * 枕頭商品列表頁面
@@ -192,7 +193,7 @@ function ProductPillowListPage() {
             <thead>
                 <tr>
                     <th>名稱</th>
-                    <th>類型</th>
+                    <th>枕頭型號</th>
                     <th>價格</th>
                     <th>短高度</th>
                     <th>長高度</th>
@@ -285,7 +286,7 @@ function ProductPillowListPage() {
 
                         <div className={styles.cardBody}>
                             <div className={styles.cardRow}>
-                                <span className={styles.cardLabel}>類型：</span>
+                                <span className={styles.cardLabel}>枕頭型號：</span>
                                 <span className={styles.cardValue}>{productPillow.type || '-'}</span>
                             </div>
 
@@ -361,16 +362,18 @@ function ProductPillowListPage() {
                         if (e.key === 'Enter') handleSearchResult(searchParam);
                     }}
                 />
-                <input
-                    type="text"
-                    placeholder="搜尋類型..."
+                <select
                     value={searchParam.type}
                     onChange={(e) => setSearchParam({ ...searchParam, type: e.target.value })}
-                    onKeyDown={(e) => {
-                        if (e.key === 'Enter') handleSearchResult(searchParam);
-                    }}
                     className={styles.typeInput}
-                />
+                >
+                    <option value="">全部枕頭型號</option>
+                    {PILLOW_MODEL_OPTIONS.map((option) => (
+                        <option key={option.value} value={option.value}>
+                            {option.label}
+                        </option>
+                    ))}
+                </select>
                 <button onClick={() => handleSearchResult(searchParam)}>搜尋</button>
                 <button 
                     onClick={() => setShowAdvancedSearch(!showAdvancedSearch)}
