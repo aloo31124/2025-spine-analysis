@@ -163,6 +163,32 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
         });
     }
 
+    /* 處理購買床墊商品按鈕點擊 */
+    const handlePurchaseMattress = () => {
+        // 準備客戶完整資料
+        const customerData = {
+            id: customer?.id,
+            name,
+            email,
+            phone,
+            address,
+            birthday,
+            gender,
+            state,
+            notes,
+            age,
+            analysisResults
+        };
+        
+        // 跳轉到床墊商品推薦列表頁面，並傳遞客戶資料
+        navigate('/manager/product-mattress-recommendation', { 
+            state: { 
+                customerData,
+                fromCustomerPage: true
+            }
+        });
+    }
+
     return (
         <div className={style.CreateEditProduct}>
             <div className={style.CreateEditProductTopBar}>
@@ -211,10 +237,11 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
                     analysisResults={analysisResults}
                 />
                 
-                <h2>購買枕頭商品</h2>
+                <h2>購買商品</h2>
                 <div className={style.CreateEditProductRow}>
                     <button onClick={handlePurchaseProduct}>購買枕頭商品</button>
                     <button onClick={() => setShowPillowRecommendationModal(true)}>推薦枕頭</button>
+                    <button onClick={handlePurchaseMattress}>購買床墊商品</button>
                     {purchasedProducts.length > 0 && (
                         <button onClick={() => setShowPurchasedProducts(!showPurchasedProducts)}>
                             {showPurchasedProducts ? '隱藏' : '顯示'}購買紀錄
