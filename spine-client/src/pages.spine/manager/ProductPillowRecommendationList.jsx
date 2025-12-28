@@ -49,14 +49,25 @@ function ProductPillowRecommendationList() {
 
     // 初始時, 取得枕頭商品列表
     useEffect(() => {
-        fetchProductPillowList();
-        
         // 檢查是否從客戶頁面跳轉過來
         if (location.state?.fromCustomerPage && location.state?.customerData) {
             const customer = location.state.customerData;
             setCustomerData(customer);
             setCustomerEmail(customer.email || '');
             setShowAnalysisResults(true);
+            
+            // 檢查是否有推薦型號，若有則帶入搜尋條件
+            if (location.state?.recommendedModel) {
+                const recommendedModel = location.state.recommendedModel;
+                const newSearchParam = { ...searchParam, type: recommendedModel };
+                setSearchParam(newSearchParam);
+                // 使用推薦型號進行搜尋
+                handleSearchResult(newSearchParam);
+            } else {
+                fetchProductPillowList();
+            }
+        } else {
+            fetchProductPillowList();
         }
     }, []);
 
@@ -382,16 +393,6 @@ function ProductPillowRecommendationList() {
                                     />
                                 </td>
                             )}
-                            <td>
-                                <div className={styles.actionButtons}>
-                                    <button 
-                                        className={`${styles.actionButton} ${styles.edit}`}
-                                        onClick={() => handleEditProductPillow(productPillow)}
-                                    >
-                                        編輯
-                                    </button>
-                                </div>
-                            </td>
                         </tr>
                     ))
                 )}

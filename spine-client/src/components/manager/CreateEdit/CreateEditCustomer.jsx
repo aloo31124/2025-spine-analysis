@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import style from './CreateEdit.module.css';
 import AnalysisResult from '../AnalysisResult/AnalysisResult';
 import ProductRecommendationModal from '../ProductRecommendation/ProductRecommendationModal';
+import PillowRecommendationModal from '../ProductRecommendation/PillowRecommendationModal';
 import { getCustomerToProductPillowByCustomerId } from '../../../api/manager/customerToProductPillow';
 
 function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCustomer, handleAddCustomer, onRefreshAnalysisResults, isAnalysisLoading = false}) {
@@ -29,6 +30,9 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
     
     // 推薦商品彈窗狀態
     const [showRecommendationModal, setShowRecommendationModal] = useState(false);
+    
+    // 枕頭推薦彈窗狀態
+    const [showPillowRecommendationModal, setShowPillowRecommendationModal] = useState(false);
 
     /* 初始客戶, 編輯客戶資訊 */
     useEffect(() => {
@@ -210,12 +214,32 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
                 <h2>購買枕頭商品</h2>
                 <div className={style.CreateEditProductRow}>
                     <button onClick={handlePurchaseProduct}>購買枕頭商品</button>
+                    <button onClick={() => setShowPillowRecommendationModal(true)}>推薦枕頭</button>
                     {purchasedProducts.length > 0 && (
                         <button onClick={() => setShowPurchasedProducts(!showPurchasedProducts)}>
                             {showPurchasedProducts ? '隱藏' : '顯示'}購買紀錄
                         </button>
                     )}
                 </div>
+                
+                {/* 枕頭推薦彈窗 */}
+                <PillowRecommendationModal
+                    isOpen={showPillowRecommendationModal}
+                    onClose={() => setShowPillowRecommendationModal(false)}
+                    customerData={{
+                        id: customer?.id,
+                        name,
+                        email,
+                        phone,
+                        address,
+                        birthday,
+                        gender,
+                        state,
+                        notes,
+                        age,
+                        analysisResults
+                    }}
+                />
                 
                 {/* 購買統計 */}
                 {purchaseStats && (
