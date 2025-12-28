@@ -23,6 +23,7 @@ const customerApiController = require('./controllers/manager/customer.api.contro
 const customerAnalysisResultApiController = require('./controllers/manager/customerAnalysisResult.api.controller');
 const customerToProductApiController = require('./controllers/manager/customerToProduct.api.controller');
 const customerToProductPillowApiController = require('./controllers/manager/customerToProductPillow.api.controller');
+const customerToProductMattressApiController = require('./controllers/manager/customerToProductMattress.api.controller');
 const productPillowApiController = require('./controllers/manager/productPillow.api.controller');
 const productMattressApiController = require('./controllers/manager/productMattress.api.controller');
 const reportSpineApiController = require('./controllers/manager/reportSpine.api.controller');
@@ -179,6 +180,17 @@ app.patch('/api/manager/customer-to-product-pillow/edit', customerToProductPillo
 app.delete('/api/manager/customer-to-product-pillow/delete/:id', customerToProductPillowApiController.deleteCustomerToProductPillow);
 app.post('/api/manager/customer-to-product-pillow/search', customerToProductPillowApiController.searchCustomerToProductPillow);
 app.get('/api/manager/customer-to-product-pillow/stats/:customerId', customerToProductPillowApiController.getCustomerPurchaseStats);
+// 後台管理 客戶購買床墊商品關聯 api
+app.get('/api/manager/customer-to-product-mattress/list', customerToProductMattressApiController.getAllCustomerToProductMattressList);
+app.post('/api/manager/customer-to-product-mattress/add', customerToProductMattressApiController.addCustomerToProductMattress);
+app.post('/api/manager/customer-to-product-mattress/add-multiple', customerToProductMattressApiController.addMultipleCustomerToProductMattress);
+app.get('/api/manager/customer-to-product-mattress/:id', customerToProductMattressApiController.getCustomerToProductMattress);
+app.get('/api/manager/customer-to-product-mattress/customer/:customerId', customerToProductMattressApiController.getCustomerToProductMattressByCustomerId);
+app.get('/api/manager/customer-to-product-mattress/product-mattress/:productMattressId', customerToProductMattressApiController.getCustomerToProductMattressByProductMattressId);
+app.patch('/api/manager/customer-to-product-mattress/edit', customerToProductMattressApiController.updateCustomerToProductMattress);
+app.delete('/api/manager/customer-to-product-mattress/delete/:id', customerToProductMattressApiController.deleteCustomerToProductMattress);
+app.post('/api/manager/customer-to-product-mattress/search', customerToProductMattressApiController.searchCustomerToProductMattress);
+app.get('/api/manager/customer-to-product-mattress/stats/:customerId', customerToProductMattressApiController.getCustomerPurchaseStats);
 // 後台管理 報表 api
 app.post('/api/manager/report-spine/revenue-line-chart', reportSpineApiController.getRevenueLineChartData);
 app.post('/api/manager/report-spine/sales-line-chart', reportSpineApiController.getSalesLineChartData);
