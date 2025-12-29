@@ -5,6 +5,7 @@ import AnalysisResult from '../AnalysisResult/AnalysisResult';
 import PillowRecommendationModal from '../ProductRecommendation/PillowRecommendationModal';
 import MattressRecommendationModal from '../ProductRecommendation/MattressRecommendationModal';
 import { getCustomerToProductPillowByCustomerId } from '../../../api/manager/customerToProductPillow';
+import { getCustomerToProductMattressByCustomerId } from '../../../api/manager/customerToProductMattress';
 
 function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCustomer, handleAddCustomer, onRefreshAnalysisResults, isAnalysisLoading = false}) {
     const navigate = useNavigate();
@@ -67,33 +68,67 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
         }
     }, [location.state, customer, navigate]);
 
-    /* 載入客戶購買的枕頭商品 */
+    /* 載入客戶購買的所有商品（枕頭 + 床墊）*/
     const fetchPurchasedProducts = async (customerId) => {
         try {
-            const response = await getCustomerToProductPillowByCustomerId(customerId);
-            if (response?.data?.records) {
-                setPurchasedProducts(response.data.records);
-                
-                // 計算購買統計
-                const stats = calculatePurchaseStats(response.data.records);
-                setPurchaseStats(stats);
-            }
+            // 同時取得枕頭和床墊購買紀錄
+            const [pillowResponse, mattressResponse] = await Promise.all([
+                getCustomerToProductPillowByCustomerId(customerId),
+                getCustomerToProductMattressByCustomerId(customerId)
+            ]);
+            
+            // 合併兩種商品的購買紀錄，並標記商品類型
+            const pillowProducts = (pillowResponse?.data?.records || []).map(item => ({
+                ...item,
+                productType: 'pillow',
+                productInfo: item.productPillowInfo
+            }));
+            
+            const mattressProducts = (mattressResponse?.data?.records || []).map(item => ({
+                ...item,
+                productType: 'mattress',
+                productInfo: item.productMattressInfo
+            }));
+            
+            // 合併並按購買日期排序（由新到舊）
+            const allProducts = [...pillowProducts, ...mattressProducts].sort((a, b) => {
+                return new Date(b.purchaseDate) - new Date(a.purchaseDate);
+            });
+            
+            setPurchasedProducts(allProducts);
+            
+            // 計算購買統計
+            const stats = calculatePurchaseStats(allProducts);
+            setPurchaseStats(stats);
         } catch (error) {
-            console.error('載入客戶購買枕頭商品失敗:', error);
+            console.error('載入客戶購買商品失敗:', error);
         }
     }
 
-    /* 計算購買統計 */
+    /* 計算購買統計（枕頭 + 床墊）*/
     const calculatePurchaseStats = (purchases) => {
         let totalQuantity = 0;
         let totalAmount = 0;
         const productCounts = {};
+        let pillowCount = 0;
+        let mattressCount = 0;
         
         purchases.forEach(purchase => {
             totalQuantity += purchase.quantity || 0;
             totalAmount += (purchase.price || 0) * (purchase.quantity || 0);
             
-            const productName = purchase.productPillowInfo?.name || '未知枕頭商品';
+            // 根據商品類型取得商品名稱
+            let productName;
+            if (purchase.productType === 'pillow') {
+                productName = purchase.productInfo?.name || '未知枕頭商品';
+                pillowCount += purchase.quantity || 0;
+            } else if (purchase.productType === 'mattress') {
+                productName = purchase.productInfo?.name || '未知床墊商品';
+                mattressCount += purchase.quantity || 0;
+            } else {
+                productName = '';
+            }
+            
             if (productCounts[productName]) {
                 productCounts[productName] += purchase.quantity || 0;
             } else {
@@ -105,7 +140,9 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
             totalPurchases: purchases.length,
             totalQuantity,
             totalAmount,
-            productCounts
+            productCounts,
+            pillowCount,
+            mattressCount
         };
     }
 
@@ -274,7 +311,7 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
                 {/* 購買統計 */}
                 {purchaseStats && (
                     <div className={style.PurchaseStatsContainer}>
-                        <h4>購買枕頭統計</h4>
+                        <h4>商品統計</h4>
                         <div className={style.StatsGrid}>
                             <div className={style.StatItem}>
                                 <span className={style.StatLabel}>總購買次數:</span>
@@ -292,33 +329,41 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
                     </div>
                 )}
                 
-                {/* 購買枕頭商品列表 */}
+                {/* 購買商品列表（枕頭 + 床墊）*/}
                 {showPurchasedProducts && purchasedProducts.length > 0 && (
                     <div className={style.PurchasedProductsContainer}>
-                        <h4>購買枕頭商品列表</h4>
+                        <h4>購買商品列表</h4>
                         <div className={style.PurchasedProductsList}>
-                            {purchasedProducts.map((purchase, index) => (
-                                <div key={`${purchase.id}-${index}`} className={style.PurchasedProductItem}>
-                                    <div className={style.ProductBasicInfo}>
-                                        <h5>{purchase.productPillowInfo?.name || '未知枕頭商品'}</h5>
-                                        <p className={style.PurchaseDate}>
-                                            購買日期: {new Date(purchase.purchaseDate).toLocaleDateString()}
-                                        </p>
+                            {purchasedProducts.map((purchase, index) => {
+                                // 根據商品類型取得商品名稱和類型標籤
+                                const productName = purchase.productInfo?.name || '';
+                                const productTypeLabel = purchase.productType === 'pillow' ? '枕頭' : '床墊';
+                                
+                                return (
+                                    <div key={`${purchase.id}-${index}`} className={style.PurchasedProductItem}>
+                                        <div className={style.ProductBasicInfo}>
+                                            <h5>
+                                                [{productTypeLabel}] {productName}
+                                            </h5>
+                                            <p className={style.PurchaseDate}>
+                                                購買日期: {new Date(purchase.purchaseDate).toLocaleDateString()}
+                                            </p>
+                                        </div>
+                                        <div className={style.ProductPurchaseInfo}>
+                                            <span className={style.Quantity}>數量: {purchase.quantity}</span>
+                                            <span className={style.Price}>
+                                                單價: NT$ {(purchase.price || 0).toLocaleString()}
+                                            </span>
+                                            <span className={style.Total}>
+                                                小計: NT$ {((purchase.price || 0) * (purchase.quantity || 0)).toLocaleString()}
+                                            </span>
+                                        </div>
+                                        {purchase.notes && (
+                                            <p className={style.PurchaseNotes}>{purchase.notes}</p>
+                                        )}
                                     </div>
-                                    <div className={style.ProductPurchaseInfo}>
-                                        <span className={style.Quantity}>數量: {purchase.quantity}</span>
-                                        <span className={style.Price}>
-                                            單價: NT$ {(purchase.price || 0).toLocaleString()}
-                                        </span>
-                                        <span className={style.Total}>
-                                            小計: NT$ {((purchase.price || 0) * (purchase.quantity || 0)).toLocaleString()}
-                                        </span>
-                                    </div>
-                                    {purchase.notes && (
-                                        <p className={style.PurchaseNotes}>{purchase.notes}</p>
-                                    )}
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     </div>
                 )}
