@@ -9,10 +9,11 @@ const RANGE_CONFIG = {
 	quarter: { count: 10 }
 };
 
-exports.getRevenueLineChartData = async ({ timeRange = DEFAULT_TIME_RANGE, productPillowId = 'all' }) => {
+exports.getRevenueLineChartData = async ({ timeRange = DEFAULT_TIME_RANGE, productPillowId = 'all', userId = '' }) => {
 	const { labels, data, timeRange: resolvedRange, filters, dateRange } = await buildLineChartDataset({
 		timeRange,
 		productPillowId,
+		userId,
 		metricFn: record => (Number(record.price) || 0) * (Number(record.quantity) || 1)
 	});
 
@@ -30,10 +31,11 @@ exports.getRevenueLineChartData = async ({ timeRange = DEFAULT_TIME_RANGE, produ
 	};
 };
 
-exports.getSalesLineChartData = async ({ timeRange = DEFAULT_TIME_RANGE, productPillowId = 'all' }) => {
+exports.getSalesLineChartData = async ({ timeRange = DEFAULT_TIME_RANGE, productPillowId = 'all', userId = '' }) => {
 	const { labels, data, timeRange: resolvedRange, filters, dateRange } = await buildLineChartDataset({
 		timeRange,
 		productPillowId,
+		userId,
 		metricFn: record => Number(record.quantity) || 0
 	});
 
@@ -54,10 +56,10 @@ exports.getProductPillowOptions = async () => {
 	return ReportSpineModel.fetchProductPillowOptions();
 };
 
-async function buildLineChartDataset({ timeRange, productPillowId, metricFn }) {
+async function buildLineChartDataset({ timeRange, productPillowId, userId, metricFn }) {
 	const rangeKey = RANGE_CONFIG[timeRange] ? timeRange : DEFAULT_TIME_RANGE;
 	const { buckets, startDateISO, endDateISO } = buildBuckets(rangeKey);
-	const records = await ReportSpineModel.fetchPurchaseRecords({ startDateISO, endDateISO });
+	const records = await ReportSpineModel.fetchPurchaseRecords({ startDateISO, endDateISO, userId });
 	const data = aggregateMetric(records, buckets, productPillowId, metricFn);
 
 	return {

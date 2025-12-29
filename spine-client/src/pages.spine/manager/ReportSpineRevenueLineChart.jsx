@@ -55,7 +55,8 @@ const ReportSpineRevenueLineChart = () => {
 		setLoadingChart(true);
 		setErrorMessage('');
 		try {
-			const payload = await getRevenueLineChartData(timeRange, productPillowId);
+			const userId = localStorage.getItem('userId') || '';
+			const payload = await getRevenueLineChartData(timeRange, productPillowId, userId);
 			setChartPayload({
 				labels: payload?.labels || [],
 				data: payload?.data || [],

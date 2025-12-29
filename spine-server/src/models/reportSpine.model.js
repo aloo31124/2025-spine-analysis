@@ -10,10 +10,15 @@ class ReportSpineModel {
 	 * @param {Object} filter
 	 * @param {string} filter.startDateISO - ISO 格式的開始時間 (含)
 	 * @param {string} filter.endDateISO - ISO 格式的結束時間 (含)
+	 * @param {string} filter.userId - 使用者ID (用於篩選當前使用者的資料)
 	 * @returns {Promise<Array>} 購買紀錄清單
 	 */
-	static async fetchPurchaseRecords({ startDateISO, endDateISO }) {
+	static async fetchPurchaseRecords({ startDateISO, endDateISO, userId }) {
 		let query = db.collection(CUSTOMER_COLLECTION);
+
+		if (userId) {
+			query = query.where('userId', '==', userId);
+		}
 
 		if (startDateISO) {
 			query = query.where('purchaseDate', '>=', startDateISO);

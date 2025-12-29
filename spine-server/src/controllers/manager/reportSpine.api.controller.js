@@ -5,8 +5,8 @@ const ERROR_HEADER = '[reportSpine.api.controller.js]';
 exports.getRevenueLineChartData = async (req, res) => {
 	console.log(`${ERROR_HEADER} getRevenueLineChartData start`, req.body);
 	try {
-		const { timeRange = 'day', productPillowId = 'all' } = req.body || {};
-		const result = await reportSpineService.getRevenueLineChartData({ timeRange, productPillowId });
+		const { timeRange = 'day', productPillowId = 'all', userId = '' } = req.body || {};
+		const result = await reportSpineService.getRevenueLineChartData({ timeRange, productPillowId, userId });
 		res.status(200).json({ result });
 	} catch (error) {
 		console.error(`${ERROR_HEADER} getRevenueLineChartData error:`, error);
@@ -17,8 +17,8 @@ exports.getRevenueLineChartData = async (req, res) => {
 exports.getSalesLineChartData = async (req, res) => {
 	console.log(`${ERROR_HEADER} getSalesLineChartData start`, req.body);
 	try {
-		const { timeRange = 'day', productPillowId = 'all' } = req.body || {};
-		const result = await reportSpineService.getSalesLineChartData({ timeRange, productPillowId });
+		const { timeRange = 'day', productPillowId = 'all', userId = '' } = req.body || {};
+		const result = await reportSpineService.getSalesLineChartData({ timeRange, productPillowId, userId });
 		res.status(200).json({ result });
 	} catch (error) {
 		console.error(`${ERROR_HEADER} getSalesLineChartData error:`, error);
