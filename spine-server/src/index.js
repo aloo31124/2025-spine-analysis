@@ -26,6 +26,7 @@ const customerToProductPillowApiController = require('./controllers/manager/cust
 const customerToProductMattressApiController = require('./controllers/manager/customerToProductMattress.api.controller');
 const productPillowApiController = require('./controllers/manager/productPillow.api.controller');
 const productMattressApiController = require('./controllers/manager/productMattress.api.controller');
+const productInventoryApiController = require('./controllers/manager/productInventory.api.controller');
 const reportSpineApiController = require('./controllers/manager/reportSpine.api.controller');
 //const productImgApiController = require('./controllers/manager/productImg.api.controller')
 const shopApiController = require('./controllers/shop/shop.api.controller');
@@ -135,6 +136,11 @@ app.patch('/api/manager/product-mattress/edit', productMattressApiController.upd
 app.delete('/api/manager/product-mattress/delete/:id', productMattressApiController.deleteProductMattress);
 app.post('/api/manager/product-mattress/search', productMattressApiController.searchProductMattress);
 app.post('/api/manager/product-mattress/import', productMattressApiController.importProductMattress);
+// 後台管理 商品庫存 api
+app.get('/api/manager/product-inventory/pillow', productInventoryApiController.getPillowInventoryList);
+app.get('/api/manager/product-inventory/mattress', productInventoryApiController.getMattressInventoryList);
+app.patch('/api/manager/product-inventory/pillow/stock', productInventoryApiController.updatePillowStock);
+app.patch('/api/manager/product-inventory/mattress/stock', productInventoryApiController.updateMattressStock);
 // 後台管理 商品分類 api
 app.get('/api/manager/product/category/list', productCategoryApiController.getProductCategoryList);
 app.get('/api/manager/product/category/:id', productCategoryApiController.getProductCategory);

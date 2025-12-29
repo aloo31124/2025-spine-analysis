@@ -9,13 +9,14 @@ const COLLECTION_NAME = 'ProductMattress';
 
 
 class ProductMattress {
-    constructor(id, name, price, state, model, userId) {
+    constructor(id, name, price, state, model, userId, stock) {
         this.id = id || "";
         this.name = name || "";          // 床墊名稱
         this.price = price || "";        // 床墊價錢
         this.state = state || "";        // 狀態
         this.model = model || "";        // 床墊型號
         this.userId = userId || "";      // 用戶ID
+        this.stock = stock || 0;         // 庫存數量
     }
 
     /** 匯入 所有 床墊商品資訊 進入空表, 不卡控, 使用於備份還原。 */
@@ -37,7 +38,8 @@ class ProductMattress {
                     productMattressData.price || "",
                     productMattressData.state || "",
                     productMattressData.model || "",
-                    productMattressData.userId || ""
+                    productMattressData.userId || "",
+                    productMattressData.stock || 0
                 );
                 const docRef = db.collection(COLLECTION_NAME).doc(productMattress.id.toString().replace(/"/g, ''));
                 batch.set(docRef, {
@@ -45,7 +47,8 @@ class ProductMattress {
                     price: (productMattress.price?.toString() || "").replace(/"/g, ''),
                     state: (productMattress.state?.toString() || "").replace(/"/g, ''),
                     model: (productMattress.model?.toString() || "").replace(/"/g, ''),
-                    userId: (productMattress.userId?.toString() || "").replace(/"/g, '')
+                    userId: (productMattress.userId?.toString() || "").replace(/"/g, ''),
+                    stock: productMattress.stock || 0
                 });
             });
 

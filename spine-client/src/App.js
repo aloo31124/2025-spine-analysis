@@ -72,6 +72,9 @@ import ProductMattressListPage from './pages.spine/manager/ProductMattressListPa
 import ProductMattressAddPage from './pages.spine/manager/ProductMattressAddPage';     // 新增床墊商品
 import ProductMattressEditPage from './pages.spine/manager/ProductMattressEditPage';   // 編輯床墊商品
 
+// === 商品庫存頁面 ===
+import ProductInventoryPage from './pages.spine/manager/ProductInventoryPage';   // 商品庫存
+
 // === 脊椎分析頁面 ===
 import AnalysisSpine from './pages.spine/manager/AnalysisSpine';   // 脊椎分析
 import AnalysisTail from './pages.spine/manager/AnalysisTail';     // 尾椎分析
@@ -165,6 +168,9 @@ const AppRouter = () => (
       <Route path="product-mattress/list" element={<AppRouterVerify element={ProductMattressListPage} node="product-mattress" />} />
       <Route path="product-mattress/add" element={<AppRouterVerify element={ProductMattressAddPage} node="product-mattress" />} />
       <Route path="product-mattress/edit/:id" element={<AppRouterVerify element={ProductMattressEditPage} node="product-mattress" />} />
+      
+      {/* 商品庫存 */}
+      <Route path="product-inventory" element={<AppRouterVerify element={ProductInventoryPage} node="product-inventory" />} />
       
       {/* 分類管理 */}
       <Route path="product/category/list" element={<CategoryListPage />} />    {/* 分類列表 */}

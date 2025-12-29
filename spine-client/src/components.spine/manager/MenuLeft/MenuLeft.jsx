@@ -38,6 +38,7 @@ function MenuLeft({ isOpen, isHidden, onClose }) {
             'customer',         // 客戶管理
             'product-pillow',   // 枕頭商品
             'product-mattress', // 床墊商品
+            'product-inventory', // 商品庫存
             'revenue'           // 營收管理
         ];
         // 如果是店長，只能訪問白名單內的頁面
@@ -116,6 +117,13 @@ function MenuLeft({ isOpen, isHidden, onClose }) {
                         onClick={e => navigate('/manager/product-mattress/list') }
                     >
                         床墊管理
+                    </button>
+                )}
+                {canAccess('product-inventory') && (
+                    <button className={style.MenuLeftButton}
+                        onClick={e => navigate('/manager/product-inventory') }
+                    >
+                        商品庫存
                     </button>
                 )}
                 {canAccess('revenue') && (

@@ -23,6 +23,7 @@ function CreateEditProductPillow({ typePage, productPillow,
     const [shortCurvature, setShortCurvature] = useState(0); // 短弧度
     const [mediumCurvature, setMediumCurvature] = useState(0); // 中弧度
     const [longCurvature, setLongCurvature] = useState(0);   // 長弧度
+    const [stock, setStock] = useState(0);                   // 庫存數量
 
     /* 初始枕頭商品資訊 */
     useEffect(() => {
@@ -36,6 +37,7 @@ function CreateEditProductPillow({ typePage, productPillow,
             setShortCurvature(productPillow.shortCurvature || 0);
             setMediumCurvature(productPillow.mediumCurvature || 0);
             setLongCurvature(productPillow.longCurvature || 0);
+            setStock(productPillow.stock || 0);
         }
     }, [productPillow]);
 
@@ -67,7 +69,8 @@ function CreateEditProductPillow({ typePage, productPillow,
             longHeight: Number(longHeight),
             shortCurvature: Number(shortCurvature),
             mediumCurvature: Number(mediumCurvature),
-            longCurvature: Number(longCurvature)
+            longCurvature: Number(longCurvature),
+            stock: Number(stock)
         });
     }
 
@@ -127,6 +130,19 @@ function CreateEditProductPillow({ typePage, productPillow,
                         placeholder='商品價格'
                         value={price}
                         onChange={e => setPrice(e.target.value)}
+                    />
+                </div>
+            </div>
+
+            {/* 庫存數量 */}
+            <div className={style.CreateEditProductContainer}>
+                <h2>庫存數量</h2>
+                <div className={style.CreateEditProductRow}>
+                    <input type="number"
+                        placeholder='庫存數量'
+                        value={stock}
+                        min="0"
+                        onChange={e => setStock(e.target.value)}
                     />
                 </div>
             </div>

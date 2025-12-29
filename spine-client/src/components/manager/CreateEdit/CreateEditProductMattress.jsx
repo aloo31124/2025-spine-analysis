@@ -24,6 +24,7 @@ function CreateEditProductMattress({ typePage, productMattress,
     const [state, setState] = useState("草稿");
     const [model, setModel] = useState("1號床墊");
     const [price, setPrice] = useState(0);
+    const [stock, setStock] = useState(0);  // 庫存數量
 
     /* 初始床墊商品資訊 */
     useEffect(() => {
@@ -32,6 +33,7 @@ function CreateEditProductMattress({ typePage, productMattress,
             setState(productMattress.state || "草稿");
             setModel(productMattress.model || "1號床墊");
             setPrice(productMattress.price || 0);
+            setStock(productMattress.stock || 0);
         }
     }, [productMattress]);
 
@@ -42,7 +44,8 @@ function CreateEditProductMattress({ typePage, productMattress,
             name,
             state,
             model,
-            price: Number(price)
+            price: Number(price),
+            stock: Number(stock)
         });
     }
 
@@ -53,7 +56,8 @@ function CreateEditProductMattress({ typePage, productMattress,
             name,
             state,
             model,
-            price: Number(price)
+            price: Number(price),
+            stock: Number(stock)
         });
     }
 
@@ -112,6 +116,19 @@ function CreateEditProductMattress({ typePage, productMattress,
                         placeholder='商品價格'
                         value={price}
                         onChange={e => setPrice(e.target.value)}
+                    />
+                </div>
+            </div>
+
+            {/* 庫存數量 */}
+            <div className={style.CreateEditProductContainer}>
+                <h2>庫存數量</h2>
+                <div className={style.CreateEditProductRow}>
+                    <input type="number"
+                        placeholder='庫存數量'
+                        value={stock}
+                        min="0"
+                        onChange={e => setStock(e.target.value)}
                     />
                 </div>
             </div>
