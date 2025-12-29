@@ -87,6 +87,8 @@
     display: flex;
     flex-direction: column;
     gap: 15px;
+    padding-left: 20px;
+    margin-top: 10px;
 }
 
 .AnalysisResultItem {
@@ -108,7 +110,8 @@
 .ResultHeader h4 {
     margin: 0;
     color: #333;
-    font-size: 16px;
+    font-size: 15px;
+    font-weight: 600;
 }
 
 .ResultDate {
@@ -469,8 +472,8 @@
 }
 
 .SectionTitle {
-    font-size: 16px;
-    font-weight: 600;
+    font-size: 20px;
+    font-weight: 700;
     color: #333;
 }
 
