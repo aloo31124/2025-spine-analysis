@@ -88,9 +88,9 @@ exports.addStoreManagerByEmail = async (req, res) => {
 exports.getStoreManagerList = async (req, res) => {
     console.log("[getStoreManagerList] 開始");
     try {
-        const result = await userToRoleService.getStoreManagerList();
-        console.log("[getStoreManagerList] 成功 : ", result);
-        res.status(200).send({result});
+        const storeManagers = await userToRoleService.getStoreManagerList();
+        console.log("[getStoreManagerList] 成功，找到", storeManagers.length, "位店長");
+        res.status(200).json({ storeManagers });
     } catch (error) {
         console.log("[getStoreManagerList] 失敗", error);
         res.status(500).json({ error: "[getStoreManagerList] 失敗" });

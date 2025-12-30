@@ -28,6 +28,7 @@ const productPillowApiController = require('./controllers/manager/productPillow.
 const productMattressApiController = require('./controllers/manager/productMattress.api.controller');
 const productInventoryApiController = require('./controllers/manager/productInventory.api.controller');
 const reportSpineApiController = require('./controllers/manager/reportSpine.api.controller');
+const storeApiController = require('./controllers/manager/store.api.controller');
 //const productImgApiController = require('./controllers/manager/productImg.api.controller')
 const shopApiController = require('./controllers/shop/shop.api.controller');
 const shopPayLogisticsApiController = require('./controllers/shop/shopPayLogistics.api.controller')
@@ -201,6 +202,15 @@ app.get('/api/manager/customer-to-product-mattress/stats/:customerId', customerT
 app.post('/api/manager/report-spine/revenue-line-chart', reportSpineApiController.getRevenueLineChartData);
 app.post('/api/manager/report-spine/sales-line-chart', reportSpineApiController.getSalesLineChartData);
 app.get('/api/manager/report-spine/product-options', reportSpineApiController.getProductPillowOptions);
+// 後台管理 店面 api
+app.post('/api/manager/store/list', storeApiController.getStoreList);
+app.get('/api/manager/store/:id', storeApiController.getStore);
+app.post('/api/manager/store/add', storeApiController.postStore);
+app.patch('/api/manager/store/edit', storeApiController.updateStore);
+app.delete('/api/manager/store/delete/:id', storeApiController.deleteStore);
+app.post('/api/manager/store/search', storeApiController.searchStore);
+app.get('/api/manager/store/store-manager/:storeManagerId', storeApiController.getStoresByStoreManagerId);
+app.post('/api/manager/store/import', storeApiController.importStore);
 // 購物 api
 app.post('/api/shop/product/list', shopApiController.searchProductList);
 app.get('/api/shop/product/category/list', shopApiController.searchProductCategory);

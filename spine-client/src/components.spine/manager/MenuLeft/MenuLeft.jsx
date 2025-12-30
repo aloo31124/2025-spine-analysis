@@ -142,6 +142,13 @@ function MenuLeft({ isOpen, isHidden, onClose }) {
                 )}
                 {hasRole('Admin') && (
                     <button className={style.MenuLeftButton}
+                        onClick={e => navigate('/manager/store/list') }
+                    >
+                        店面管理
+                    </button>
+                )}
+                {hasRole('Admin') && (
+                    <button className={style.MenuLeftButton}
                         onClick={e => navigate('/manager/payment/list') }
                     >
                         方案管理

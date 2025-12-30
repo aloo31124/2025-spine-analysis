@@ -101,6 +101,11 @@ import ReportSpineSalesLineChart from './pages.spine/manager/ReportSpineSalesLin
 // 分權設定頁
 import RoleManagementPage from './pages.spine/manager/RoleManagementPage';
 
+// 店面管理頁
+import StoreListPage from './pages.spine/manager/StoreListPage';
+import StoreAddPage from './pages.spine/manager/StoreAddPage';
+import StoreEditPage from './pages.spine/manager/StoreEditPage';
+
 /**
  * 路由配置器 - 管理整個應用的頁面導航
  * 
@@ -193,6 +198,11 @@ const AppRouter = () => (
       
       {/* 分權設定 */}
       <Route path="role-management" element={<AppRouterVerify element={RoleManagementPage} node="role-management" />} />
+      
+      {/* 店面管理 */}
+      <Route path="store/list" element={<AppRouterVerify element={StoreListPage} node="store" />} />
+      <Route path="store/add" element={<AppRouterVerify element={StoreAddPage} node="store" />} />
+      <Route path="store/edit/:id" element={<AppRouterVerify element={StoreEditPage} node="store" />} />
       
       {/* 系統管理 */}
       <Route path="system" element={<AppRouterVerify element={SystemPage} node="system" />} />

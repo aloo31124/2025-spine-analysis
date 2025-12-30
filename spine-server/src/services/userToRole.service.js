@@ -100,24 +100,32 @@ exports.getStoreManagerList = async () => {
     try {
         const pagingParam = { pageIndex: 1, pageSize: 1000, sort: "asc", pageTotal:-1, dataTotal:-1 };
         
-        // 取得所有用戶
+        // 步驟1: 從 UserToRole 表找出所有 role='StoreManager' 的資料
+        const userToRoleList = (await UserToRole.search({role: 'StoreManager'}, pagingParam)).userToRoleList;
+        console.log(`[getStoreManagerList] 找到 ${userToRoleList.length} 位店長`);
+        
+        // 步驟2: 取得所有用戶資料
         const userList = (await User.search({}, pagingParam)).userList;
         
-        // 取得所有 StoreManager 角色
-        const userToRoleList = (await UserToRole.search({role: 'StoreManager'}, pagingParam)).userToRoleList;
-        
-        // 合併資料
-        return userToRoleList.map((userToRole) => {
-            const user = userList.find((user) => user.id === userToRole.userId);
-            if(!user) return null;
-            return {
-                id: userToRole.id,
-                userId: userToRole.userId,
-                role: userToRole.role,
-                email: user.mail,
-                account: user.account
+        // 步驟3: 根據 userId 到 User 表找出對應資料，並組合結果
+        const storeManagerList = userToRoleList.map((userToRole) => {
+            const user = userList.find((u) => u.id === userToRole.userId);
+            if (!user) {
+                console.warn(`[getStoreManagerList] 找不到 userId=${userToRole.userId} 的用戶`);
+                return null;
             }
+            return {
+                id: userToRole.id,           // UserToRole 的 id
+                userId: user.id,             // User 的 id（用於保存到 Store.storeManagerId）
+                role: userToRole.role,       // 角色：StoreManager
+                userName: user.mail,         // 顯示名稱（使用 mail 欄位）
+                userEmail: user.mail,        // User 的 email
+                userAccount: user.account    // User 的 account
+            };
         }).filter((item) => item !== null);
+        
+        console.log(`[getStoreManagerList] 返回 ${storeManagerList.length} 位店長資料`);
+        return storeManagerList;
     } catch (error) {
         console.error("[getStoreManagerList] Error:", error);
         throw error;
