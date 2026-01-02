@@ -48,8 +48,28 @@ function AnalysisTail() {
         initPoints();
     }, []);
 
-    // 從 React Router state 接收拍照頁面傳來的數據
+    // 從 React Router state 或 localStorage 接收拍照頁面傳來的數據
     useEffect(() => {
+        // 優先檢查 localStorage 中的照片數據（來自 PhotoCapture）
+        const storedPhoto = localStorage.getItem('spineAnalysisPhoto');
+        const storedTimestamp = localStorage.getItem('spineAnalysisPhotoTimestamp');
+        
+        if (storedPhoto && storedTimestamp) {
+            // 檢查照片是否在 5 分鐘內上傳（避免使用過期的照片）
+            const timestamp = parseInt(storedTimestamp, 10);
+            const now = Date.now();
+            const fiveMinutes = 5 * 60 * 1000;
+            
+            if (now - timestamp < fiveMinutes) {
+                setBackgroundImage(storedPhoto);
+                // 清除已使用的照片數據
+                localStorage.removeItem('spineAnalysisPhoto');
+                localStorage.removeItem('spineAnalysisPhotoTimestamp');
+                return;
+            }
+        }
+        
+        // 如果 localStorage 沒有數據，則檢查 location.state（來自 PhotoCaptureDrag）
         const analysisData = location.state;
         
         if (analysisData && analysisData.photo && analysisData.points) {
