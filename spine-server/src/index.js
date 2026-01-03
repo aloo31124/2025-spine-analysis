@@ -43,7 +43,20 @@ const productImgApiController = require('./controllers/manager/productImgFireSto
 const app = express();
 // 使用環境變數 PORT（Cloud Run 會自動設定），預設為 8083
 const PORT = process.env.PORT || 8083;
-app.use(cors());
+
+// CORS 配置 - 明確設定允許的來源
+const corsOptions = {
+    origin: [
+        'http://localhost:3000',
+        'http://localhost:8083',
+        'https://spineanalysis1006test1.web.app',
+        'https://spineanalysis1006test1.firebaseapp.com'
+    ],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+};
+app.use(cors(corsOptions));
 
 // 設定 Express 支援 JSON 和 URL Encoded 資料
 app.use(express.json());
