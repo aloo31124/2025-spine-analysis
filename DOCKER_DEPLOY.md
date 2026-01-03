@@ -78,6 +78,7 @@ gcloud run deploy spine-analysis \
 
 ```bash
 # 使用 Cloud Build 建置並部署
+gcloud builds submit --config cloudbuild.yaml
 gcloud builds submit --config cloudbuild.yaml \
 gcloud builds submit --config [cloudbuild.yaml](http://_vscodecontentref_/5) --substitutions=COMMIT_SHA=latest
   --substitutions=_REGION=us-central1
