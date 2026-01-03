@@ -590,12 +590,11 @@ function AnalysisTail() {
                             />
                         )}
 
-                        {!showBlankScreen && (
-                            <ScaleIndicator 
-                                scaleFactor={scaleFactorState}
-                                onScaleFactorChange={handleScaleFactorChange}
-                            />
-                        )}
+                        <ScaleIndicator 
+                            scaleFactor={scaleFactorState}
+                            onScaleFactorChange={handleScaleFactorChange}
+                            useScreenDPI={showBlankScreen}
+                        />
                     </div>
                 </div>
             </div>
