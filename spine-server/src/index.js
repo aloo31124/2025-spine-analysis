@@ -41,18 +41,12 @@ const productImgApiController = require('./controllers/manager/productImgFireSto
 
 // 設定 express app 相關設定
 const app = express();
-// 使用環境變數 PORT（Cloud Run 會自動設定），預設為 8083
-const PORT = process.env.PORT || 8083;
+const PORT = 8083;
 app.use(cors());
 
 // 設定 Express 支援 JSON 和 URL Encoded 資料
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // 文件上傳
-
-// 健康檢查端點（Cloud Run 需要）
-app.get('/api/health', (req, res) => {
-    res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
-});
 
 
 
