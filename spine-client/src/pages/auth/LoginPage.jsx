@@ -99,6 +99,26 @@ function LoginPage() {
                 <button onClick={clickForgetPassword}>忘記密碼</button>
             </div>
             <button onClick={clickRegist}>註冊</button>
+
+            {/** 更新版本 */}
+            <div style={{
+                position: 'fixed',
+                bottom: '10px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                fontSize: '12px',
+                color: '#999',
+                textAlign: 'center',
+                padding: '5px',
+                backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                borderRadius: '5px'
+            }}>
+                更新版本: 
+                <br />
+                Date: 2026年1月6日 下午 02:28:45
+                <br />
+                cc658f7
+            </div>
         </div>
     );
 }
