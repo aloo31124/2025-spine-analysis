@@ -53,7 +53,7 @@ function LoginPage() {
             localStorage.setItem('savedEmailTime', new Date().getTime().toString());
         }
 
-        navigate('/manager/home')
+        navigate('/manager/analysis/spine')
     }
 
     /* 註冊 */
