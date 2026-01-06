@@ -65,12 +65,6 @@ function SearchBarCustomer({ getSearchParam, pagingParam }) {
                     onChange={(e) => setPhone(e.target.value)}
                     onKeyPress={handleKeyPress}
                 />
-                <select value={state} onChange={(e) => setState(e.target.value)}>
-                    <option value="">全部狀態</option>
-                    <option value="正常">正常</option>
-                    <option value="暫停">暫停</option>
-                    <option value="黑名單">黑名單</option>
-                </select>
             </div>
             <div className={style.SearchBarRow}>
                 <button onClick={handleSearch}>搜尋</button>

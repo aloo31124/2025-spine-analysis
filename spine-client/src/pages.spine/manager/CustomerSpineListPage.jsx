@@ -132,7 +132,6 @@ function CustomerSpineListPage() {
                     <th>年齡</th>
                     <th>電子郵件</th>
                     <th>電話</th>
-                    <th>狀態</th>
                     <th>操作</th>
                 </tr>
             </thead>
@@ -178,11 +177,6 @@ function CustomerSpineListPage() {
                                 <div className={styles.customerPhone}>
                                     {customer.phone}
                                 </div>
-                            </td>
-                            <td>
-                                <span className={getStatusClass(customer.state)}>
-                                    {customer.state}
-                                </span>
                             </td>
                             <td>
                                 <div className={styles.actionButtons}>

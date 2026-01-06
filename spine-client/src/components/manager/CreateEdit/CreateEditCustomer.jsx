@@ -230,9 +230,6 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
         <div className={style.CreateEditProduct}>
             <div className={style.CreateEditProductTopBar}>
                 <div className={style.CreateEditProductRow}>
-                    <span>狀態:{typePage === typePageList.CREATE ? '(新增)' : '(編輯)'} {state}</span>
-                </div>
-                <div className={style.CreateEditProductRow}>
                     {typePage === typePageList.CREATE ? 
                         <button onClick={clickAddCustomer}>新增</button>
                         : <button onClick={clickUpdateCustomer}>儲存</button>
@@ -429,18 +426,6 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
                         <option value="男">男</option>
                         <option value="女">女</option>
                         <option value="其他">其他</option>
-                    </select>
-                </div>
-            </div>
-
-            <div className={style.CreateEditProductContainer}>
-                <h2>狀態管理</h2>
-                <div className={style.CreateEditProductRow}>
-                    <label>客戶狀態:</label>
-                    <select value={state} onChange={e => setState(e.target.value)}>
-                        <option value="正常">正常</option>
-                        <option value="暫停">暫停</option>
-                        <option value="黑名單">黑名單</option>
                     </select>
                 </div>
             </div>

@@ -79,14 +79,6 @@ function CreateEditProductPillow({ typePage, productPillow,
             {/* 頂部操作區 */}
             <div className={style.CreateEditProductTopBar}>
                 <div className={style.CreateEditProductRow}>
-                    <span>狀態: {typePage === typePageList.CREATE ? '(新增)' : '(編輯)'} {state}</span>
-                    <select value={state} onChange={e => setState(e.target.value)}>
-                        <option value="草稿">草稿</option>
-                        <option value="上架">上架</option>
-                        <option value="下架">下架</option>
-                    </select>
-                </div>
-                <div className={style.CreateEditProductRow}>
                     {typePage === typePageList.CREATE ?
                         <button onClick={clickAddProductPillow}>新增</button>
                         : <button onClick={clickUpdateProductPillow}>儲存</button>

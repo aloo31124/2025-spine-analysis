@@ -200,7 +200,6 @@ function ProductPillowListPage() {
                     <th>短弧度</th>
                     <th>中弧度</th>
                     <th>長弧度</th>
-                    <th>狀態</th>
                     <th>操作</th>
                 </tr>
             </thead>
@@ -236,11 +235,6 @@ function ProductPillowListPage() {
                             <td>{productPillow.shortCurvature}°</td>
                             <td>{productPillow.mediumCurvature}°</td>
                             <td>{productPillow.longCurvature}°</td>
-                            <td>
-                                <span className={getStatusClass(productPillow.state)}>
-                                    {productPillow.state}
-                                </span>
-                            </td>
                             <td>
                                 <div className={styles.actionButtons}>
                                     <button
@@ -387,20 +381,6 @@ function ProductPillowListPage() {
             {/* 進階搜尋區域 */}
             {showAdvancedSearch && (
                 <div className={styles.advancedSearchBar}>
-                    {/* 狀態多選 */}
-                    <div className={styles.stateCheckboxGroup}>
-                        <label>狀態：</label>
-                        {stateOptions.map((state) => (
-                            <label key={state} className={styles.checkboxLabel}>
-                                <input
-                                    type="checkbox"
-                                    checked={searchParam.stateList.includes(state)}
-                                    onChange={() => handleStateChange(state)}
-                                />
-                                {state}
-                            </label>
-                        ))}
-                    </div>
 
                     {/* 範圍搜尋 */}
                     <div className={styles.rangeSearchGrid}>

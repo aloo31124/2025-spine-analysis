@@ -190,7 +190,6 @@ function ProductMattressListPage() {
                     <th>名稱</th>
                     <th>型號</th>
                     <th>價格</th>
-                    <th>狀態</th>
                     <th>操作</th>
                 </tr>
             </thead>
@@ -220,11 +219,6 @@ function ProductMattressListPage() {
                                 <div className={styles.productPrice}>
                                     NT$ {productMattress.price?.toLocaleString()}
                                 </div>
-                            </td>
-                            <td>
-                                <span className={getStatusClass(productMattress.state)}>
-                                    {productMattress.state}
-                                </span>
                             </td>
                             <td>
                                 <div className={styles.actionButtons}>
@@ -356,20 +350,6 @@ function ProductMattressListPage() {
             {/* 進階搜尋區 */}
             {showAdvancedSearch && (
                 <div className={styles.advancedSearchBar}>
-                    {/* 狀態多選 */}
-                    <div className={styles.stateCheckboxGroup}>
-                        <label>狀態：</label>
-                        {stateOptions.map((state) => (
-                            <label key={state} className={styles.checkboxLabel}>
-                                <input
-                                    type="checkbox"
-                                    checked={searchParam.stateList.includes(state)}
-                                    onChange={() => handleStateChange(state)}
-                                />
-                                {state}
-                            </label>
-                        ))}
-                    </div>
 
                     {/* 價格範圍搜尋 */}
                     <div className={styles.rangeSearchGrid}>
