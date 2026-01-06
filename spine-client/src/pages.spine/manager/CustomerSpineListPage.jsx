@@ -12,7 +12,13 @@ import styles from './CustomerSpineListPage.module.css';
 function CustomerSpineListPage() {
     const navigate = useNavigate();
     const [customerList, setCustomerList] = useState([]);
-    const [pagingParam, setPagingParam] = useState({ pageIndex: 1, pageSize: 5, sort: 'keyword', pageTotal:-1, dataTotal:-1 });
+    const [pagingParam, setPagingParam] = useState({ 
+        pageIndex: 1, 
+        pageSize: parseInt(localStorage.getItem('customerListPageSize')) || 10, 
+        sort: 'createdAt', 
+        pageTotal:-1, 
+        dataTotal:-1 
+    });
     const [searchParam, setSearchParam] = useState({keyword:'', state:'', createDate:'', phone:'', email:''});
     const [isLoading, setIsLoading] = useState(false);
 
@@ -42,6 +48,7 @@ function CustomerSpineListPage() {
     // 切換每頁顯示筆數
     const handlePageSizeChange = async (event) => {
         const newSize = parseInt(event.target.value, 10);
+        localStorage.setItem('customerListPageSize', newSize);
         const res = await searchCustomer(searchParam, { ...pagingParam, pageSize: newSize, pageIndex: 1 });
         setCustomerList(res.data.searchResult.customerList);
         setPagingParam({ ...pagingParam, pageSize: newSize, pageIndex: 1 }); // 變更 pageSize 時，重置 pageIndex

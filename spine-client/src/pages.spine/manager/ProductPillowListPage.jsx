@@ -14,7 +14,13 @@ import { PILLOW_MODEL_OPTIONS } from '../../utils/pillowModelOptions';
 function ProductPillowListPage() {
     const navigate = useNavigate();
     const [productPillowList, setProductPillowList] = useState([]);
-    const [pagingParam, setPagingParam] = useState({ pageIndex: 1, pageSize: 5, sort: 'name', pageTotal: -1, dataTotal: -1 });
+    const [pagingParam, setPagingParam] = useState({ 
+        pageIndex: 1, 
+        pageSize: parseInt(localStorage.getItem('pillowListPageSize')) || 10, 
+        sort: 'createdAt', 
+        pageTotal: -1, 
+        dataTotal: -1 
+    });
     const [searchParam, setSearchParam] = useState({ 
         keyword: '', 
         type: '',
@@ -58,6 +64,7 @@ function ProductPillowListPage() {
     // 切換每頁顯示筆數
     const handlePageSizeChange = async (event) => {
         const newSize = parseInt(event.target.value, 10);
+        localStorage.setItem('pillowListPageSize', newSize);
         const res = await searchProductPillow(searchParam, { ...pagingParam, pageSize: newSize, pageIndex: 1 });
         setProductPillowList(res.data.searchResult?.productPillowList || []);
         setPagingParam({ ...pagingParam, pageSize: newSize, pageIndex: 1 });
