@@ -25,7 +25,7 @@ exports.sendMailVerifyCode = (mail) => {
     return new Promise((resolve, reject) => {
         // 設定送出信件內容
         const mailOptions = {
-            from: process.env.Email_User,
+            from: process.env.EMAIL_USER,
             to: mail,
             subject: "新商城 - 信箱驗證碼",
             text: "您的驗證碼是:" + code,
