@@ -51,7 +51,7 @@ function RoleManagementPage() {
             const searchParam = { keyword: '', region: '', storeManagerId: '' };
             const pagingParam = { pageIndex: 1, pageSize: 1000 };
             const res = await getStoreList(searchParam, pagingParam);
-            setStoreList(res.data.storeList || []);
+            setStoreList(res.data.result.storeList || []);
         } catch (error) {
             console.error('取得店面列表發生錯誤', error);
         }
