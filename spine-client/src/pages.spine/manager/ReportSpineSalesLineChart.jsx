@@ -23,12 +23,19 @@ const TIME_RANGE_META = {
     quarter: { description: '聚焦 10 季銷量表現' }
 };
 
+const PRODUCT_TYPE_OPTIONS = [
+    { value: 'all', label: '全部' },
+    { value: 'pillow', label: '枕頭' },
+    { value: 'mattress', label: '床墊' }
+];
+
 const DEFAULT_CHART_STATE = { labels: [], data: [], summary: {} };
 
 const ReportSpineSalesLineChart = () => {
     const navigate = useNavigate();
     const activeTab = 'sales';
     const [timeRange, setTimeRange] = useState('day');
+    const [productType, setProductType] = useState('all');
     const [productPillowId, setProductPillowId] = useState('all');
     const [productOptions, setProductOptions] = useState([{ id: 'all', name: '全部商品' }]);
     const [chartPayload, setChartPayload] = useState(DEFAULT_CHART_STATE);
@@ -43,20 +50,20 @@ const ReportSpineSalesLineChart = () => {
     const fetchOptions = useCallback(async () => {
         setOptionsError('');
         try {
-            const options = await getProductPillowOptions();
+            const options = await getProductPillowOptions(productType);
             setProductOptions([{ id: 'all', name: '全部商品' }, ...(options || [])]);
         } catch (error) {
             console.error('[ReportSpineSalesLineChart] fetchOptions error:', error);
             setOptionsError('無法取得商品選項，已套用全部商品。');
         }
-    }, []);
+    }, [productType]);
 
     const fetchChartData = useCallback(async () => {
         setLoadingChart(true);
         setErrorMessage('');
         try {
             const userId = localStorage.getItem('userId') || '';
-            const payload = await getSalesLineChartData(timeRange, productPillowId, userId);
+            const payload = await getSalesLineChartData(timeRange, productPillowId, userId, productType);
             setChartPayload({
                 labels: payload?.labels || [],
                 data: payload?.data || [],
@@ -71,11 +78,15 @@ const ReportSpineSalesLineChart = () => {
         } finally {
             setLoadingChart(false);
         }
-    }, [timeRange, productPillowId]);
+    }, [timeRange, productPillowId, productType]);
 
     useEffect(() => {
         fetchOptions();
     }, [fetchOptions]);
+
+    useEffect(() => {
+        setProductPillowId('all');
+    }, [productType]);
 
     useEffect(() => {
         fetchChartData();
@@ -215,6 +226,17 @@ const ReportSpineSalesLineChart = () => {
                             onChange={event => setTimeRange(event.target.value)}
                         >
                             {TIME_RANGE_OPTIONS.map(option => (
+                                <option key={option.value} value={option.value}>
+                                    {option.label}
+                                </option>
+                            ))}
+                        </select>
+                        <select
+                            className={styles.select}
+                            value={productType}
+                            onChange={event => setProductType(event.target.value)}
+                        >
+                            {PRODUCT_TYPE_OPTIONS.map(option => (
                                 <option key={option.value} value={option.value}>
                                     {option.label}
                                 </option>

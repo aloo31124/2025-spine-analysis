@@ -6,9 +6,9 @@ const ERROR_HEADER = '[reportSpine.api.controller.js]';
 exports.getRevenueLineChartData = async (req, res) => {
 	console.log(`${ERROR_HEADER} getRevenueLineChartData start`, req.body);
 	try {
-		const { timeRange = 'day', productPillowId = 'all' } = req.body || {};
+		const { timeRange = 'day', productPillowId = 'all', productType = 'all' } = req.body || {};
 		const payload = authService.verifyJwt(req);
-		const result = await reportSpineService.getRevenueLineChartData({ timeRange, productPillowId, userId: payload?.userId });
+		const result = await reportSpineService.getRevenueLineChartData({ timeRange, productPillowId, userId: payload?.userId, productType });
 		res.status(200).json({ result });
 	} catch (error) {
 		console.error(`${ERROR_HEADER} getRevenueLineChartData error:`, error);
@@ -19,8 +19,8 @@ exports.getRevenueLineChartData = async (req, res) => {
 exports.getSalesLineChartData = async (req, res) => {
 	console.log(`${ERROR_HEADER} getSalesLineChartData start`, req.body);
 	try {
-		const { timeRange = 'day', productPillowId = 'all', userId = '' } = req.body || {};
-		const result = await reportSpineService.getSalesLineChartData({ timeRange, productPillowId, userId });
+		const { timeRange = 'day', productPillowId = 'all', userId = '', productType = 'all' } = req.body || {};
+		const result = await reportSpineService.getSalesLineChartData({ timeRange, productPillowId, userId, productType });
 		res.status(200).json({ result });
 	} catch (error) {
 		console.error(`${ERROR_HEADER} getSalesLineChartData error:`, error);
@@ -29,9 +29,10 @@ exports.getSalesLineChartData = async (req, res) => {
 };
 
 exports.getProductPillowOptions = async (req, res) => {
-	console.log(`${ERROR_HEADER} getProductPillowOptions start`);
+	console.log(`${ERROR_HEADER} getProductPillowOptions start`, req.query);
 	try {
-		const result = await reportSpineService.getProductPillowOptions();
+		const { productType = 'all' } = req.query || {};
+		const result = await reportSpineService.getProductPillowOptions(productType);
 		res.status(200).json({ result });
 	} catch (error) {
 		console.error(`${ERROR_HEADER} getProductPillowOptions error:`, error);

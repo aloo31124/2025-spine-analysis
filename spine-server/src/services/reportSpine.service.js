@@ -9,11 +9,12 @@ const RANGE_CONFIG = {
 	quarter: { count: 10 }
 };
 
-exports.getRevenueLineChartData = async ({ timeRange = DEFAULT_TIME_RANGE, productPillowId = 'all', userId = '' }) => {
+exports.getRevenueLineChartData = async ({ timeRange = DEFAULT_TIME_RANGE, productPillowId = 'all', userId = '', productType = 'all' }) => {
 	const { labels, data, timeRange: resolvedRange, filters, dateRange } = await buildLineChartDataset({
 		timeRange,
 		productPillowId,
 		userId,
+		productType,
 		metricFn: record => (Number(record.price) || 0) * (Number(record.quantity) || 1)
 	});
 
@@ -31,11 +32,12 @@ exports.getRevenueLineChartData = async ({ timeRange = DEFAULT_TIME_RANGE, produ
 	};
 };
 
-exports.getSalesLineChartData = async ({ timeRange = DEFAULT_TIME_RANGE, productPillowId = 'all', userId = '' }) => {
+exports.getSalesLineChartData = async ({ timeRange = DEFAULT_TIME_RANGE, productPillowId = 'all', userId = '', productType = 'all' }) => {
 	const { labels, data, timeRange: resolvedRange, filters, dateRange } = await buildLineChartDataset({
 		timeRange,
 		productPillowId,
 		userId,
+		productType,
 		metricFn: record => Number(record.quantity) || 0
 	});
 
@@ -52,14 +54,14 @@ exports.getSalesLineChartData = async ({ timeRange = DEFAULT_TIME_RANGE, product
 	};
 };
 
-exports.getProductPillowOptions = async () => {
-	return ReportSpineModel.fetchProductPillowOptions();
+exports.getProductPillowOptions = async (productType = 'all') => {
+	return ReportSpineModel.fetchProductOptions(productType);
 };
 
-async function buildLineChartDataset({ timeRange, productPillowId, userId, metricFn }) {
+async function buildLineChartDataset({ timeRange, productPillowId, userId, productType, metricFn }) {
 	const rangeKey = RANGE_CONFIG[timeRange] ? timeRange : DEFAULT_TIME_RANGE;
 	const { buckets, startDateISO, endDateISO } = buildBuckets(rangeKey);
-	const records = await ReportSpineModel.fetchPurchaseRecords({ startDateISO, endDateISO, userId });
+	const records = await ReportSpineModel.fetchPurchaseRecords({ startDateISO, endDateISO, userId, productType });
 	const data = aggregateMetric(records, buckets, productPillowId, metricFn);
 
 	return {
