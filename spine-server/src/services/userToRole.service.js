@@ -94,6 +94,25 @@ exports.addStoreManagerByEmail = async (email) => {
     }
 };
 
+/* 檢查使用者是否為店長 */
+exports.isStoreManager = async (userId) => {
+    console.log("[isStoreManager] 開始檢查 userId :", userId);
+    try {
+        if (!userId) {
+            return false;
+        }
+        
+        const userRole = await UserToRole.findByUserIdAndRole(userId, 'StoreManager');
+        const isManager = !!userRole;
+        
+        console.log(`[isStoreManager] userId=${userId} 是否為店長: ${isManager}`);
+        return isManager;
+    } catch (error) {
+        console.error("[isStoreManager] Error:", error);
+        return false;
+    }
+};
+
 /* 取得所有店長列表 */
 exports.getStoreManagerList = async () => {
     console.log("[getStoreManagerList] 開始");

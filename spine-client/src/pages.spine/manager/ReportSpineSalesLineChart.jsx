@@ -50,7 +50,8 @@ const ReportSpineSalesLineChart = () => {
     const fetchOptions = useCallback(async () => {
         setOptionsError('');
         try {
-            const options = await getProductPillowOptions(productType);
+            const userId = localStorage.getItem('userId') || '';
+            const options = await getProductPillowOptions(productType, userId);
             setProductOptions([{ id: 'all', name: '全部商品' }, ...(options || [])]);
         } catch (error) {
             console.error('[ReportSpineSalesLineChart] fetchOptions error:', error);

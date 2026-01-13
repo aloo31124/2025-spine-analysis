@@ -78,9 +78,10 @@ export const getSalesLineChartData = async (timeRange = 'day', productPillowId =
 /**
  * 取得商品選項列表（用於下拉選單）
  * @param {string} productType - 商品類型 ('all', 'pillow', 'mattress')
+ * @param {string} userId - 使用者ID（用於店長權限篩選）
  * @returns {Promise} API回傳
  */
-export const getProductPillowOptions = async (productType = 'all') => {
+export const getProductPillowOptions = async (productType = 'all', userId = '') => {
     const token = localStorage.getItem('jwt');
     if (!token) {
         throw new Error('未登入');
@@ -91,7 +92,8 @@ export const getProductPillowOptions = async (productType = 'all') => {
             `${BASE_URL}/product-options`,
             {
                 params: {
-                    productType
+                    productType,
+                    userId
                 },
                 headers: {
                     Authorization: `Bearer ${token}`

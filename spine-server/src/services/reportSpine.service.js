@@ -1,4 +1,5 @@
 const ReportSpineModel = require('../models/reportSpine.model');
+const UserToRoleService = require('./userToRole.service');
 
 const DEFAULT_TIME_RANGE = 'day';
 
@@ -10,11 +11,21 @@ const RANGE_CONFIG = {
 };
 
 exports.getRevenueLineChartData = async ({ timeRange = DEFAULT_TIME_RANGE, productPillowId = 'all', userId = '', productType = 'all' }) => {
+	// 檢查是否為店長
+	const isManager = await UserToRoleService.isStoreManager(userId);
+	if (!isManager) {
+		throw new Error('權限不符');
+	}
+
+	// 取得店長所屬的商品 ID
+	const storeManagerProductIds = await ReportSpineModel.fetchStoreManagerProductIds(userId, productType);
+
 	const { labels, data, timeRange: resolvedRange, filters, dateRange } = await buildLineChartDataset({
 		timeRange,
 		productPillowId,
 		userId,
 		productType,
+		storeManagerProductIds,
 		metricFn: record => (Number(record.price) || 0) * (Number(record.quantity) || 1)
 	});
 
@@ -33,11 +44,21 @@ exports.getRevenueLineChartData = async ({ timeRange = DEFAULT_TIME_RANGE, produ
 };
 
 exports.getSalesLineChartData = async ({ timeRange = DEFAULT_TIME_RANGE, productPillowId = 'all', userId = '', productType = 'all' }) => {
+	// 檢查是否為店長
+	const isManager = await UserToRoleService.isStoreManager(userId);
+	if (!isManager) {
+		throw new Error('權限不符');
+	}
+
+	// 取得店長所屬的商品 ID
+	const storeManagerProductIds = await ReportSpineModel.fetchStoreManagerProductIds(userId, productType);
+
 	const { labels, data, timeRange: resolvedRange, filters, dateRange } = await buildLineChartDataset({
 		timeRange,
 		productPillowId,
 		userId,
 		productType,
+		storeManagerProductIds,
 		metricFn: record => Number(record.quantity) || 0
 	});
 
@@ -54,14 +75,27 @@ exports.getSalesLineChartData = async ({ timeRange = DEFAULT_TIME_RANGE, product
 	};
 };
 
-exports.getProductPillowOptions = async (productType = 'all') => {
-	return ReportSpineModel.fetchProductOptions(productType);
+exports.getProductPillowOptions = async (productType = 'all', userId = '') => {
+	// 檢查是否為店長
+	const isManager = await UserToRoleService.isStoreManager(userId);
+	if (!isManager) {
+		throw new Error('權限不符');
+	}
+
+	// 只返回該店長的商品
+	return ReportSpineModel.fetchProductOptions(productType, userId);
 };
 
-async function buildLineChartDataset({ timeRange, productPillowId, userId, productType, metricFn }) {
+async function buildLineChartDataset({ timeRange, productPillowId, userId, productType, storeManagerProductIds, metricFn }) {
 	const rangeKey = RANGE_CONFIG[timeRange] ? timeRange : DEFAULT_TIME_RANGE;
 	const { buckets, startDateISO, endDateISO } = buildBuckets(rangeKey);
-	const records = await ReportSpineModel.fetchPurchaseRecords({ startDateISO, endDateISO, userId, productType });
+	const records = await ReportSpineModel.fetchPurchaseRecords({ 
+		startDateISO, 
+		endDateISO, 
+		userId, 
+		productType,
+		storeManagerProductIds 
+	});
 	const data = aggregateMetric(records, buckets, productPillowId, metricFn);
 
 	return {
