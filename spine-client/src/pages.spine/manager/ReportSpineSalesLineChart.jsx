@@ -243,17 +243,6 @@ const ReportSpineSalesLineChart = () => {
                                 </option>
                             ))}
                         </select>
-                        <select
-                            className={styles.select}
-                            value={productPillowId}
-                            onChange={event => setProductPillowId(event.target.value)}
-                        >
-                            {productOptions.map(option => (
-                                <option key={option.id} value={option.id}>
-                                    {option.name || '未命名商品'}
-                                </option>
-                            ))}
-                        </select>
                     </div>
                 </div>
             </div>
