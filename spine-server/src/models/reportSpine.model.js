@@ -16,9 +16,11 @@ class ReportSpineModel {
 	static async fetchPurchaseRecords({ startDateISO, endDateISO, userId }) {
 		let query = db.collection(CUSTOMER_COLLECTION);
 
+		/* 無 userId 欄位
 		if (userId) {
 			query = query.where('userId', '==', userId);
 		}
+		*/
 
 		if (startDateISO) {
 			query = query.where('purchaseDate', '>=', startDateISO);

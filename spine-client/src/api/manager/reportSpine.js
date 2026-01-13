@@ -55,8 +55,7 @@ export const getSalesLineChartData = async (timeRange = 'day', productPillowId =
             `${BASE_URL}/sales-line-chart`,
             {
                 timeRange,
-                productPillowId,
-                userId
+                productPillowId
             },
             {
                 headers: {

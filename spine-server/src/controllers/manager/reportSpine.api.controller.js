@@ -1,12 +1,14 @@
 const reportSpineService = require('../../services/reportSpine.service');
+const authService = require('../../services/auth.service');
 
 const ERROR_HEADER = '[reportSpine.api.controller.js]';
 
 exports.getRevenueLineChartData = async (req, res) => {
 	console.log(`${ERROR_HEADER} getRevenueLineChartData start`, req.body);
 	try {
-		const { timeRange = 'day', productPillowId = 'all', userId = '' } = req.body || {};
-		const result = await reportSpineService.getRevenueLineChartData({ timeRange, productPillowId, userId });
+		const { timeRange = 'day', productPillowId = 'all' } = req.body || {};
+		const payload = authService.verifyJwt(req);
+		const result = await reportSpineService.getRevenueLineChartData({ timeRange, productPillowId, userId: payload?.userId });
 		res.status(200).json({ result });
 	} catch (error) {
 		console.error(`${ERROR_HEADER} getRevenueLineChartData error:`, error);
