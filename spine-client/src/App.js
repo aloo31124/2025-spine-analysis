@@ -57,7 +57,8 @@ import ShoppingOrder from './pages.spine/account/ShoppingOrder';   // 購物訂�
 
 // === 商品管理頁面 ===
 import ProductListPage from './pages.spine/manager/ProductListPage';     // 商品列表
-import ProductListPageSpine from './pages.spine/manager/ProductListPageSpine'; // 商品列表脊椎版本
+import ProductPillowRecommendationList from './pages.spine/manager/ProductPillowRecommendationList'; // 枕頭商品推薦列表
+import ProductMattressRecommendationList from './pages.spine/manager/ProductMattressRecommendationList'; // 床墊商品推薦列表
 import ProductAddPage from './pages.spine/manager/ProductAddPage';       // 新增商品
 import ProductEditPage from './pages.spine/manager/ProductEditPage';     // 編輯商品
 
@@ -70,6 +71,9 @@ import ProductPillowEditPage from './pages.spine/manager/ProductPillowEditPage';
 import ProductMattressListPage from './pages.spine/manager/ProductMattressListPage';   // 床墊商品列表
 import ProductMattressAddPage from './pages.spine/manager/ProductMattressAddPage';     // 新增床墊商品
 import ProductMattressEditPage from './pages.spine/manager/ProductMattressEditPage';   // 編輯床墊商品
+
+// === 商品庫存頁面 ===
+import ProductInventoryPage from './pages.spine/manager/ProductInventoryPage';   // 商品庫存
 
 // === 脊椎分析頁面 ===
 import AnalysisSpine from './pages.spine/manager/AnalysisSpine';   // 脊椎分析
@@ -88,7 +92,7 @@ import PaymentListPage from './pages/manager/PaymentListPage';
 import PaymentFormPage from './pages/manager/PaymentFormPage';
 
 // 客戶管理頁
-import CustomerListPage from './pages.spine/manager/CustomerListPage';
+import CustomerSpineListPage from './pages.spine/manager/CustomerSpineListPage';
 import CustomerAddPage from './pages.spine/manager/CustomerAddPage';
 import CustomerEditPage from './pages.spine/manager/CustomerEditPage';
 import ReportSpineRevenueLineChart from './pages.spine/manager/ReportSpineRevenueLineChart';
@@ -96,6 +100,11 @@ import ReportSpineSalesLineChart from './pages.spine/manager/ReportSpineSalesLin
 
 // 分權設定頁
 import RoleManagementPage from './pages.spine/manager/RoleManagementPage';
+
+// 店面管理頁
+import StoreListPage from './pages.spine/manager/StoreListPage';
+import StoreAddPage from './pages.spine/manager/StoreAddPage';
+import StoreEditPage from './pages.spine/manager/StoreEditPage';
 
 /**
  * 路由配置器 - 管理整個應用的頁面導航
@@ -152,7 +161,8 @@ const AppRouter = () => (
       <Route path="product/list" element={<ProductListPage />} />      {/* 商品列表 */}
       <Route path="product/add" element={<ProductAddPage />} />        {/* 新增商品 */}
       <Route path="product/edit/:id" element={<ProductEditPage />} />  {/* 編輯商品 */}
-      <Route path="product-spine" element={<ProductListPageSpine />} />     {/* 商品列表脊椎版本 */}
+      <Route path="product-pillow-recommendation" element={<ProductPillowRecommendationList />} />     {/* 枕頭商品推薦列表 */}
+      <Route path="product-mattress-recommendation" element={<ProductMattressRecommendationList />} />     {/* 床墊商品推薦列表 */}
       
       {/* 枕頭商品管理 */}
       <Route path="product-pillow/list" element={<AppRouterVerify element={ProductPillowListPage} node="product-pillow" />} />
@@ -164,13 +174,16 @@ const AppRouter = () => (
       <Route path="product-mattress/add" element={<AppRouterVerify element={ProductMattressAddPage} node="product-mattress" />} />
       <Route path="product-mattress/edit/:id" element={<AppRouterVerify element={ProductMattressEditPage} node="product-mattress" />} />
       
+      {/* 商品庫存 */}
+      <Route path="product-inventory" element={<AppRouterVerify element={ProductInventoryPage} node="product-inventory" />} />
+      
       {/* 分類管理 */}
       <Route path="product/category/list" element={<CategoryListPage />} />    {/* 分類列表 */}
       <Route path="product/category/add" element={<CategoryAddPage />} />      {/* 新增分類 */}
       <Route path="product/category/edit/:id" element={<CategoryEditPage />} /> {/* 編輯分類 */}
 
       {/* 客戶管理 */}
-      <Route path="customer/list" element={<AppRouterVerify element={CustomerListPage} node="customer" />} />
+      <Route path="customer/list" element={<AppRouterVerify element={CustomerSpineListPage} node="customer" />} />
       <Route path="customer/add" element={<AppRouterVerify element={CustomerAddPage} node="customer" />} />
       <Route path="customer/edit/:id" element={<AppRouterVerify element={CustomerEditPage} node="customer" />} />
 
@@ -185,6 +198,11 @@ const AppRouter = () => (
       
       {/* 分權設定 */}
       <Route path="role-management" element={<AppRouterVerify element={RoleManagementPage} node="role-management" />} />
+      
+      {/* 店面管理 */}
+      <Route path="store/list" element={<AppRouterVerify element={StoreListPage} node="store" />} />
+      <Route path="store/add" element={<AppRouterVerify element={StoreAddPage} node="store" />} />
+      <Route path="store/edit/:id" element={<AppRouterVerify element={StoreEditPage} node="store" />} />
       
       {/* 系統管理 */}
       <Route path="system" element={<AppRouterVerify element={SystemPage} node="system" />} />

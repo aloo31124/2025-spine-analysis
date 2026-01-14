@@ -1,0 +1,284 @@
+/* 床墊推薦彈窗樣式 */
+
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+.modalContent {
+    background-color: white;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 650px;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+}
+
+.modalHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid #e0e0e0;
+    background-color: #f5f5f5;
+}
+
+.modalHeader h2 {
+    margin: 0;
+    font-size: 20px;
+    color: #333;
+}
+
+.closeButton {
+    background: none;
+    border: none;
+    font-size: 28px;
+    cursor: pointer;
+    color: #666;
+    padding: 0;
+    line-height: 1;
+    transition: color 0.2s;
+}
+
+.closeButton:hover {
+    color: #333;
+}
+
+.modalBody {
+    padding: 20px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.ruleDescription {
+    background-color: #f9f9f9;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 20px;
+}
+
+.ruleDescription h4 {
+    margin: 0 0 12px 0;
+    font-size: 16px;
+    color: #333;
+}
+
+.ruleDescription p {
+    margin: 0 0 12px 0;
+    font-size: 14px;
+    color: #555;
+    line-height: 1.5;
+}
+
+.ruleDescription ul {
+    margin: 0;
+    padding-left: 0;
+    list-style: none;
+}
+
+.ruleDescription li {
+    margin-bottom: 10px;
+    font-size: 14px;
+    color: #555;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.angleRange {
+    background-color: #e3f2fd;
+    color: #1976d2;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-weight: 500;
+    min-width: 80px;
+    text-align: center;
+}
+
+.arrow {
+    color: #999;
+    font-size: 16px;
+}
+
+.ruleBed {
+    font-weight: bold;
+}
+
+.customerInfo {
+    background-color: #e8f5e9;
+    border: 1px solid #a5d6a7;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 20px;
+}
+
+.customerInfo h4 {
+    margin: 0 0 12px 0;
+    font-size: 16px;
+    color: #2e7d32;
+}
+
+.infoRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.infoRow:last-child {
+    margin-bottom: 0;
+}
+
+.infoLabel {
+    font-size: 14px;
+    color: #666;
+    min-width: 100px;
+}
+
+.infoValue {
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+}
+
+.recommendationResult {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 16px;
+}
+
+.recommendationResult h4 {
+    margin: 0 0 16px 0;
+    font-size: 16px;
+    color: #333;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 10px;
+}
+
+.noResults {
+    text-align: center;
+    padding: 30px 20px;
+    color: #666;
+}
+
+.noResults p {
+    margin: 8px 0;
+    font-size: 14px;
+}
+
+.resultItem {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.recommendationInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.bedRecommendation {
+    display: inline-block;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 18px;
+    text-align: center;
+    width: fit-content;
+}
+
+.recommendationDesc {
+    margin: 0;
+    font-size: 14px;
+    color: #666;
+    line-height: 1.6;
+}
+
+.modalFooter {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 16px 20px;
+    border-top: 1px solid #e0e0e0;
+    background-color: #f5f5f5;
+}
+
+.purchaseButton {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.purchaseButton:hover {
+    background-color: #43A047;
+}
+
+.confirmButton {
+    background-color: #1976d2;
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.confirmButton:hover {
+    background-color: #1565c0;
+}
+
+/* 響應式設計 */
+@media (max-width: 600px) {
+    .modalContent {
+        max-height: 90vh;
+    }
+    
+    .modalHeader h2 {
+        font-size: 18px;
+    }
+    
+    .ruleDescription li {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+    }
+    
+    .angleRange {
+        min-width: auto;
+    }
+    
+    .bedRecommendation {
+        font-size: 16px;
+        padding: 10px 16px;
+    }
+    
+    .modalFooter {
+        flex-direction: column;
+    }
+    
+    .purchaseButton,
+    .confirmButton {
+        width: 100%;
+    }
+}

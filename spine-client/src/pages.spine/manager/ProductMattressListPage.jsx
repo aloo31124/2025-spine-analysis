@@ -13,7 +13,13 @@ import styles from './ProductListPage.module.css';
 function ProductMattressListPage() {
     const navigate = useNavigate();
     const [productMattressList, setProductMattressList] = useState([]);
-    const [pagingParam, setPagingParam] = useState({ pageIndex: 1, pageSize: 5, sort: 'name', pageTotal: -1, dataTotal: -1 });
+    const [pagingParam, setPagingParam] = useState({ 
+        pageIndex: 1, 
+        pageSize: parseInt(localStorage.getItem('mattressListPageSize')) || 10, 
+        sort: 'createdAt', 
+        pageTotal: -1, 
+        dataTotal: -1 
+    });
     const [searchParam, setSearchParam] = useState({ 
         keyword: '', 
         model: '',
@@ -61,6 +67,7 @@ function ProductMattressListPage() {
     // 切換每頁顯示筆數
     const handlePageSizeChange = async (event) => {
         const newSize = parseInt(event.target.value, 10);
+        localStorage.setItem('mattressListPageSize', newSize);
         const res = await searchProductMattress(searchParam, { ...pagingParam, pageSize: newSize, pageIndex: 1 });
         setProductMattressList(res.data.searchResult?.productMattressList || []);
         setPagingParam({ ...pagingParam, pageSize: newSize, pageIndex: 1 });
@@ -190,7 +197,6 @@ function ProductMattressListPage() {
                     <th>名稱</th>
                     <th>型號</th>
                     <th>價格</th>
-                    <th>狀態</th>
                     <th>操作</th>
                 </tr>
             </thead>
@@ -220,11 +226,6 @@ function ProductMattressListPage() {
                                 <div className={styles.productPrice}>
                                     NT$ {productMattress.price?.toLocaleString()}
                                 </div>
-                            </td>
-                            <td>
-                                <span className={getStatusClass(productMattress.state)}>
-                                    {productMattress.state}
-                                </span>
                             </td>
                             <td>
                                 <div className={styles.actionButtons}>
@@ -356,20 +357,6 @@ function ProductMattressListPage() {
             {/* 進階搜尋區 */}
             {showAdvancedSearch && (
                 <div className={styles.advancedSearchBar}>
-                    {/* 狀態多選 */}
-                    <div className={styles.stateCheckboxGroup}>
-                        <label>狀態：</label>
-                        {stateOptions.map((state) => (
-                            <label key={state} className={styles.checkboxLabel}>
-                                <input
-                                    type="checkbox"
-                                    checked={searchParam.stateList.includes(state)}
-                                    onChange={() => handleStateChange(state)}
-                                />
-                                {state}
-                            </label>
-                        ))}
-                    </div>
 
                     {/* 價格範圍搜尋 */}
                     <div className={styles.rangeSearchGrid}>

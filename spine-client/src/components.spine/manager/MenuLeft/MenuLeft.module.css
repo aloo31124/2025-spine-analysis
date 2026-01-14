@@ -54,6 +54,13 @@
     background: rgba(255, 255, 255, 0.3);
 }
 
+/* 選中狀態樣式 */
+.MenuLeftButton.active {
+    background: rgba(255, 255, 255, 0.35);
+    font-weight: bold;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
 /* 遮罩層樣式 */
 .overlay {
     position: fixed;

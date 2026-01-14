@@ -23,12 +23,19 @@ const TIME_RANGE_META = {
 	quarter: { description: '聚焦 10 季營收表現' }
 };
 
+const PRODUCT_TYPE_OPTIONS = [
+	{ value: 'all', label: '全部' },
+	{ value: 'pillow', label: '枕頭' },
+	{ value: 'mattress', label: '床墊' }
+];
+
 const DEFAULT_CHART_STATE = { labels: [], data: [], summary: {} };
 
 const ReportSpineRevenueLineChart = () => {
 	const navigate = useNavigate();
 	const activeTab = 'revenue';
 	const [timeRange, setTimeRange] = useState('day');
+	const [productType, setProductType] = useState('all');
 	const [productPillowId, setProductPillowId] = useState('all');
 	const [productOptions, setProductOptions] = useState([{ id: 'all', name: '全部商品' }]);
 	const [chartPayload, setChartPayload] = useState(DEFAULT_CHART_STATE);
@@ -43,19 +50,21 @@ const ReportSpineRevenueLineChart = () => {
 	const fetchOptions = useCallback(async () => {
 		setOptionsError('');
 		try {
-			const options = await getProductPillowOptions();
+			const userId = localStorage.getItem('userId') || '';
+			const options = await getProductPillowOptions(productType, userId);
 			setProductOptions([{ id: 'all', name: '全部商品' }, ...(options || [])]);
 		} catch (error) {
 			console.error('[ReportSpineRevenueLineChart] fetchOptions error:', error);
 			setOptionsError('無法取得商品選項，已套用全部商品。');
 		}
-	}, []);
+	}, [productType]);
 
 	const fetchChartData = useCallback(async () => {
 		setLoadingChart(true);
 		setErrorMessage('');
 		try {
-			const payload = await getRevenueLineChartData(timeRange, productPillowId);
+			const userId = localStorage.getItem('userId') || '';
+			const payload = await getRevenueLineChartData(timeRange, productPillowId, userId, productType);
 			setChartPayload({
 				labels: payload?.labels || [],
 				data: payload?.data || [],
@@ -70,11 +79,15 @@ const ReportSpineRevenueLineChart = () => {
 		} finally {
 			setLoadingChart(false);
 		}
-	}, [timeRange, productPillowId]);
+	}, [timeRange, productPillowId, productType]);
 
 	useEffect(() => {
 		fetchOptions();
 	}, [fetchOptions]);
+
+	useEffect(() => {
+		setProductPillowId('all');
+	}, [productType]);
 
 	useEffect(() => {
 		fetchChartData();
@@ -221,12 +234,12 @@ const ReportSpineRevenueLineChart = () => {
 						</select>
 						<select
 							className={styles.select}
-							value={productPillowId}
-							onChange={event => setProductPillowId(event.target.value)}
+							value={productType}
+							onChange={event => setProductType(event.target.value)}
 						>
-							{productOptions.map(option => (
-								<option key={option.id} value={option.id}>
-									{option.name || '未命名商品'}
+							{PRODUCT_TYPE_OPTIONS.map(option => (
+								<option key={option.value} value={option.value}>
+									{option.label}
 								</option>
 							))}
 						</select>

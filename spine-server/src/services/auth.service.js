@@ -75,7 +75,7 @@ exports.createJwtToken = async (req) => {
         const user = await userService.getUserByEmail(email);
         if (!user) throw new Error("User not found");
         const userAgent = req.headers['user-agent'];
-        return utils.createToken({ userId: user.id, email, userAgent }, '5m');
+        return utils.createToken({ userId: user.id, email, userAgent }, '30m');
     } catch (error) {
         console.error("[createJwtToken] error:", error);
         return null;

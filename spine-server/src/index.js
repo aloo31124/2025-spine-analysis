@@ -23,9 +23,12 @@ const customerApiController = require('./controllers/manager/customer.api.contro
 const customerAnalysisResultApiController = require('./controllers/manager/customerAnalysisResult.api.controller');
 const customerToProductApiController = require('./controllers/manager/customerToProduct.api.controller');
 const customerToProductPillowApiController = require('./controllers/manager/customerToProductPillow.api.controller');
+const customerToProductMattressApiController = require('./controllers/manager/customerToProductMattress.api.controller');
 const productPillowApiController = require('./controllers/manager/productPillow.api.controller');
 const productMattressApiController = require('./controllers/manager/productMattress.api.controller');
+const productInventoryApiController = require('./controllers/manager/productInventory.api.controller');
 const reportSpineApiController = require('./controllers/manager/reportSpine.api.controller');
+const storeApiController = require('./controllers/manager/store.api.controller');
 //const productImgApiController = require('./controllers/manager/productImg.api.controller')
 const shopApiController = require('./controllers/shop/shop.api.controller');
 const shopPayLogisticsApiController = require('./controllers/shop/shopPayLogistics.api.controller')
@@ -38,18 +41,12 @@ const productImgApiController = require('./controllers/manager/productImgFireSto
 
 // 設定 express app 相關設定
 const app = express();
-// 使用環境變數 PORT（Cloud Run 會自動設定），預設為 8083
-const PORT = process.env.PORT || 8083;
+const PORT = 8083;
 app.use(cors());
 
 // 設定 Express 支援 JSON 和 URL Encoded 資料
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // 文件上傳
-
-// 健康檢查端點（Cloud Run 需要）
-app.get('/api/health', (req, res) => {
-    res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
-});
 
 
 
@@ -134,6 +131,11 @@ app.patch('/api/manager/product-mattress/edit', productMattressApiController.upd
 app.delete('/api/manager/product-mattress/delete/:id', productMattressApiController.deleteProductMattress);
 app.post('/api/manager/product-mattress/search', productMattressApiController.searchProductMattress);
 app.post('/api/manager/product-mattress/import', productMattressApiController.importProductMattress);
+// 後台管理 商品庫存 api
+app.get('/api/manager/product-inventory/pillow', productInventoryApiController.getPillowInventoryList);
+app.get('/api/manager/product-inventory/mattress', productInventoryApiController.getMattressInventoryList);
+app.patch('/api/manager/product-inventory/pillow/stock', productInventoryApiController.updatePillowStock);
+app.patch('/api/manager/product-inventory/mattress/stock', productInventoryApiController.updateMattressStock);
 // 後台管理 商品分類 api
 app.get('/api/manager/product/category/list', productCategoryApiController.getProductCategoryList);
 app.get('/api/manager/product/category/:id', productCategoryApiController.getProductCategory);
@@ -179,10 +181,30 @@ app.patch('/api/manager/customer-to-product-pillow/edit', customerToProductPillo
 app.delete('/api/manager/customer-to-product-pillow/delete/:id', customerToProductPillowApiController.deleteCustomerToProductPillow);
 app.post('/api/manager/customer-to-product-pillow/search', customerToProductPillowApiController.searchCustomerToProductPillow);
 app.get('/api/manager/customer-to-product-pillow/stats/:customerId', customerToProductPillowApiController.getCustomerPurchaseStats);
+// 後台管理 客戶購買床墊商品關聯 api
+app.get('/api/manager/customer-to-product-mattress/list', customerToProductMattressApiController.getAllCustomerToProductMattressList);
+app.post('/api/manager/customer-to-product-mattress/add', customerToProductMattressApiController.addCustomerToProductMattress);
+app.post('/api/manager/customer-to-product-mattress/add-multiple', customerToProductMattressApiController.addMultipleCustomerToProductMattress);
+app.get('/api/manager/customer-to-product-mattress/:id', customerToProductMattressApiController.getCustomerToProductMattress);
+app.get('/api/manager/customer-to-product-mattress/customer/:customerId', customerToProductMattressApiController.getCustomerToProductMattressByCustomerId);
+app.get('/api/manager/customer-to-product-mattress/product-mattress/:productMattressId', customerToProductMattressApiController.getCustomerToProductMattressByProductMattressId);
+app.patch('/api/manager/customer-to-product-mattress/edit', customerToProductMattressApiController.updateCustomerToProductMattress);
+app.delete('/api/manager/customer-to-product-mattress/delete/:id', customerToProductMattressApiController.deleteCustomerToProductMattress);
+app.post('/api/manager/customer-to-product-mattress/search', customerToProductMattressApiController.searchCustomerToProductMattress);
+app.get('/api/manager/customer-to-product-mattress/stats/:customerId', customerToProductMattressApiController.getCustomerPurchaseStats);
 // 後台管理 報表 api
 app.post('/api/manager/report-spine/revenue-line-chart', reportSpineApiController.getRevenueLineChartData);
 app.post('/api/manager/report-spine/sales-line-chart', reportSpineApiController.getSalesLineChartData);
 app.get('/api/manager/report-spine/product-options', reportSpineApiController.getProductPillowOptions);
+// 後台管理 店面 api
+app.post('/api/manager/store/list', storeApiController.getStoreList);
+app.get('/api/manager/store/:id', storeApiController.getStore);
+app.post('/api/manager/store/add', storeApiController.postStore);
+app.patch('/api/manager/store/edit', storeApiController.updateStore);
+app.delete('/api/manager/store/delete/:id', storeApiController.deleteStore);
+app.post('/api/manager/store/search', storeApiController.searchStore);
+app.get('/api/manager/store/store-manager/:storeManagerId', storeApiController.getStoresByStoreManagerId);
+app.post('/api/manager/store/import', storeApiController.importStore);
 // 購物 api
 app.post('/api/shop/product/list', shopApiController.searchProductList);
 app.get('/api/shop/product/category/list', shopApiController.searchProductCategory);

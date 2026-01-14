@@ -9,7 +9,7 @@ const COLLECTION_NAME = 'ProductPillow';
 
 
 class ProductPillow {
-    constructor(id, name, price, state, type, userId, shortHeight, longHeight, shortCurvature, mediumCurvature, longCurvature) {
+    constructor(id, name, price, state, type, userId, shortHeight, longHeight, shortCurvature, mediumCurvature, longCurvature, stock) {
         this.id = id || "";
         this.name = name || "";
         this.price = price || "";
@@ -21,6 +21,7 @@ class ProductPillow {
         this.shortCurvature = shortCurvature || 0; // 短弧度
         this.mediumCurvature = mediumCurvature || 0; // 中弧度
         this.longCurvature = longCurvature || 0;   // 長弧度
+        this.stock = stock || 0;                   // 庫存數量
     }
 
     /** 匯入 所有 枕頭商品資訊 進入空表, 不卡控, 使用於備份還原。 */
@@ -48,6 +49,7 @@ class ProductPillow {
                     productPillowData.shortCurvature || 0,
                     productPillowData.mediumCurvature || 0,
                     productPillowData.longCurvature || 0,
+                    productPillowData.stock || 0,
                 );
                 const docRef = db.collection(COLLECTION_NAME).doc(productPillow.id.toString().replace(/"/g, ''));
                 batch.set(docRef, {
@@ -61,6 +63,7 @@ class ProductPillow {
                     shortCurvature: productPillow.shortCurvature || 0,
                     mediumCurvature: productPillow.mediumCurvature || 0,
                     longCurvature: productPillow.longCurvature || 0,
+                    stock: productPillow.stock || 0,
                 });
             });
 

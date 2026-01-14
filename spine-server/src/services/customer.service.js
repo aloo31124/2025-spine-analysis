@@ -44,6 +44,16 @@ exports.searchCustomer = async (searchParam, pagingParam, userId = null) => {
 
         // 分頁 臨時寫法
         let { pageIndex, pageSize, sort } = pagingParam; // 分頁參數
+        
+        // 排序 - 按 createdAt 降序（最新的在前）
+        if (sort === 'createdAt' || sort) {
+            customerList = customerList.sort((a, b) => {
+                const dateA = new Date(a.createDate || 0);
+                const dateB = new Date(b.createDate || 0);
+                return dateB - dateA; // 降序：最新的在前
+            });
+        }
+        
         if(pageIndex && pageSize) {
             pagingParam.dataTotal = (customerList.length);
             pagingParam.pageTotal = Math.ceil(customerList.length / pageSize);

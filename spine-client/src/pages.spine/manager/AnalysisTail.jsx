@@ -48,8 +48,28 @@ function AnalysisTail() {
         initPoints();
     }, []);
 
-    // 從 React Router state 接收拍照頁面傳來的數據
+    // 從 React Router state 或 localStorage 接收拍照頁面傳來的數據
     useEffect(() => {
+        // 優先檢查 localStorage 中的照片數據（來自 PhotoCapture）
+        const storedPhoto = localStorage.getItem('spineAnalysisPhoto');
+        const storedTimestamp = localStorage.getItem('spineAnalysisPhotoTimestamp');
+        
+        if (storedPhoto && storedTimestamp) {
+            // 檢查照片是否在 5 分鐘內上傳（避免使用過期的照片）
+            const timestamp = parseInt(storedTimestamp, 10);
+            const now = Date.now();
+            const fiveMinutes = 5 * 60 * 1000;
+            
+            if (now - timestamp < fiveMinutes) {
+                setBackgroundImage(storedPhoto);
+                // 清除已使用的照片數據
+                localStorage.removeItem('spineAnalysisPhoto');
+                localStorage.removeItem('spineAnalysisPhotoTimestamp');
+                return;
+            }
+        }
+        
+        // 如果 localStorage 沒有數據，則檢查 location.state（來自 PhotoCaptureDrag）
         const analysisData = location.state;
         
         if (analysisData && analysisData.photo && analysisData.points) {
@@ -263,10 +283,12 @@ function AnalysisTail() {
 
     // 建立尾椎量測指標
     // scaleFactor 參數為可選，如果沒有傳入則使用狀態中的值
-    const buildTailMetrics = (scaleFactor) => {
+    // currentPoints 參數為可選，如果沒有傳入則使用狀態中的值
+    const buildTailMetrics = (scaleFactor, currentPoints) => {
         const currentScaleFactor = scaleFactor !== undefined ? scaleFactor : scaleFactorState;
-        if (points.length < 3) return null;
-        const [p1, p2, p3] = points;
+        const pointsToUse = currentPoints !== undefined ? currentPoints : points;
+        if (pointsToUse.length < 3) return null;
+        const [p1, p2, p3] = pointsToUse;
         
         // 三點之間互相的距離
         const distance12 = calculateDistance(p1, p2);
@@ -298,12 +320,11 @@ function AnalysisTail() {
     };
 
     // 處理計算逻輯
-    // scaleFactor 參數為可選，如果沒有傳入則使用狀態中的值
-    const handleCalculate = (scaleFactor) => {
-        const currentScaleFactor = scaleFactor !== undefined ? scaleFactor : scaleFactorState;
+    const handleCalculate = () => {
         if (points.length < 3) return;
 
-        const metrics = buildTailMetrics(currentScaleFactor);
+        // 將當前的 points 傳入 buildTailMetrics，確保使用最新的點位數據
+        const metrics = buildTailMetrics(scaleFactorState, points);
         if (!metrics) return;
 
         setLines([
@@ -325,7 +346,7 @@ function AnalysisTail() {
         const formatDistance = (pxDistance) => formatDistanceWithMode(
             pxDistance,
             showBlankScreen,  // 空白畫面模式使用螢幕實際 DPI 轉換
-            (px) => formatPxCmText(px, currentScaleFactor)  // 傳入縮放因子到格式化函數
+            (px) => formatPxCmText(px, scaleFactorState)  // 傳入縮放因子到格式化函數
         );
 
         setCalculationResults([
@@ -343,8 +364,32 @@ function AnalysisTail() {
         setScaleFactorState(newScaleFactor);
         // 如果已經計算過，則重新計算所有距離
         if (isCalculated) {
-            handleCalculate(newScaleFactor);
+            // 使用新的縮放因子重新計算
+            recalculateWithScaleFactor(newScaleFactor);
         }
+    };
+
+    // 使用指定的縮放因子重新計算（用於比例尺調整時）
+    const recalculateWithScaleFactor = (scaleFactor) => {
+        if (points.length < 3) return;
+
+        const metrics = buildTailMetrics(scaleFactor, points);
+        if (!metrics) return;
+
+        // 使用傳入的縮放因子格式化距離
+        const formatDistance = (pxDistance) => formatDistanceWithMode(
+            pxDistance,
+            showBlankScreen,
+            (px) => formatPxCmText(px, scaleFactor)
+        );
+
+        setCalculationResults([
+            '=== 尾椎量測結果 ===',
+            `點 1-2 距離：${formatDistance(metrics.distance12)}`,
+            `點 2-3 距離：${formatDistance(metrics.distance23)}`,
+            `點 1-3 距離：${formatDistance(metrics.distance13)}`,
+            `∠123 夾角：${metrics.angle123.toFixed(2)}°`
+        ]);
     };
 
     const handleSaveResult = () => {
@@ -375,7 +420,7 @@ function AnalysisTail() {
                 analysisData: {
                     scale: currentScale,
                     timestamp: new Date().toISOString(),
-                    metrics: buildTailMetrics()
+                    metrics: buildTailMetrics(scaleFactorState, points)
                 },
                 points,
                 lines,
@@ -416,7 +461,7 @@ function AnalysisTail() {
                 analysisData: {
                     scale: currentScale,
                     timestamp: new Date().toISOString(),
-                    metrics: buildTailMetrics()
+                    metrics: buildTailMetrics(scaleFactorState, points)
                 },
                 points,
                 lines,
@@ -545,12 +590,11 @@ function AnalysisTail() {
                             />
                         )}
 
-                        {!showBlankScreen && (
-                            <ScaleIndicator 
-                                scaleFactor={scaleFactorState}
-                                onScaleFactorChange={handleScaleFactorChange}
-                            />
-                        )}
+                        <ScaleIndicator 
+                            scaleFactor={scaleFactorState}
+                            onScaleFactorChange={handleScaleFactorChange}
+                            useScreenDPI={showBlankScreen}
+                        />
                     </div>
                 </div>
             </div>

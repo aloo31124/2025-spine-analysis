@@ -1,10 +1,11 @@
 import React, {useState, useEffect} from "react";
 import style from './MenuLeft.module.css'
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 
 function MenuLeft({ isOpen, isHidden, onClose }) {
     const navigate = useNavigate();
+    const location = useLocation();
     const [userRoles, setUserRoles] = useState([]);
     
     // 從 localStorage 讀取用戶角色
@@ -38,6 +39,7 @@ function MenuLeft({ isOpen, isHidden, onClose }) {
             'customer',         // 客戶管理
             'product-pillow',   // 枕頭商品
             'product-mattress', // 床墊商品
+            'product-inventory', // 商品庫存
             'revenue'           // 營收管理
         ];
         // 如果是店長，只能訪問白名單內的頁面
@@ -77,70 +79,84 @@ function MenuLeft({ isOpen, isHidden, onClose }) {
             <div className={`${style.MenuLeft} ${isOpen ? style.open : ''} ${isHidden ? style.hidden : ''}`}>
                 <h3 className={style.MenuTitle}>頸椎分析系統</h3>
                 {canAccess('photo-capture') && (
-                    <button className={style.MenuLeftButton}
+                    <button className={`${style.MenuLeftButton} ${location.pathname.startsWith('/manager/photo/capture') ? style.active : ''}`}
                         onClick={e => navigate('/manager/photo/capture') }
                     >
                         拍照上傳
                     </button>
                 )}
                 {canAccess('analysis-spine') && (
-                    <button className={style.MenuLeftButton}
+                    <button className={`${style.MenuLeftButton} ${location.pathname.startsWith('/manager/analysis/spine') ? style.active : ''}`}
                         onClick={e => navigate('/manager/analysis/spine') }
                     >
                         頸部分析
                     </button>
                 )}
                 {canAccess('analysis-tail') && (
-                    <button className={style.MenuLeftButton}
+                    <button className={`${style.MenuLeftButton} ${location.pathname.startsWith('/manager/analysis/tail') ? style.active : ''}`}
                         onClick={e => navigate('/manager/analysis/tail') }
                     >
                         尾椎分析
                     </button>
                 )}
                 {canAccess('customer') && (
-                    <button className={style.MenuLeftButton} 
+                    <button className={`${style.MenuLeftButton} ${location.pathname.startsWith('/manager/customer') ? style.active : ''}`}
                         onClick={e => navigate('/manager/customer/list') }
                     >
                         客戶管理
                     </button>
                 )}
                 {canAccess('product-pillow') && (
-                    <button className={style.MenuLeftButton}
+                    <button className={`${style.MenuLeftButton} ${location.pathname.startsWith('/manager/product-pillow') ? style.active : ''}`}
                         onClick={e => navigate('/manager/product-pillow/list') }
                     >
                         枕頭商品
                     </button>
                 )}
                 {canAccess('product-mattress') && (
-                    <button className={style.MenuLeftButton}
+                    <button className={`${style.MenuLeftButton} ${location.pathname.startsWith('/manager/product-mattress') ? style.active : ''}`}
                         onClick={e => navigate('/manager/product-mattress/list') }
                     >
                         床墊管理
                     </button>
                 )}
+                {canAccess('product-inventory') && (
+                    <button className={`${style.MenuLeftButton} ${location.pathname.startsWith('/manager/product-inventory') ? style.active : ''}`}
+                        onClick={e => navigate('/manager/product-inventory') }
+                    >
+                        商品庫存
+                    </button>
+                )}
                 {canAccess('revenue') && (
-                    <button className={style.MenuLeftButton}
+                    <button className={`${style.MenuLeftButton} ${location.pathname.startsWith('/manager/report') ? style.active : ''}`}
                         onClick={e => navigate('/manager/report/revenue-line-chart') }
                     >
                         營收管理
                     </button>
                 )}
                 {hasRole('Admin') && (
-                    <button className={style.MenuLeftButton}
+                    <button className={`${style.MenuLeftButton} ${location.pathname.startsWith('/manager/role-management') ? style.active : ''}`}
                         onClick={e => navigate('/manager/role-management') }
                     >
                         分權設定
                     </button>
                 )}
                 {hasRole('Admin') && (
-                    <button className={style.MenuLeftButton}
+                    <button className={`${style.MenuLeftButton} ${location.pathname.startsWith('/manager/store') ? style.active : ''}`}
+                        onClick={e => navigate('/manager/store/list') }
+                    >
+                        店面管理
+                    </button>
+                )}
+                {hasRole('Admin') && (
+                    <button className={`${style.MenuLeftButton} ${location.pathname.startsWith('/manager/payment') ? style.active : ''}`}
                         onClick={e => navigate('/manager/payment/list') }
                     >
                         方案管理
                     </button>
                 )}
                 {hasRole('Admin') && (
-                    <button className={style.MenuLeftButton}
+                    <button className={`${style.MenuLeftButton} ${location.pathname.startsWith('/manager/system') ? style.active : ''}`}
                         onClick={e => navigate('/manager/system') }
                     >
                         系統管理

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import style from './CreateEdit.module.css';
+import { PILLOW_MODEL_OPTIONS } from '../../../utils/pillowModelOptions';
 
 /**
  * 枕頭商品新增/編輯組件
@@ -22,6 +23,7 @@ function CreateEditProductPillow({ typePage, productPillow,
     const [shortCurvature, setShortCurvature] = useState(0); // 短弧度
     const [mediumCurvature, setMediumCurvature] = useState(0); // 中弧度
     const [longCurvature, setLongCurvature] = useState(0);   // 長弧度
+    const [stock, setStock] = useState(0);                   // 庫存數量
 
     /* 初始枕頭商品資訊 */
     useEffect(() => {
@@ -35,6 +37,7 @@ function CreateEditProductPillow({ typePage, productPillow,
             setShortCurvature(productPillow.shortCurvature || 0);
             setMediumCurvature(productPillow.mediumCurvature || 0);
             setLongCurvature(productPillow.longCurvature || 0);
+            setStock(productPillow.stock || 0);
         }
     }, [productPillow]);
 
@@ -66,7 +69,8 @@ function CreateEditProductPillow({ typePage, productPillow,
             longHeight: Number(longHeight),
             shortCurvature: Number(shortCurvature),
             mediumCurvature: Number(mediumCurvature),
-            longCurvature: Number(longCurvature)
+            longCurvature: Number(longCurvature),
+            stock: Number(stock)
         });
     }
 
@@ -74,14 +78,6 @@ function CreateEditProductPillow({ typePage, productPillow,
         <div className={style.CreateEditProduct}>
             {/* 頂部操作區 */}
             <div className={style.CreateEditProductTopBar}>
-                <div className={style.CreateEditProductRow}>
-                    <span>狀態: {typePage === typePageList.CREATE ? '(新增)' : '(編輯)'} {state}</span>
-                    <select value={state} onChange={e => setState(e.target.value)}>
-                        <option value="草稿">草稿</option>
-                        <option value="上架">上架</option>
-                        <option value="下架">下架</option>
-                    </select>
-                </div>
                 <div className={style.CreateEditProductRow}>
                     {typePage === typePageList.CREATE ?
                         <button onClick={clickAddProductPillow}>新增</button>
@@ -99,16 +95,22 @@ function CreateEditProductPillow({ typePage, productPillow,
                 </div>
             </div>
 
-            {/* 枕頭類型 */}
+            {/* 枕頭型號 */}
             <div className={style.CreateEditProductContainer}>
-                <h2>枕頭類型</h2>
+                <h2>枕頭型號</h2>
                 <div className={style.CreateEditProductRow}>
-                    <input
-                        type="text"
-                        placeholder="枕頭類型 (例如: 記憶棉、乳膠...)"
+                    <select
                         value={type}
                         onChange={e => setType(e.target.value)}
-                    />
+                        style={{ width: '100%', padding: '8px', fontSize: '14px' }}
+                    >
+                        <option value="">請選擇枕頭型號</option>
+                        {PILLOW_MODEL_OPTIONS.map((option) => (
+                            <option key={option.value} value={option.value}>
+                                {option.label}
+                            </option>
+                        ))}
+                    </select>
                 </div>
             </div>
 
@@ -120,6 +122,19 @@ function CreateEditProductPillow({ typePage, productPillow,
                         placeholder='商品價格'
                         value={price}
                         onChange={e => setPrice(e.target.value)}
+                    />
+                </div>
+            </div>
+
+            {/* 庫存數量 */}
+            <div className={style.CreateEditProductContainer}>
+                <h2>庫存數量</h2>
+                <div className={style.CreateEditProductRow}>
+                    <input type="number"
+                        placeholder='庫存數量'
+                        value={stock}
+                        min="0"
+                        onChange={e => setStock(e.target.value)}
                     />
                 </div>
             </div>

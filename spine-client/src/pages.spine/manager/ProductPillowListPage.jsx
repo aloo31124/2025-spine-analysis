@@ -5,6 +5,7 @@ import { getProductPillowList, deleteProductPillow, searchProductPillow } from '
 import PaginationBar from '../../components/tools/PaginationBar/PaginationBar';
 import loadingGif from '../../assets/loading.gif';
 import styles from './ProductListPage.module.css';
+import { PILLOW_MODEL_OPTIONS } from '../../utils/pillowModelOptions';
 
 /**
  * 枕頭商品列表頁面
@@ -13,7 +14,13 @@ import styles from './ProductListPage.module.css';
 function ProductPillowListPage() {
     const navigate = useNavigate();
     const [productPillowList, setProductPillowList] = useState([]);
-    const [pagingParam, setPagingParam] = useState({ pageIndex: 1, pageSize: 5, sort: 'name', pageTotal: -1, dataTotal: -1 });
+    const [pagingParam, setPagingParam] = useState({ 
+        pageIndex: 1, 
+        pageSize: parseInt(localStorage.getItem('pillowListPageSize')) || 10, 
+        sort: 'createdAt', 
+        pageTotal: -1, 
+        dataTotal: -1 
+    });
     const [searchParam, setSearchParam] = useState({ 
         keyword: '', 
         type: '',
@@ -57,6 +64,7 @@ function ProductPillowListPage() {
     // 切換每頁顯示筆數
     const handlePageSizeChange = async (event) => {
         const newSize = parseInt(event.target.value, 10);
+        localStorage.setItem('pillowListPageSize', newSize);
         const res = await searchProductPillow(searchParam, { ...pagingParam, pageSize: newSize, pageIndex: 1 });
         setProductPillowList(res.data.searchResult?.productPillowList || []);
         setPagingParam({ ...pagingParam, pageSize: newSize, pageIndex: 1 });
@@ -192,14 +200,13 @@ function ProductPillowListPage() {
             <thead>
                 <tr>
                     <th>名稱</th>
-                    <th>類型</th>
+                    <th>枕頭型號</th>
                     <th>價格</th>
                     <th>短高度</th>
                     <th>長高度</th>
                     <th>短弧度</th>
                     <th>中弧度</th>
                     <th>長弧度</th>
-                    <th>狀態</th>
                     <th>操作</th>
                 </tr>
             </thead>
@@ -235,11 +242,6 @@ function ProductPillowListPage() {
                             <td>{productPillow.shortCurvature}°</td>
                             <td>{productPillow.mediumCurvature}°</td>
                             <td>{productPillow.longCurvature}°</td>
-                            <td>
-                                <span className={getStatusClass(productPillow.state)}>
-                                    {productPillow.state}
-                                </span>
-                            </td>
                             <td>
                                 <div className={styles.actionButtons}>
                                     <button
@@ -285,7 +287,7 @@ function ProductPillowListPage() {
 
                         <div className={styles.cardBody}>
                             <div className={styles.cardRow}>
-                                <span className={styles.cardLabel}>類型：</span>
+                                <span className={styles.cardLabel}>枕頭型號：</span>
                                 <span className={styles.cardValue}>{productPillow.type || '-'}</span>
                             </div>
 
@@ -361,16 +363,18 @@ function ProductPillowListPage() {
                         if (e.key === 'Enter') handleSearchResult(searchParam);
                     }}
                 />
-                <input
-                    type="text"
-                    placeholder="搜尋類型..."
+                <select
                     value={searchParam.type}
                     onChange={(e) => setSearchParam({ ...searchParam, type: e.target.value })}
-                    onKeyDown={(e) => {
-                        if (e.key === 'Enter') handleSearchResult(searchParam);
-                    }}
                     className={styles.typeInput}
-                />
+                >
+                    <option value="">全部枕頭型號</option>
+                    {PILLOW_MODEL_OPTIONS.map((option) => (
+                        <option key={option.value} value={option.value}>
+                            {option.label}
+                        </option>
+                    ))}
+                </select>
                 <button onClick={() => handleSearchResult(searchParam)}>搜尋</button>
                 <button 
                     onClick={() => setShowAdvancedSearch(!showAdvancedSearch)}
@@ -384,20 +388,6 @@ function ProductPillowListPage() {
             {/* 進階搜尋區域 */}
             {showAdvancedSearch && (
                 <div className={styles.advancedSearchBar}>
-                    {/* 狀態多選 */}
-                    <div className={styles.stateCheckboxGroup}>
-                        <label>狀態：</label>
-                        {stateOptions.map((state) => (
-                            <label key={state} className={styles.checkboxLabel}>
-                                <input
-                                    type="checkbox"
-                                    checked={searchParam.stateList.includes(state)}
-                                    onChange={() => handleStateChange(state)}
-                                />
-                                {state}
-                            </label>
-                        ))}
-                    </div>
 
                     {/* 範圍搜尋 */}
                     <div className={styles.rangeSearchGrid}>

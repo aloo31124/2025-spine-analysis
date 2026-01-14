@@ -86,8 +86,15 @@ exports.searchProductMattress = async (searchParam, pagingParam, userId = null) 
         // 分頁
         let { pageIndex, pageSize, sort } = pagingParam;
         
-        // 排序
-        if (sort) {
+        // 排序 - 按 createdAt 降序（最新的在前）
+        if (sort === 'createdAt') {
+            productMattressList = productMattressList.sort((a, b) => {
+                const dateA = new Date(a.createDate || 0);
+                const dateB = new Date(b.createDate || 0);
+                return dateB - dateA; // 降序：最新的在前
+            });
+        } else if (sort) {
+            // 其他欄位的升序排序
             productMattressList = productMattressList.sort((a, b) => {
                 if (a[sort] > b[sort]) return 1;
                 if (a[sort] < b[sort]) return -1;
