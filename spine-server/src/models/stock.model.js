@@ -3,7 +3,7 @@
  * 儲存店面與商品的庫存關聯
  */
 
-const db = require('../utils/firebase.js');
+const db = require('../firestore');
 const COLLECTION_NAME = 'StoreToStock';
 
 class StoreToStock {
