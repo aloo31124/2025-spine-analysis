@@ -26,16 +26,17 @@ exports.getPillowInventoryByStoreManager = async (storeManagerId) => {
         
         const storeIds = stores.map(store => store.id);
         
-        // 2. 取得所有枕頭商品
+        // 2. 取得所有枕頭商品，並過濾出該店長建立的商品
         const allPillows = await ProductPillow.getAllProductPillowList();
-        console.log('[getPillowInventoryByStoreManager] 找到', allPillows.length, '個枕頭商品');
+        const filteredPillows = allPillows.filter(pillow => pillow.userId === storeManagerId);
+        console.log('[getPillowInventoryByStoreManager] 找到', allPillows.length, '個枕頭商品，過濾後', filteredPillows.length, '個');
         
         // 3. 取得這些店面的枕頭庫存
         const stockList = await StoreToStock.findByStoreIdsAndType(storeIds, 'Pillow');
         console.log('[getPillowInventoryByStoreManager] 找到', stockList.length, '筆庫存紀錄');
         
         // 4. 組合資料：每個商品包含所有店面的庫存
-        const pillowList = allPillows.map(pillow => {
+        const pillowList = filteredPillows.map(pillow => {
             // 找出該商品在各店面的庫存
             const storeStocks = stores.map(store => {
                 const stockRecord = stockList.find(
@@ -93,16 +94,17 @@ exports.getMattressInventoryByStoreManager = async (storeManagerId) => {
         
         const storeIds = stores.map(store => store.id);
         
-        // 2. 取得所有床墊商品
+        // 2. 取得所有床墊商品，並過濾出該店長建立的商品
         const allMattresses = await ProductMattress.getAllProductMattressList();
-        console.log('[getMattressInventoryByStoreManager] 找到', allMattresses.length, '個床墊商品');
+        const filteredMattresses = allMattresses.filter(mattress => mattress.userId === storeManagerId);
+        console.log('[getMattressInventoryByStoreManager] 找到', allMattresses.length, '個床墊商品，過濾後', filteredMattresses.length, '個');
         
         // 3. 取得這些店面的床墊庫存
         const stockList = await StoreToStock.findByStoreIdsAndType(storeIds, 'Mattress');
         console.log('[getMattressInventoryByStoreManager] 找到', stockList.length, '筆庫存紀錄');
         
         // 4. 組合資料：每個商品包含所有店面的庫存
-        const mattressList = allMattresses.map(mattress => {
+        const mattressList = filteredMattresses.map(mattress => {
             // 找出該商品在各店面的庫存
             const storeStocks = stores.map(store => {
                 const stockRecord = stockList.find(
