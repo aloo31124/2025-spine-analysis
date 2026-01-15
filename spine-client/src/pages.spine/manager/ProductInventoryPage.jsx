@@ -165,9 +165,7 @@ function ProductInventoryPage() {
                         <th>商品名稱</th>
                         <th>商品編號</th>
                         <th>總庫存</th>
-                        {stores.map(store => (
-                            <th key={store.id}>{store.name}</th>
-                        ))}
+                        <th>分店面庫存</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -180,50 +178,55 @@ function ProductInventoryPage() {
                                     {item.totalStock || 0}
                                 </span>
                             </td>
-                            {item.storeStocks && item.storeStocks.map(storeStock => {
-                                const key = `${item.id}_${storeStock.storeId}`;
-                                const isEditing = editingStock[key] !== undefined;
-                                
-                                return (
-                                    <td key={storeStock.storeId}>
-                                        {isEditing ? (
-                                            <div className={styles.editCell}>
-                                                <input
-                                                    type="number"
-                                                    min="0"
-                                                    className={styles.stockInput}
-                                                    value={editingStock[key]}
-                                                    onChange={(e) => handleStockChange(item.id, storeStock.storeId, e.target.value)}
-                                                />
-                                                <button 
-                                                    className={styles.saveBtn}
-                                                    onClick={() => handleSaveStock(item.id, storeStock.storeId, productType)}
-                                                >
-                                                    ✓
-                                                </button>
-                                                <button 
-                                                    className={styles.cancelBtn}
-                                                    onClick={() => handleCancelEdit(item.id, storeStock.storeId)}
-                                                >
-                                                    ✗
-                                                </button>
+                            <td>
+                                <div className={styles.storeStocksVertical}>
+                                    {item.storeStocks && item.storeStocks.map(storeStock => {
+                                        const key = `${item.id}_${storeStock.storeId}`;
+                                        const isEditing = editingStock[key] !== undefined;
+                                        
+                                        return (
+                                            <div key={storeStock.storeId} className={styles.storeStockRow}>
+                                                <span className={styles.storeName}>{storeStock.storeName}</span>
+                                                {isEditing ? (
+                                                    <div className={styles.editCell}>
+                                                        <input
+                                                            type="number"
+                                                            min="0"
+                                                            className={styles.stockInput}
+                                                            value={editingStock[key]}
+                                                            onChange={(e) => handleStockChange(item.id, storeStock.storeId, e.target.value)}
+                                                        />
+                                                        <button 
+                                                            className={styles.saveBtn}
+                                                            onClick={() => handleSaveStock(item.id, storeStock.storeId, productType)}
+                                                        >
+                                                            ✓
+                                                        </button>
+                                                        <button 
+                                                            className={styles.cancelBtn}
+                                                            onClick={() => handleCancelEdit(item.id, storeStock.storeId)}
+                                                        >
+                                                            ✗
+                                                        </button>
+                                                    </div>
+                                                ) : (
+                                                    <div className={styles.viewCell}>
+                                                        <span className={storeStock.stock <= 0 ? styles.lowStock : ''}>
+                                                            {storeStock.stock || 0}
+                                                        </span>
+                                                        <button 
+                                                            className={styles.editIconBtn}
+                                                            onClick={() => handleStartEdit(item.id, storeStock.storeId, storeStock.stock || 0)}
+                                                        >
+                                                            ✎
+                                                        </button>
+                                                    </div>
+                                                )}
                                             </div>
-                                        ) : (
-                                            <div className={styles.viewCell}>
-                                                <span className={storeStock.stock <= 0 ? styles.lowStock : ''}>
-                                                    {storeStock.stock || 0}
-                                                </span>
-                                                <button 
-                                                    className={styles.editIconBtn}
-                                                    onClick={() => handleStartEdit(item.id, storeStock.storeId, storeStock.stock || 0)}
-                                                >
-                                                    ✎
-                                                </button>
-                                            </div>
-                                        )}
-                                    </td>
-                                );
-                            })}
+                                        );
+                                    })}
+                                </div>
+                            </td>
                         </tr>
                     ))}
                 </tbody>
