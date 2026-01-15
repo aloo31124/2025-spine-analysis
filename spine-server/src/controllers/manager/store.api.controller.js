@@ -7,6 +7,7 @@
 
 const storeService = require('../../services/store.service');
 const authService = require('../../services/auth.service');
+const userToRoleService = require('../../services/userToRole.service');
 
 const ERROR_HEADER = '[store.api.controller.js]';
 
@@ -93,6 +94,35 @@ exports.getStoresByStoreManagerId = async (req, res) => {
         res.status(200).json({ result: '200', stores });
     } catch (error) {
         console.error('[getStoresByStoreManagerId] 錯誤:', error);
+        res.status(500).json({ result: '500', error: error.message });
+    }
+};
+
+/** 取得當前店長管理的店面 (從 JWT 取得店長 ID) */
+exports.getMyStores = async (req, res) => {
+    console.log('[getMyStores] 開始');
+    try {
+        // 從 JWT 取得 userId
+        const payload = authService.verifyJwt(req);
+        const userId = payload?.userId;
+        
+        if (!userId) {
+            return res.status(401).json({ result: '401', message: '未授權' });
+        }
+        
+        console.log('[getMyStores] userId:', userId);
+        
+        // 檢查是否為店長
+        const isManager = await userToRoleService.isStoreManager(userId);
+        if (!isManager) {
+            return res.status(403).json({ result: '403', message: '權限不足：您不是店長' });
+        }
+        
+        // 取得該店長管理的所有店面
+        const stores = await storeService.getStoresByStoreManagerId(userId);
+        res.status(200).json({ result: '200', stores });
+    } catch (error) {
+        console.error('[getMyStores] 錯誤:', error);
         res.status(500).json({ result: '500', error: error.message });
     }
 };

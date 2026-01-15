@@ -78,6 +78,16 @@ export const getStoresByStoreManagerId = async (storeManagerId) => {
     });
 };
 
+/** 取得當前店長管理的店面 (從 JWT 取得店長 ID) */
+export const getMyStores = async () => {
+    const token = localStorage.getItem('jwt');
+    return axios.get(`${BASE_URL}/my-stores`, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+};
+
 /** 匯入店面 */
 export const importStore = async (storeList) => {
     const token = localStorage.getItem('jwt');

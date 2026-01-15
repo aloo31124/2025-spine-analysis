@@ -27,6 +27,7 @@ const customerToProductMattressApiController = require('./controllers/manager/cu
 const productPillowApiController = require('./controllers/manager/productPillow.api.controller');
 const productMattressApiController = require('./controllers/manager/productMattress.api.controller');
 const productInventoryApiController = require('./controllers/manager/productInventory.api.controller');
+const stockApiController = require('./controllers/manager/stock.api.controller');
 const reportSpineApiController = require('./controllers/manager/reportSpine.api.controller');
 const storeApiController = require('./controllers/manager/store.api.controller');
 //const productImgApiController = require('./controllers/manager/productImg.api.controller')
@@ -136,6 +137,13 @@ app.get('/api/manager/product-inventory/pillow', productInventoryApiController.g
 app.get('/api/manager/product-inventory/mattress', productInventoryApiController.getMattressInventoryList);
 app.patch('/api/manager/product-inventory/pillow/stock', productInventoryApiController.updatePillowStock);
 app.patch('/api/manager/product-inventory/mattress/stock', productInventoryApiController.updateMattressStock);
+// 後台管理 庫存 api (新版：店面庫存)
+app.get('/api/manager/stock/pillow', stockApiController.getPillowInventory);
+app.get('/api/manager/stock/mattress', stockApiController.getMattressInventory);
+app.patch('/api/manager/stock/update', stockApiController.updateStoreStock);
+app.post('/api/manager/stock/batch-update', stockApiController.batchUpdateProductStock);
+app.get('/api/manager/stock/product', stockApiController.getProductStock);
+app.delete('/api/manager/stock/product/:productId', stockApiController.deleteProductStock);
 // 後台管理 商品分類 api
 app.get('/api/manager/product/category/list', productCategoryApiController.getProductCategoryList);
 app.get('/api/manager/product/category/:id', productCategoryApiController.getProductCategory);
@@ -197,8 +205,7 @@ app.post('/api/manager/report-spine/revenue-line-chart', reportSpineApiControlle
 app.post('/api/manager/report-spine/sales-line-chart', reportSpineApiController.getSalesLineChartData);
 app.get('/api/manager/report-spine/product-options', reportSpineApiController.getProductPillowOptions);
 // 後台管理 店面 api
-app.post('/api/manager/store/list', storeApiController.getStoreList);
-app.get('/api/manager/store/:id', storeApiController.getStore);
+app.post('/api/manager/store/list', storeApiController.getStoreList);app.get('/api/manager/store/my-stores', storeApiController.getMyStores);app.get('/api/manager/store/:id', storeApiController.getStore);
 app.post('/api/manager/store/add', storeApiController.postStore);
 app.patch('/api/manager/store/edit', storeApiController.updateStore);
 app.delete('/api/manager/store/delete/:id', storeApiController.deleteStore);
