@@ -40,11 +40,26 @@ function MenuLeft({ isOpen, isHidden, onClose }) {
             'product-pillow',   // 枕頭商品
             'product-mattress', // 床墊商品
             'product-inventory', // 商品庫存
-            'revenue'           // 營收管理
+            'revenue',          // 營收管理
+            'operator-management' // 操作員設定
         ];
         // 如果是店長，只能訪問白名單內的頁面
         if (hasRole('StoreManager')) {
             return storeManagerWhitelist.includes(feature);
+        }
+
+        // 操作員的白名單頁面
+        const operatorWhitelist = [
+            'photo-capture',    // 拍照上傳
+            'analysis-spine',   // 頸部分析
+            'analysis-tail',    // 尾椎分析
+            'customer',         // 客戶管理
+            'product-pillow',   // 枕頭商品
+            'product-mattress'  // 床墊管理
+        ];
+        // 如果是操作員，只能訪問白名單內的頁面
+        if (hasRole('Operator')) {
+            return operatorWhitelist.includes(feature);
         }
 
         // 沒有任何角色，不能訪問任何頁面
@@ -141,11 +156,18 @@ function MenuLeft({ isOpen, isHidden, onClose }) {
                         店長設定
                     </button>
                 )}
-                {hasRole('Admin') && (
+                {(hasRole('Admin') || hasRole('StoreManager')) && (
                     <button className={`${style.MenuLeftButton} ${location.pathname.startsWith('/manager/store') ? style.active : ''}`}
                         onClick={e => navigate('/manager/store/list') }
                     >
                         店面管理
+                    </button>
+                )}
+                {canAccess('operator-management') && (
+                    <button className={`${style.MenuLeftButton} ${location.pathname.startsWith('/manager/operator-management') ? style.active : ''}`}
+                        onClick={e => navigate('/manager/operator-management') }
+                    >
+                        操作員設定
                     </button>
                 )}
                 {hasRole('Admin') && (

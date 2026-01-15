@@ -29,6 +29,7 @@ const productMattressApiController = require('./controllers/manager/productMattr
 const productInventoryApiController = require('./controllers/manager/productInventory.api.controller');
 const reportSpineApiController = require('./controllers/manager/reportSpine.api.controller');
 const storeApiController = require('./controllers/manager/store.api.controller');
+const storeManagerToOperatorApiController = require('./controllers/manager/storeManagerToOperator.api.controller');
 //const productImgApiController = require('./controllers/manager/productImg.api.controller')
 const shopApiController = require('./controllers/shop/shop.api.controller');
 const shopPayLogisticsApiController = require('./controllers/shop/shopPayLogistics.api.controller')
@@ -95,6 +96,11 @@ app.get('/api/account/role/:userId', accountApiController.getUserRoleByUserId);
 app.delete('/api/account/role/delete/:id', accountApiController.deleteUserToRole);
 app.post('/api/account/role/store-manager/add', accountApiController.addStoreManagerByEmail);
 app.get('/api/account/role/store-manager/list', accountApiController.getStoreManagerList);
+// [操作員管理] 店長綁定操作員 api
+app.get('/api/account/store-manager-to-operator/list', storeManagerToOperatorApiController.getOperatorList);
+app.post('/api/account/store-manager-to-operator/add', storeManagerToOperatorApiController.addOperator);
+app.delete('/api/account/store-manager-to-operator/delete/:id', storeManagerToOperatorApiController.deleteOperator);
+app.post('/api/account/store-manager-to-operator/search', storeManagerToOperatorApiController.searchBinding);
 app.get('/api/account/payment/userId/:userId', accountApiController.getUserPaymentByUserId);
 app.get('/api/account/payment/paymentId/:paymentId', accountApiController.getPaymentByPaymentid);
 app.post('/api/account/payment/search', accountApiController.searchPayment);
