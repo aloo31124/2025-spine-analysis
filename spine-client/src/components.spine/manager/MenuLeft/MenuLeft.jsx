@@ -138,7 +138,7 @@ function MenuLeft({ isOpen, isHidden, onClose }) {
                     <button className={`${style.MenuLeftButton} ${location.pathname.startsWith('/manager/role-management') ? style.active : ''}`}
                         onClick={e => navigate('/manager/role-management') }
                     >
-                        分權設定
+                        店長設定
                     </button>
                 )}
                 {hasRole('Admin') && (
