@@ -39,10 +39,14 @@ function ProductInventoryPage() {
         setIsLoading(true);
         setError(null);
         try {
+            // 從localStorage取得選中的店長ID和當前用戶ID
+            const selectedManagerId = localStorage.getItem('selectedStoreManagerId');
+            const userId = localStorage.getItem('userId') || '';
+            
             // 同時取得枕頭與床墊庫存
             const [pillowRes, mattressRes] = await Promise.all([
-                getPillowInventoryList(),
-                getMattressInventoryList()
+                getPillowInventoryList(userId, selectedManagerId || ''),
+                getMattressInventoryList(userId, selectedManagerId || '')
             ]);
             
             setPillowList(pillowRes.data.result || []);
