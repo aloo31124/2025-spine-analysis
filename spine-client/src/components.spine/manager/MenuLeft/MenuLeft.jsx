@@ -31,6 +31,18 @@ function MenuLeft({ isOpen, isHidden, onClose }) {
         // 管理員可以訪問所有功能
         if (hasRole('Admin')) return true;
 
+        // 總經理的白名單頁面
+        const generalManagerWhitelist = [
+            'product-inventory', // 商品庫存
+            'revenue',          // 營收管理
+            'manager-setting',  // 經理設定
+            'store-management'  // 店面管理
+        ];
+        // 如果是總經理，只能訪問白名單內的頁面
+        if (hasRole('GeneralManager')) {
+            return generalManagerWhitelist.includes(feature);
+        }
+
         // 店長的白名單頁面
         const storeManagerWhitelist = [
             'photo-capture',    // 拍照上傳
@@ -149,6 +161,13 @@ function MenuLeft({ isOpen, isHidden, onClose }) {
                         營收管理
                     </button>
                 )}
+                {(hasRole('Admin') || hasRole('GeneralManager')) && (
+                    <button className={`${style.MenuLeftButton} ${location.pathname.startsWith('/manager/manager-setting') ? style.active : ''}`}
+                        onClick={e => navigate('/manager/manager-setting') }
+                    >
+                        經理設定
+                    </button>
+                )}
                 {hasRole('Admin') && (
                     <button className={`${style.MenuLeftButton} ${location.pathname.startsWith('/manager/role-management') ? style.active : ''}`}
                         onClick={e => navigate('/manager/role-management') }
@@ -156,7 +175,7 @@ function MenuLeft({ isOpen, isHidden, onClose }) {
                         店長設定
                     </button>
                 )}
-                {(hasRole('Admin') || hasRole('StoreManager')) && (
+                {(hasRole('Admin') || hasRole('StoreManager') || hasRole('GeneralManager')) && (
                     <button className={`${style.MenuLeftButton} ${location.pathname.startsWith('/manager/store') ? style.active : ''}`}
                         onClick={e => navigate('/manager/store/list') }
                     >

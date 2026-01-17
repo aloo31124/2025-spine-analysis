@@ -96,6 +96,12 @@ class UserToRole {
             });
     }
 
+    // 根據 id 查找
+    static async findById(id) {
+        const docRef = await db.collection(COLLECTION_NAME).doc(id).get();
+        return docRef.exists ? { id: docRef.id, ...docRef.data() } : null;
+    }
+
     // 刪除使用者角色對應關係
     static async delete(id) {
         try {

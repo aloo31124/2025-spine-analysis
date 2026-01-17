@@ -30,6 +30,8 @@ const productInventoryApiController = require('./controllers/manager/productInve
 const reportSpineApiController = require('./controllers/manager/reportSpine.api.controller');
 const storeApiController = require('./controllers/manager/store.api.controller');
 const storeManagerToOperatorApiController = require('./controllers/manager/storeManagerToOperator.api.controller');
+const authPermissionApiController = require('./controllers/manager/authPermission.api.controller');
+const generalManagerApiController = require('./controllers/manager/generalManager.api.controller');
 //const productImgApiController = require('./controllers/manager/productImg.api.controller')
 const shopApiController = require('./controllers/shop/shop.api.controller');
 const shopPayLogisticsApiController = require('./controllers/shop/shopPayLogistics.api.controller')
@@ -101,6 +103,13 @@ app.get('/api/account/store-manager-to-operator/list', storeManagerToOperatorApi
 app.post('/api/account/store-manager-to-operator/add', storeManagerToOperatorApiController.addOperator);
 app.delete('/api/account/store-manager-to-operator/delete/:id', storeManagerToOperatorApiController.deleteOperator);
 app.post('/api/account/store-manager-to-operator/search', storeManagerToOperatorApiController.searchBinding);
+// [權限管理] 檢查角色權限、取得店長列表 api
+app.get('/api/manager/auth-permission/check-role', authPermissionApiController.checkUserRole);
+app.get('/api/manager/auth-permission/store-manager-list', authPermissionApiController.getStoreManagerList);
+// [總經理管理] 總經理增刪查 api
+app.get('/api/manager/general-manager/list', generalManagerApiController.getGeneralManagerList);
+app.post('/api/manager/general-manager/add', generalManagerApiController.addGeneralManagerByEmail);
+app.delete('/api/manager/general-manager/delete/:roleId', generalManagerApiController.deleteGeneralManager);
 app.get('/api/account/payment/userId/:userId', accountApiController.getUserPaymentByUserId);
 app.get('/api/account/payment/paymentId/:paymentId', accountApiController.getPaymentByPaymentid);
 app.post('/api/account/payment/search', accountApiController.searchPayment);
