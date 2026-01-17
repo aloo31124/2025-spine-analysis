@@ -58,6 +58,45 @@ exports.getUserRoleByUserId = async (req, res) => {
     }
 };
 
+/* 刪除使用者角色對應關係 */
+exports.deleteUserToRole = async (req, res) => {
+    console.log("[deleteUserToRole] 開始", req.params.id);
+    try {
+        const result = await userToRoleService.deleteUserToRole(req.params.id);
+        console.log("[deleteUserToRole] 成功 : ", result);
+        res.status(200).send({result, message: '角色刪除成功'});
+    } catch (error) {
+        console.log("[deleteUserToRole] 失敗", error);
+        res.status(500).json({ error: "[deleteUserToRole] 失敗" });
+    }
+};
+
+/* 根據 email 新增店長角色 */
+exports.addStoreManagerByEmail = async (req, res) => {
+    console.log("[addStoreManagerByEmail] 開始", req.body);
+    try {
+        const result = await userToRoleService.addStoreManagerByEmail(req.body.email);
+        console.log("[addStoreManagerByEmail] 成功 : ", result);
+        res.status(200).send({result, message: '店長新增成功'});
+    } catch (error) {
+        console.log("[addStoreManagerByEmail] 失敗", error);
+        res.status(500).json({ error: error.message || "[addStoreManagerByEmail] 失敗" });
+    }
+};
+
+/* 取得所有店長列表 */
+exports.getStoreManagerList = async (req, res) => {
+    console.log("[getStoreManagerList] 開始");
+    try {
+        const storeManagers = await userToRoleService.getStoreManagerList();
+        console.log("[getStoreManagerList] 成功，找到", storeManagers.length, "位店長");
+        res.status(200).json({ storeManagers });
+    } catch (error) {
+        console.log("[getStoreManagerList] 失敗", error);
+        res.status(500).json({ error: "[getStoreManagerList] 失敗" });
+    }
+};
+
 
 
 /* 搜尋 使用者對應購買方案, 依照 userId */
@@ -123,3 +162,30 @@ exports.getPaySelectPageHtml = async (req, res) => {
 }
 
 
+/** 免費付款方案 儲存 */
+exports.postFreePayment = async (req, res) => {
+    try {
+        console.log(' [postFreePayment] :', req.body, req.query, req.params);
+        const {userId, paymentId} = req.body;
+        // 新增紀錄
+        const result1 = await payEcpayService.addPaymentHistory({userId, paymentId, message: "免費方案成功 "});
+        console.log(' [postFreePayment] addPaymentHistory :', result1);
+        // 更新(新增) 使用者 購買方案
+        const result2 = await payEcpayService.addUserToPayment(userId, paymentId);
+        console.log(' [postFreePayment] addUserToPayment :', result2);
+        // 檢查是否已有 [擁有者] owner 角色, 已有角色為 [續約],  若無 角色為首次購買, 新增角色
+        const result3 = await userToRoleService.getUserRoleByUserId(userId);
+        if(result3?.length > 0) { // 續約
+            console.log(' [postFreePayment] getUserRoleByUserId  續約成功 ', result3);
+        } else { // 首次建立帳號
+            console.log(' [postFreePayment] getUserRoleByUserId 轉創建帳號 result3 : :', result3);
+            const result4 = await userToRoleService.addUserToRole({userId, role: 'seller'});
+            console.log(' [postFreePayment] addUserToRole 首次建立帳號 result4 :', result4);
+        }
+        // 回傳結果
+        res.status(200).send("1|OK");
+    } catch (error) {
+        console.error("[postFreePayment] 失敗 : ", error);
+        res.status(500).json({ error: "[postFreePayment] 失敗 : " + error });
+    }
+}

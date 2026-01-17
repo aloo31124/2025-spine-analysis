@@ -15,7 +15,7 @@ class Payment {
     /* [系統管理] 搜尋 [方案]  */
     static async search(payment) {
         //let { pageIndex, pageSize, sort, pageTotal, dataTotal } = pagingParam; // 分頁參數
-        const {name, interval, type} = payment;
+        const {name, interval, type, costRange} = payment;
         let sort = "name";
         let query = db.collection(COLLECTION_NAME);
         const snapshot = await query.get();
@@ -40,6 +40,8 @@ class Payment {
                 (type ? (type === 'all' || payment.type === type) : true)
                 && (interval ? (interval === 'all' || payment.interval === interval) : true)
                 && (name ? (name === 'all' || payment.name.includes(name)) : true)
+                && (Number(costRange?.min) ? Number(payment.cost) >= Number(costRange.min) : true) 
+                && (Number(costRange?.max) ? Number(payment.cost) <= Number(costRange.max) : true) 
             )
         /*
         // 分頁設定

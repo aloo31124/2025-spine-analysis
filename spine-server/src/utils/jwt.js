@@ -8,7 +8,7 @@ const SECRET_KEY = 'SECRET_KEY';
 const tokenBlacklist = new Set();
 
 /* 產生 jwt token */
-exports.createToken = (payload, expiresIn = '5m') => {
+exports.createToken = (payload, expiresIn = '30m') => {
     return jwt.sign(payload, SECRET_KEY, {expiresIn});
 }
 

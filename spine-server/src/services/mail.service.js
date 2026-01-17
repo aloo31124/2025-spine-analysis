@@ -25,7 +25,7 @@ exports.sendMailVerifyCode = (mail) => {
     return new Promise((resolve, reject) => {
         // 設定送出信件內容
         const mailOptions = {
-            from: process.env.Email_User,
+            from: process.env.EMAIL_USER,
             to: mail,
             subject: "新商城 - 信箱驗證碼",
             text: "您的驗證碼是:" + code,
@@ -34,10 +34,16 @@ exports.sendMailVerifyCode = (mail) => {
         transporter.sendMail(mailOptions, async (error, info) => {
             if(error) {
                 console.log("nodemailer 信件寄送失敗: ", error);
-                reject("nodemailer 信件寄送失敗: ", error);
+                reject("nodemailer 信件寄送失敗: " + error.message);
+                return;
             }
-            console.log("信件寄送成功: ", info.response);
-            resolve("信件寄送成功: ", info.response.toString());
+            if(info && info.response) {
+                console.log("信件寄送成功: ", info.response);
+                resolve("信件寄送成功: " + info.response.toString());
+            } else {
+                console.log("信件寄送成功，但沒有回應資訊");
+                resolve("信件寄送成功");
+            }
         });
     });
 }

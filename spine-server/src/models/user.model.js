@@ -3,7 +3,7 @@ const COLLECTION_NAME = 'User';
 
 class User {
     constructor({id, account, mail, status, phone, role, pay, password, createdAt}) {
-        this.id = id || ""; // 不能納入 firestore 欄位
+        // this.id = id || ""; // 不能納入 firestore 欄位, 首次創建帳號, 會造成空 id 欄位, 後續 金流等操作會出錯。
         this.account = account || "";
         this.mail = mail || "";
         this.status = status || "無 狀態 status ";
@@ -45,7 +45,7 @@ class User {
             const batch = db.batch();
             userList.forEach(userData => {
                 const user = new User({
-                    id: userData.id || "",
+                    // id: userData.id || "",
                     account: userData.account || "",
                     mail: userData.mail || "",
                     status: userData.status || "",
@@ -102,6 +102,34 @@ class User {
         await userRef.update(fieldsToUpdate);
         const updatedSnapshot = await userRef.get();
         return { id: userRef.id, ...updatedSnapshot.data() };
+    }
+
+    /* 搜尋使用者 */
+    static async search(searchParam, pagingParam) {
+        const { email, account } = searchParam;
+        let { pageIndex, pageSize, sort, pageTotal, dataTotal } = pagingParam;
+        
+        let query = db.collection(COLLECTION_NAME);
+        const snapshot = await query.get();
+        let userList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        
+        // 篩選條件
+        userList = userList.filter(user => 
+            (email ? user.mail && user.mail.includes(email) : true)
+            && (account ? user.account && user.account.includes(account) : true)
+        );
+        
+        // 排序
+        if (sort) {
+            userList = userList.sort((a, b) => a[sort] > b[sort] ? 1 : -1);
+        }
+        
+        // 分頁
+        dataTotal = userList.length;
+        pageTotal = Math.ceil(userList.length / pageSize);
+        userList = userList.slice((pageIndex - 1) * pageSize, pageIndex * pageSize);
+        
+        return { userList, pagingParam: { ...pagingParam, pageTotal, dataTotal } };
     }
 }
 

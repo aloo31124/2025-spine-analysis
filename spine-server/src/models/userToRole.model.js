@@ -95,5 +95,26 @@ class UserToRole {
                 return {id: doc.id, ...doc.data()};
             });
     }
+
+    // 刪除使用者角色對應關係
+    static async delete(id) {
+        try {
+            await db.collection(COLLECTION_NAME).doc(id).delete();
+            return { success: true, message: '角色刪除成功' };
+        } catch (error) {
+            console.error('[UserToRole.delete] error:', error);
+            throw error;
+        }
+    }
+
+    // 根據 userId 和 role 查找
+    static async findByUserIdAndRole(userId, role) {
+        const snapshot = await db.collection(COLLECTION_NAME)
+            .where('userId', '==', userId)
+            .where('role', '==', role)
+            .get();
+        return snapshot.empty ? null : { id: snapshot.docs[0].id, ...snapshot.docs[0].data() };
+    }
 }
 module.exports = UserToRole;
+

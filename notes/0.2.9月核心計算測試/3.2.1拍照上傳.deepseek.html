@@ -314,7 +314,7 @@
             let isCropping = false;
             let cropStartX, cropStartY, cropEndX, cropEndY;
             
-            // 检测设备类型
+            // 檢測設備種類
             function detectDevice() {
                 const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
                 deviceInfo.textContent = isMobile ? 
@@ -326,10 +326,10 @@
             
             const isMobileDevice = detectDevice();
             
-            // 拍摄照片
+            // 拍攝照片
             captureBtn.addEventListener('click', function() {
                 if (isMobileDevice) {
-                    // 移动设备
+                    // 移動設備
                     const input = document.createElement('input');
                     input.type = 'file';
                     input.accept = 'image/*';
@@ -347,18 +347,18 @@
                     
                     input.click();
                 } else {
-                    // 桌面设备
+                    // 桌面設備
                     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
                         navigator.mediaDevices.getUserMedia({ video: true })
                             .then(function(mediaStream) {
                                 stream = mediaStream;
                                 
-                                // 创建视频元素用于拍照
+                                // 創建視頻元素用於拍照
                                 const video = document.createElement('video');
                                 video.srcObject = mediaStream;
                                 video.play();
                                 
-                                // 创建画布用于拍照
+                                // 創建畫布用於拍照
                                 const canvas = document.createElement('canvas');
                                 const ctx = canvas.getContext('2d');
                                 
@@ -375,7 +375,7 @@
                                         editor.src = dataUrl;
                                         previewContainer.style.display = 'flex';
                                         
-                                        // 停止视频流
+                                        // 停止視頻串流
                                         stream.getTracks().forEach(track => track.stop());
                                         stream = null;
                                     }, 500);
@@ -390,7 +390,7 @@
                 }
             });
             
-            // 上传照片
+            // 上傳照片
             uploadBtn.addEventListener('click', function() {
                 const input = document.createElement('input');
                 input.type = 'file';
@@ -409,14 +409,14 @@
                 input.click();
             });
             
-            // 编辑照片
+            // 編輯照片
             editBtn.addEventListener('click', function() {
                 previewContainer.style.display = 'none';
                 editorContainer.style.display = 'flex';
                 initCropArea();
             });
             
-            // 初始化裁剪区域
+            // 初始化剪裁區
             function initCropArea() {
                 const width = Math.min(editor.width, 300);
                 const height = Math.min(editor.height, 300);
@@ -469,7 +469,7 @@
                 isCropping = false;
             });
             
-            // 取消编辑
+            // 取消編輯
             cancelEditBtn.addEventListener('click', function() {
                 editorContainer.style.display = 'none';
                 previewContainer.style.display = 'flex';
@@ -482,7 +482,7 @@
                 previewContainer.style.display = 'none';
             });
             
-            // 裁剪区域拖动功能
+            // 剪裁區域拖曳
             cropArea.addEventListener('mousedown', function(e) {
                 if (!isCropping) return;
                 
@@ -518,7 +518,7 @@
                 document.addEventListener('mouseup', onMouseUp);
             });
             
-            // 触摸设备支持
+            // 觸碰設備支持
             cropArea.addEventListener('touchstart', function(e) {
                 if (!isCropping) return;
                 

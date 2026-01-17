@@ -1,0 +1,52 @@
+.clockPicker {
+    width: 200px;
+    text-align: center;
+    font-family: Arial, sans-serif;
+}
+
+.timeBar {
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+}
+
+.timeBar span {
+    padding: 5px 10px;
+    border-radius: 5px;
+}
+
+.timeBar .active {
+    background: #007bff;
+    color: white;
+}
+
+.clockFace {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    margin: 10px auto;
+    border-radius: 50%;
+    background: #f0f0f0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.clockCenter {
+    width: 8px;
+    height: 8px;
+    background: black;
+    border-radius: 50%;
+    position: absolute;
+}
+
+.clockNumber {
+    position: absolute;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transform: translate(-50%, -50%);
+}

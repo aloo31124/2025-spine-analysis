@@ -1,13 +1,13 @@
 {
 	"info": {
 		"_postman_id": "316737b1-7c72-49c0-9d84-ee176ca27014",
-		"name": "新商城",
+		"name": "?��???,
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "13565560"
 	},
 	"item": [
 		{
-			"name": "登入",
+			"name": "?�入",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -21,12 +21,12 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8081/api/auth/login",
+					"raw": "http://localhost:8083/api/auth/login",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "8081",
+					"port": "8083",
 					"path": [
 						"api",
 						"auth",
@@ -37,7 +37,7 @@
 			"response": []
 		},
 		{
-			"name": "驗證jwt",
+			"name": "驗�?jwt",
 			"request": {
 				"auth": {
 					"type": "bearer",
@@ -68,12 +68,12 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8081/api/auth/jwt",
+					"raw": "http://localhost:8083/api/auth/jwt",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "8081",
+					"port": "8083",
 					"path": [
 						"api",
 						"auth",
@@ -84,7 +84,7 @@
 			"response": []
 		},
 		{
-			"name": "註冊信箱驗證",
+			"name": "註�?信箱驗�?",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -98,12 +98,12 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8081/api/auth/regist/mail",
+					"raw": "http://localhost:8083/api/auth/regist/mail",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "8081",
+					"port": "8083",
 					"path": [
 						"api",
 						"auth",
@@ -115,7 +115,7 @@
 			"response": []
 		},
 		{
-			"name": "註冊建立使用者",
+			"name": "註�?建�?使用??,
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -129,12 +129,12 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8081/api/auth/regist/user/add",
+					"raw": "http://localhost:8083/api/auth/regist/user/add",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "8081",
+					"port": "8083",
 					"path": [
 						"api",
 						"auth",
@@ -147,13 +147,13 @@
 			"response": []
 		},
 		{
-			"name": "註冊使用者資訊更新",
+			"name": "註�?使用?��?訊更??,
 			"request": {
 				"method": "POST",
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"newUser\": {\n        \"mail\": \"aloo31124@gmail.com\",\n        \"phone\": \"09123\",\n        \"account\": \"yoyo123\",\n        \"state\": \"註冊資訊更新\"\n    }\n}",
+					"raw": "{\n    \"newUser\": {\n        \"mail\": \"aloo31124@gmail.com\",\n        \"phone\": \"09123\",\n        \"account\": \"yoyo123\",\n        \"state\": \"註�?資�??�新\"\n    }\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -161,12 +161,12 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8081/api/auth/regist/user/info",
+					"raw": "http://localhost:8083/api/auth/regist/user/info",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "8081",
+					"port": "8083",
 					"path": [
 						"api",
 						"auth",
@@ -179,13 +179,13 @@
 			"response": []
 		},
 		{
-			"name": "註冊驗證碼",
+			"name": "註�?驗�?�?,
 			"request": {
 				"method": "POST",
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"newUser\": {\n        \"mail\": \"aloo31124@gmail.com\",\n        \"code\": \"21f5e\",\n        \"state\": \"註冊資訊更新\"\n    }\n}",
+					"raw": "{\n    \"newUser\": {\n        \"mail\": \"aloo31124@gmail.com\",\n        \"code\": \"21f5e\",\n        \"state\": \"註�?資�??�新\"\n    }\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -193,12 +193,12 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8081/api/auth/regist/verify/code",
+					"raw": "http://localhost:8083/api/auth/regist/verify/code",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "8081",
+					"port": "8083",
 					"path": [
 						"api",
 						"auth",
@@ -211,13 +211,13 @@
 			"response": []
 		},
 		{
-			"name": "註冊使用者更新密碼",
+			"name": "註�?使用?�更?��?�?,
 			"request": {
 				"method": "POST",
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"newUser\": {\n        \"mail\": \"aloo31124@gmail.com\",\n        \"password\": \"ab123\",\n        \"state\" : \"更新密碼\"\n    }\n}",
+					"raw": "{\n    \"newUser\": {\n        \"mail\": \"aloo31124@gmail.com\",\n        \"password\": \"ab123\",\n        \"state\" : \"?�新密碼\"\n    }\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -225,12 +225,12 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8081/api/auth/regist/user/password",
+					"raw": "http://localhost:8083/api/auth/regist/user/password",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "8081",
+					"port": "8083",
 					"path": [
 						"api",
 						"auth",
@@ -243,7 +243,7 @@
 			"response": []
 		},
 		{
-			"name": "商品搜尋列表",
+			"name": "?��??��??�表",
 			"protocolProfileBehavior": {
 				"disableBodyPruning": true
 			},
@@ -260,12 +260,12 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8081/api/product/list",
+					"raw": "http://localhost:8083/api/product/list",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "8081",
+					"port": "8083",
 					"path": [
 						"api",
 						"product",
@@ -275,7 +275,7 @@
 			},
 			"response": [
 				{
-					"name": "商品列表",
+					"name": "?��??�表",
 					"originalRequest": {
 						"method": "GET",
 						"header": [],
@@ -289,12 +289,12 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8081/api/product/list",
+							"raw": "http://localhost:8083/api/product/list",
 							"protocol": "http",
 							"host": [
 								"localhost"
 							],
-							"port": "8081",
+							"port": "8083",
 							"path": [
 								"api",
 								"product",
@@ -340,12 +340,12 @@
 						}
 					],
 					"cookie": [],
-					"body": "{\n    \"result\": \"200\",\n    \"productList\": [\n        {\n            \"id\": \"15VUG307zBg2ac2YPfyR\",\n            \"name\": \"測試商品\",\n            \"price\": \"150\"\n        },\n        {\n            \"id\": \"5QvzWzCxvE1tl5whpj0J\",\n            \"price\": \"450\",\n            \"name\": \"女黑洋裝\"\n        },\n        {\n            \"id\": \"RlDMb05mB3C0KKpxEsk0\",\n            \"name\": \"酷炫男T shirt\",\n            \"price\": \"500\"\n        },\n        {\n            \"id\": \"bd3BNlDe1tMbP5wbf6p6\",\n            \"name\": \"測試商品\",\n            \"price\": \"150\"\n        }\n    ]\n}"
+					"body": "{\n    \"result\": \"200\",\n    \"productList\": [\n        {\n            \"id\": \"15VUG307zBg2ac2YPfyR\",\n            \"name\": \"測試?��?\",\n            \"price\": \"150\"\n        },\n        {\n            \"id\": \"5QvzWzCxvE1tl5whpj0J\",\n            \"price\": \"450\",\n            \"name\": \"女�?洋�?\"\n        },\n        {\n            \"id\": \"RlDMb05mB3C0KKpxEsk0\",\n            \"name\": \"?�炫?�T shirt\",\n            \"price\": \"500\"\n        },\n        {\n            \"id\": \"bd3BNlDe1tMbP5wbf6p6\",\n            \"name\": \"測試?��?\",\n            \"price\": \"150\"\n        }\n    ]\n}"
 				}
 			]
 		},
 		{
-			"name": "商品取得資訊",
+			"name": "?��??��?資�?",
 			"protocolProfileBehavior": {
 				"disableBodyPruning": true
 			},
@@ -362,12 +362,12 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8081/api/product/RlDMb05mB3C0KKpxEsk0",
+					"raw": "http://localhost:8083/api/product/RlDMb05mB3C0KKpxEsk0",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "8081",
+					"port": "8083",
 					"path": [
 						"api",
 						"product",
@@ -377,7 +377,7 @@
 			},
 			"response": [
 				{
-					"name": "商品取得資訊",
+					"name": "?��??��?資�?",
 					"originalRequest": {
 						"method": "GET",
 						"header": [],
@@ -391,12 +391,12 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8081/api/product/RlDMb05mB3C0KKpxEsk0",
+							"raw": "http://localhost:8083/api/product/RlDMb05mB3C0KKpxEsk0",
 							"protocol": "http",
 							"host": [
 								"localhost"
 							],
-							"port": "8081",
+							"port": "8083",
 							"path": [
 								"api",
 								"product",
@@ -442,18 +442,18 @@
 						}
 					],
 					"cookie": [],
-					"body": "{\n    \"product\": {\n        \"id\": \"RlDMb05mB3C0KKpxEsk0\",\n        \"name\": \"酷炫男T shirt\",\n        \"price\": \"500\"\n    }\n}"
+					"body": "{\n    \"product\": {\n        \"id\": \"RlDMb05mB3C0KKpxEsk0\",\n        \"name\": \"?�炫?�T shirt\",\n        \"price\": \"500\"\n    }\n}"
 				}
 			]
 		},
 		{
-			"name": "商品創建",
+			"name": "?��??�建",
 			"request": {
 				"method": "POST",
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"newProduct\": {\n        \"name\": \"測試商品2\",\n        \"price\": \"250\"\n    }\n}",
+					"raw": "{\n    \"newProduct\": {\n        \"name\": \"測試?��?2\",\n        \"price\": \"250\"\n    }\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -461,12 +461,12 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8081/api/product/add",
+					"raw": "http://localhost:8083/api/product/add",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "8081",
+					"port": "8083",
 					"path": [
 						"api",
 						"product",
@@ -476,13 +476,13 @@
 			},
 			"response": [
 				{
-					"name": "商品創建",
+					"name": "?��??�建",
 					"originalRequest": {
 						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"newProduct\": {\n        \"name\": \"測試商品2\",\n        \"price\": \"250\"\n    }\n}",
+							"raw": "{\n    \"newProduct\": {\n        \"name\": \"測試?��?2\",\n        \"price\": \"250\"\n    }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -490,12 +490,12 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8081/api/product/add",
+							"raw": "http://localhost:8083/api/product/add",
 							"protocol": "http",
 							"host": [
 								"localhost"
 							],
-							"port": "8081",
+							"port": "8083",
 							"path": [
 								"api",
 								"product",
@@ -541,18 +541,18 @@
 						}
 					],
 					"cookie": [],
-					"body": "{\n    \"newProduct\": {\n        \"id\": \"PQPCU6E2dEQkkOKexme8\",\n        \"name\": \"測試商品2\",\n        \"price\": \"250\"\n    }\n}"
+					"body": "{\n    \"newProduct\": {\n        \"id\": \"PQPCU6E2dEQkkOKexme8\",\n        \"name\": \"測試?��?2\",\n        \"price\": \"250\"\n    }\n}"
 				}
 			]
 		},
 		{
-			"name": "商品編輯",
+			"name": "?��?編輯",
 			"request": {
 				"method": "PATCH",
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"updateProduct\": {\n        \"id\": \"PQPCU6E2dEQkkOKexme8\",\n        \"name\": \"測試商品2 在加個3\",\n        \"price\": \"251\"\n    }\n}",
+					"raw": "{\n    \"updateProduct\": {\n        \"id\": \"PQPCU6E2dEQkkOKexme8\",\n        \"name\": \"測試?��?2 ?��???\",\n        \"price\": \"251\"\n    }\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -560,12 +560,12 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8081/api/product/edit",
+					"raw": "http://localhost:8083/api/product/edit",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "8081",
+					"port": "8083",
 					"path": [
 						"api",
 						"product",
@@ -575,13 +575,13 @@
 			},
 			"response": [
 				{
-					"name": "商品編輯",
+					"name": "?��?編輯",
 					"originalRequest": {
 						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"newProduct\": {\n        \"name\": \"測試商品2\",\n        \"price\": \"250\"\n    }\n}",
+							"raw": "{\n    \"newProduct\": {\n        \"name\": \"測試?��?2\",\n        \"price\": \"250\"\n    }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -589,12 +589,12 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8081/api/product/add",
+							"raw": "http://localhost:8083/api/product/add",
 							"protocol": "http",
 							"host": [
 								"localhost"
 							],
-							"port": "8081",
+							"port": "8083",
 							"path": [
 								"api",
 								"product",
@@ -640,22 +640,22 @@
 						}
 					],
 					"cookie": [],
-					"body": "{\n    \"newProduct\": {\n        \"id\": \"PQPCU6E2dEQkkOKexme8\",\n        \"name\": \"測試商品2\",\n        \"price\": \"250\"\n    }\n}"
+					"body": "{\n    \"newProduct\": {\n        \"id\": \"PQPCU6E2dEQkkOKexme8\",\n        \"name\": \"測試?��?2\",\n        \"price\": \"250\"\n    }\n}"
 				}
 			]
 		},
 		{
-			"name": "商品刪除",
+			"name": "?��??�除",
 			"request": {
 				"method": "DELETE",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8081/api/product/delete/H1CIMKpevvUBUq64v5V7",
+					"raw": "http://localhost:8083/api/product/delete/H1CIMKpevvUBUq64v5V7",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "8081",
+					"port": "8083",
 					"path": [
 						"api",
 						"product",
@@ -666,17 +666,17 @@
 			},
 			"response": [
 				{
-					"name": "商品刪除",
+					"name": "?��??�除",
 					"originalRequest": {
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8081/api/product/delete/H1CIMKpevvUBUq64v5V7",
+							"raw": "http://localhost:8083/api/product/delete/H1CIMKpevvUBUq64v5V7",
 							"protocol": "http",
 							"host": [
 								"localhost"
 							],
-							"port": "8081",
+							"port": "8083",
 							"path": [
 								"api",
 								"product",

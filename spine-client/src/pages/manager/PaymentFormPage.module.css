@@ -1,0 +1,208 @@
+.PaymentFormPage {
+    width: 100%;
+    min-height: 100vh;
+    background-color: #f5f5f5;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.FormContainer {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+    width: 100%;
+    max-width: 600px;
+    margin-top: 40px;
+}
+
+.FormTitle {
+    font-size: 24px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 30px;
+    text-align: center;
+    border-bottom: 2px solid #1976d2;
+    padding-bottom: 10px;
+}
+
+.PaymentForm {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.FormRow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.FormGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.FormLabel {
+    font-weight: 600;
+    color: #333;
+    font-size: 14px;
+}
+
+.FormInput,
+.FormSelect,
+.FormTextarea {
+    padding: 12px 16px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    font-family: inherit;
+}
+
+.FormInput:focus,
+.FormSelect:focus,
+.FormTextarea:focus {
+    outline: none;
+    border-color: #1976d2;
+    box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.1);
+}
+
+.FormInput:invalid,
+.FormSelect:invalid,
+.FormTextarea:invalid {
+    border-color: #d32f2f;
+}
+
+.FormTextarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.RadioGroup {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.RadioLabel {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #333;
+}
+
+.RadioInput {
+    margin: 0;
+    cursor: pointer;
+}
+
+.FormActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 16px;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.CancelButton,
+.SubmitButton {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 120px;
+}
+
+.CancelButton {
+    background-color: #6c757d;
+    color: white;
+}
+
+.CancelButton:hover:not(:disabled) {
+    background-color: #5a6268;
+}
+
+.SubmitButton {
+    background-color: #1976d2;
+    color: white;
+}
+
+.SubmitButton:hover:not(:disabled) {
+    background-color: #1565c0;
+}
+
+.CancelButton:disabled,
+.SubmitButton:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* RWD 響應式設計 */
+@media (max-width: 768px) {
+    .PaymentFormPage {
+        padding: 15px;
+    }
+    
+    .FormContainer {
+        padding: 20px;
+        margin-top: 20px;
+    }
+    
+    .FormTitle {
+        font-size: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .FormRow {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .PaymentForm {
+        gap: 15px;
+    }
+    
+    .FormActions {
+        flex-direction: column-reverse;
+        gap: 12px;
+        margin-top: 20px;
+    }
+    
+    .CancelButton,
+    .SubmitButton {
+        width: 100%;
+        padding: 14px 24px;
+    }
+}
+
+@media (max-width: 480px) {
+    .PaymentFormPage {
+        padding: 10px;
+    }
+    
+    .FormContainer {
+        padding: 15px;
+        margin-top: 10px;
+    }
+    
+    .FormTitle {
+        font-size: 18px;
+    }
+    
+    .FormInput,
+    .FormSelect,
+    .FormTextarea {
+        padding: 10px 12px;
+        font-size: 13px;
+    }
+}

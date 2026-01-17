@@ -1,0 +1,338 @@
+/* 商品列表頁面 - RWD 優化樣式 */
+
+.productListContainer {
+    width: 100%;
+    padding: 10px;
+}
+
+/* 桌面版表格樣式 */
+.productTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.productTable th {
+    background-color: #f8f9fa;
+    padding: 15px 10px;
+    text-align: left;
+    font-weight: 600;
+    border-bottom: 2px solid #dee2e6;
+    color: #495057;
+    font-size: 14px;
+}
+
+.productTable td {
+    padding: 15px 10px;
+    border-bottom: 1px solid #dee2e6;
+    vertical-align: middle;
+}
+
+.productTable tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+/* 商品圖片樣式 */
+.productImage {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 2px solid #e9ecef;
+}
+
+/* 商品名稱樣式 */
+.productName {
+    font-weight: 500;
+    color: #212529;
+    max-width: 200px;
+    word-wrap: break-word;
+    line-height: 1.4;
+}
+
+/* 價格樣式 */
+.productPrice {
+    font-weight: 600;
+    color: #28a745;
+    font-size: 16px;
+}
+
+/* 狀態標籤樣式 */
+.productStatus {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    text-align: center;
+    min-width: 60px;
+}
+
+.statusActive {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.statusDraft {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+}
+
+.statusInactive {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* 操作按鈕樣式 */
+.actionButtons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.actionButton {
+    padding: 6px 12px;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    background: white;
+    color: #495057;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 50px;
+}
+
+.actionButton.edit {
+    border-color: #007bff;
+    color: #007bff;
+}
+
+.actionButton.edit:hover {
+    background-color: #007bff;
+    color: white;
+}
+
+.actionButton.delete {
+    border-color: #dc3545;
+    color: #dc3545;
+}
+
+.actionButton.delete:hover {
+    background-color: #dc3545;
+    color: white;
+}
+
+/* Loading 和 空狀態 */
+.loadingContainer,
+.emptyState {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.loadingContainer img {
+    height: 60px;
+}
+
+.emptyState {
+    color: #6c757d;
+    font-size: 16px;
+}
+
+/* 手機版卡片樣式 */
+.mobileCardContainer {
+    display: none;
+}
+
+.productCard {
+    background: white;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e9ecef;
+}
+
+.cardHeader {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.cardImage {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 8px;
+    flex-shrink: 0;
+}
+
+.cardTitle {
+    flex: 1;
+    font-weight: 600;
+    color: #212529;
+    font-size: 16px;
+    line-height: 1.4;
+}
+
+.cardBody {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.cardRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 0;
+}
+
+.cardLabel {
+    font-weight: 500;
+    color: #6c757d;
+    font-size: 14px;
+}
+
+.cardValue {
+    color: #212529;
+    font-size: 14px;
+    text-align: right;
+}
+
+.cardActions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #e9ecef;
+}
+
+.cardButton {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    background: white;
+    color: #495057;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.cardButton.edit {
+    border-color: #007bff;
+    color: #007bff;
+}
+
+.cardButton.edit:hover {
+    background-color: #007bff;
+    color: white;
+}
+
+.cardButton.delete {
+    border-color: #dc3545;
+    color: #dc3545;
+}
+
+.cardButton.delete:hover {
+    background-color: #dc3545;
+    color: white;
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+    .productListContainer {
+        padding: 5px;
+    }
+    
+    /* 隱藏桌面表格，顯示手機卡片 */
+    .productTable {
+        display: none;
+    }
+    
+    .mobileCardContainer {
+        display: block;
+    }
+    
+    /* 調整其他組件在手機上的間距 */
+    .productListContainer > * {
+        margin-bottom: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .productListContainer {
+        padding: 8px;
+    }
+    
+    .cardHeader {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .cardImage {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .cardTitle {
+        font-size: 15px;
+    }
+    
+    .cardActions {
+        flex-direction: column;
+        gap: 6px;
+    }
+    
+    .cardButton {
+        padding: 10px 12px;
+        font-size: 15px;
+    }
+}
+
+/* 平板電腦優化 */
+@media (max-width: 1024px) and (min-width: 769px) {
+    .productTable th,
+    .productTable td {
+        padding: 12px 8px;
+        font-size: 13px;
+    }
+    
+    .productImage {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .actionButton {
+        padding: 5px 8px;
+        font-size: 11px;
+        min-width: 45px;
+    }
+}
+
+/* 大螢幕優化 */
+@media (min-width: 1200px) {
+    .productListContainer {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    
+    .productTable th,
+    .productTable td {
+        padding: 18px 15px;
+    }
+    
+    .productImage {
+        width: 100px;
+        height: 100px;
+    }
+}
