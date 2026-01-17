@@ -31,6 +31,18 @@ function MenuLeft({ isOpen, isHidden, onClose }) {
         // 管理員可以訪問所有功能
         if (hasRole('Admin')) return true;
 
+        // 總經理的白名單頁面
+        const generalManagerWhitelist = [
+            'product-inventory', // 商品庫存
+            'revenue',          // 營收管理
+            'manager-setting',  // 經理設定
+            'store-management'  // 店面管理
+        ];
+        // 如果是總經理，只能訪問白名單內的頁面
+        if (hasRole('GeneralManager')) {
+            return generalManagerWhitelist.includes(feature);
+        }
+
         // 店長的白名單頁面
         const storeManagerWhitelist = [
             'photo-capture',    // 拍照上傳
@@ -40,11 +52,26 @@ function MenuLeft({ isOpen, isHidden, onClose }) {
             'product-pillow',   // 枕頭商品
             'product-mattress', // 床墊商品
             'product-inventory', // 商品庫存
-            'revenue'           // 營收管理
+            'revenue',          // 營收管理
+            'operator-management' // 操作員設定
         ];
         // 如果是店長，只能訪問白名單內的頁面
         if (hasRole('StoreManager')) {
             return storeManagerWhitelist.includes(feature);
+        }
+
+        // 操作員的白名單頁面
+        const operatorWhitelist = [
+            'photo-capture',    // 拍照上傳
+            'analysis-spine',   // 頸部分析
+            'analysis-tail',    // 尾椎分析
+            'customer',         // 客戶管理
+            'product-pillow',   // 枕頭商品
+            'product-mattress'  // 床墊管理
+        ];
+        // 如果是操作員，只能訪問白名單內的頁面
+        if (hasRole('Operator')) {
+            return operatorWhitelist.includes(feature);
         }
 
         // 沒有任何角色，不能訪問任何頁面
@@ -134,18 +161,32 @@ function MenuLeft({ isOpen, isHidden, onClose }) {
                         營收管理
                     </button>
                 )}
+                {(hasRole('Admin') || hasRole('GeneralManager')) && (
+                    <button className={`${style.MenuLeftButton} ${location.pathname.startsWith('/manager/manager-setting') ? style.active : ''}`}
+                        onClick={e => navigate('/manager/manager-setting') }
+                    >
+                        經理設定
+                    </button>
+                )}
                 {hasRole('Admin') && (
                     <button className={`${style.MenuLeftButton} ${location.pathname.startsWith('/manager/role-management') ? style.active : ''}`}
                         onClick={e => navigate('/manager/role-management') }
                     >
-                        分權設定
+                        店長設定
                     </button>
                 )}
-                {hasRole('Admin') && (
+                {(hasRole('Admin') || hasRole('StoreManager') || hasRole('GeneralManager')) && (
                     <button className={`${style.MenuLeftButton} ${location.pathname.startsWith('/manager/store') ? style.active : ''}`}
                         onClick={e => navigate('/manager/store/list') }
                     >
                         店面管理
+                    </button>
+                )}
+                {canAccess('operator-management') && (
+                    <button className={`${style.MenuLeftButton} ${location.pathname.startsWith('/manager/operator-management') ? style.active : ''}`}
+                        onClick={e => navigate('/manager/operator-management') }
+                    >
+                        操作員設定
                     </button>
                 )}
                 {hasRole('Admin') && (

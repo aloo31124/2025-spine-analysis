@@ -149,6 +149,32 @@ exports.searchProductPillow = async (searchParam, pagingParam, userId = null) =>
 
 /* 新增枕頭商品 */
 exports.addProductPillow = async (productPillow) => {
+    const storeManagerToOperatorService = require('./storeManagerToOperator.service');
+    const userToRoleService = require('./userToRole.service');
+    
+    // 檢查是否為操作員
+    const isOperator = await storeManagerToOperatorService.isOperator(productPillow.userId);
+    
+    if (isOperator) {
+        // 如果是操作員，取得綁定的店長ID
+        const storeManagerId = await storeManagerToOperatorService.getStoreManagerIdByOperatorId(productPillow.userId);
+        
+        if (!storeManagerId) {
+            throw new Error('操作員未綁定店長');
+        }
+        
+        // 保存操作員ID作為 createId（實際創建者）
+        const createId = productPillow.userId;
+        
+        // 將商品的 userId 設置為店長ID（商品所屬者）
+        return ProductPillow.addProductPillow({
+            ...productPillow,
+            userId: storeManagerId,
+            createId: createId
+        });
+    }
+    
+    // 如果不是操作員，正常新增商品
     return ProductPillow.addProductPillow(productPillow);
 }
 

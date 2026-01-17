@@ -16,9 +16,13 @@ const ERROR_HEADER = "[productInventory.api.controller.js]";
  */
 exports.getPillowInventoryList = async (req, res) => {
     try {
-        console.log("[getPillowInventoryList] start ");
+        console.log("[getPillowInventoryList] start, query:", req.query);
         const payload = authService.verifyJwt(req);
-        const result = await productInventoryService.getPillowInventoryList(payload?.userId);
+        const { storeManagerId = '' } = req.query || {};
+        const result = await productInventoryService.getPillowInventoryList(
+            payload?.userId, 
+            storeManagerId
+        );
         res.status(200).json({ result });
     } catch (error) {
         console.error("[getPillowInventoryList] error :", error);
@@ -32,9 +36,13 @@ exports.getPillowInventoryList = async (req, res) => {
  */
 exports.getMattressInventoryList = async (req, res) => {
     try {
-        console.log("[getMattressInventoryList] start ");
+        console.log("[getMattressInventoryList] start, query:", req.query);
         const payload = authService.verifyJwt(req);
-        const result = await productInventoryService.getMattressInventoryList(payload?.userId);
+        const { storeManagerId = '' } = req.query || {};
+        const result = await productInventoryService.getMattressInventoryList(
+            payload?.userId,
+            storeManagerId
+        );
         res.status(200).json({ result });
     } catch (error) {
         console.error("[getMattressInventoryList] error :", error);

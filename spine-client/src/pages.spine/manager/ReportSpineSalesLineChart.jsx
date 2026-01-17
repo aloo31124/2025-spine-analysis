@@ -63,8 +63,16 @@ const ReportSpineSalesLineChart = () => {
         setLoadingChart(true);
         setErrorMessage('');
         try {
+            // 從localStorage取得選中的店長ID和當前用戶ID
+            const selectedManagerId = localStorage.getItem('selectedStoreManagerId');
             const userId = localStorage.getItem('userId') || '';
-            const payload = await getSalesLineChartData(timeRange, productPillowId, userId, productType);
+            const payload = await getSalesLineChartData(
+                timeRange, 
+                productPillowId, 
+                userId, 
+                productType,
+                selectedManagerId || ''  // 傳遞storeManagerId
+            );
             setChartPayload({
                 labels: payload?.labels || [],
                 data: payload?.data || [],

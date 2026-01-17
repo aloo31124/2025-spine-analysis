@@ -6,27 +6,39 @@ const BASE_URL = HOST + CONTEXT;
 
 /**
  * 取得枕頭商品庫存清單
+ * @param {string} userId - 使用者ID
+ * @param {string} storeManagerId - 店長ID (總經理/Admin選擇的店長)
  * @returns {Promise} 枕頭商品庫存資料
  */
-export const getPillowInventoryList = async () => {
+export const getPillowInventoryList = async (userId = '', storeManagerId = '') => {
     const token = localStorage.getItem('jwt');
+    const params = {};
+    if (userId) params.userId = userId;
+    if (storeManagerId) params.storeManagerId = storeManagerId;
     return axios.get(`${BASE_URL}/pillow`, {
         headers: {
             Authorization: `Bearer ${token}`
-        }
+        },
+        params
     });
 };
 
 /**
  * 取得床墊商品庫存清單
+ * @param {string} userId - 使用者ID
+ * @param {string} storeManagerId - 店長ID (總經理/Admin選擇的店長)
  * @returns {Promise} 床墊商品庫存資料
  */
-export const getMattressInventoryList = async () => {
+export const getMattressInventoryList = async (userId = '', storeManagerId = '') => {
     const token = localStorage.getItem('jwt');
+    const params = {};
+    if (userId) params.userId = userId;
+    if (storeManagerId) params.storeManagerId = storeManagerId;
     return axios.get(`${BASE_URL}/mattress`, {
         headers: {
             Authorization: `Bearer ${token}`
-        }
+        },
+        params
     });
 };
 
