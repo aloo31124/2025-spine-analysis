@@ -49,7 +49,7 @@ exports.getPillowInventory = async (req, res) => {
             return res.status(200).json({ 
                 result: '200', 
                 data: { pillowList: [], stores: [] },
-                message: '您目前沒有管理任何店面'
+                message: '您尚未綁定任何店面，請進行綁定。'
             });
         }
         
@@ -100,7 +100,7 @@ exports.getMattressInventory = async (req, res) => {
             return res.status(200).json({ 
                 result: '200', 
                 data: { mattressList: [], stores: [] },
-                message: '您目前沒有管理任何店面'
+                message: '您尚未綁定任何店面，請進行綁定。'
             });
         }
         
