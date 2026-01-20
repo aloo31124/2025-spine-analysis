@@ -4,7 +4,7 @@ import logo from '../../assets.spine/logo.png';
 import { logout } from '../../api/auth';
 import {useNavigate} from 'react-router-dom';
 import { FaCog, FaUserTie } from 'react-icons/fa';
-import { getStoreManagerList } from '../../api/manager/authPermission';
+import { getStoreManagerList, checkIsGeneralManagerOrAdmin } from '../../api/manager/authPermission';
 
 function Header({ onToggleMenu }) {
     const navigate = useNavigate();
@@ -32,6 +32,15 @@ function Header({ onToggleMenu }) {
     useEffect(() => {
         const fetchStoreManagers = async () => {
             try {
+                // 先檢查使用者角色權限
+                const hasPermission = await checkIsGeneralManagerOrAdmin();
+                
+                // 只有系統管理員(Admin)或總經理(GeneralManager)才能看到店長選單
+                if (!hasPermission) {
+                    setShowStoreManagerSelect(false);
+                    return;
+                }
+                
                 const response = await getStoreManagerList();
                 if (response.success && response.data && response.data.length > 0) {
                     setStoreManagerList(response.data);

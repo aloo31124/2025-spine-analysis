@@ -21,7 +21,7 @@ exports.checkUserRole = async (userId) => {
             pageTotal: -1, 
             dataTotal: -1 
         };
-        const userRoles = (await UserToRole.search({ userId }, pagingParam)).userToRoleList;
+        const userRoles = (await UserToRole.findByUserId(userId));
 
         console.log(`${ERROR_HEADER} 找到 ${userRoles.length} 個角色`);
         return {
