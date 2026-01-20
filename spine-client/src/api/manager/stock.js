@@ -11,10 +11,16 @@ const BASE_URL = HOST + CONTEXT;
 /**
  * 取得枕頭商品庫存列表
  * 根據當前使用者（店長）取得其管理的所有店面的枕頭庫存
+ * @param {string} storeManagerId - 選中的店長ID（可選）
  */
-export const getPillowInventory = async () => {
+export const getPillowInventory = async (storeManagerId = '') => {
     const token = localStorage.getItem('jwt');
+    const params = {};
+    if (storeManagerId) {
+        params.storeManagerId = storeManagerId;
+    }
     return axios.get(`${BASE_URL}/pillow`, {
+        params,
         headers: {
             Authorization: `Bearer ${token}`
         }
@@ -24,10 +30,16 @@ export const getPillowInventory = async () => {
 /**
  * 取得床墊商品庫存列表
  * 根據當前使用者（店長）取得其管理的所有店面的床墊庫存
+ * @param {string} storeManagerId - 選中的店長ID（可選）
  */
-export const getMattressInventory = async () => {
+export const getMattressInventory = async (storeManagerId = '') => {
     const token = localStorage.getItem('jwt');
+    const params = {};
+    if (storeManagerId) {
+        params.storeManagerId = storeManagerId;
+    }
     return axios.get(`${BASE_URL}/mattress`, {
+        params,
         headers: {
             Authorization: `Bearer ${token}`
         }
