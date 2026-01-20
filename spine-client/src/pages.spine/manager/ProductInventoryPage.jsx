@@ -47,10 +47,8 @@ function ProductInventoryPage() {
             
             // 同時取得枕頭與床墊庫存
             const [pillowRes, mattressRes] = await Promise.all([
-                //getPillowInventoryList(userId, selectedManagerId || ''),
-                //getMattressInventoryList(userId, selectedManagerId || ''),
-                getPillowInventory(),
-                getMattressInventory()
+                getPillowInventory(selectedManagerId || ''),
+                getMattressInventory(selectedManagerId || '')
             ]);
             
             console.log('枕頭庫存回應:', pillowRes.data);

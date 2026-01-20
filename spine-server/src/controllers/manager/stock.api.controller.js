@@ -15,10 +15,11 @@ const ERROR_HEADER = "[stock.api.controller.js]";
 /**
  * 取得枕頭商品庫存列表
  * 根據當前使用者（店長）取得其管理的所有店面的枕頭庫存
+ * Query: storeManagerId (可選)
  */
 exports.getPillowInventory = async (req, res) => {
     try {
-        console.log("[getPillowInventory] 開始");
+        console.log("[getPillowInventory] 開始, query:", req.query);
         
         // 1. 從 JWT 取得 userId
         const payload = authService.verifyJwt(req);
@@ -28,16 +29,20 @@ exports.getPillowInventory = async (req, res) => {
             return res.status(401).json({ result: '401', message: '未授權' });
         }
         
-        console.log("[getPillowInventory] userId:", userId);
+        // 2. 從 query 取得 storeManagerId（如果有的話）
+        const { storeManagerId = '' } = req.query || {};
+        const targetManagerId = storeManagerId || userId;
         
-        // 2. 檢查是否為店長
-        const isManager = await userToRoleService.isStoreManager(userId);
+        console.log("[getPillowInventory] userId:", userId, "targetManagerId:", targetManagerId);
+        
+        // 3. 檢查是否為店長
+        const isManager = await userToRoleService.isStoreManager(targetManagerId);
         if (!isManager) {
-            return res.status(403).json({ result: '403', message: '權限不足：您不是店長' });
+            return res.status(403).json({ result: '403', message: '權限不足：該使用者不是店長' });
         }
         
-        // 3. 取得該店長管理的所有店面
-        const stores = await storeService.getStoresByStoreManagerId(userId);
+        // 4. 取得該店長管理的所有店面
+        const stores = await storeService.getStoresByStoreManagerId(targetManagerId);
         console.log("[getPillowInventory] 找到", stores.length, "個店面");
         
         if (stores.length === 0) {
@@ -48,8 +53,8 @@ exports.getPillowInventory = async (req, res) => {
             });
         }
         
-        // 4. 取得枕頭商品庫存列表
-        const data = await stockService.getPillowInventoryByStoreManager(userId);
+        // 5. 取得枕頭商品庫存列表
+        const data = await stockService.getPillowInventoryByStoreManager(targetManagerId);
         
         res.status(200).json({ result: '200', data });
     } catch (error) {
@@ -61,10 +66,11 @@ exports.getPillowInventory = async (req, res) => {
 /**
  * 取得床墊商品庫存列表
  * 根據當前使用者（店長）取得其管理的所有店面的床墊庫存
+ * Query: storeManagerId (可選)
  */
 exports.getMattressInventory = async (req, res) => {
     try {
-        console.log("[getMattressInventory] 開始");
+        console.log("[getMattressInventory] 開始, query:", req.query);
         
         // 1. 從 JWT 取得 userId
         const payload = authService.verifyJwt(req);
@@ -74,16 +80,20 @@ exports.getMattressInventory = async (req, res) => {
             return res.status(401).json({ result: '401', message: '未授權' });
         }
         
-        console.log("[getMattressInventory] userId:", userId);
+        // 2. 從 query 取得 storeManagerId（如果有的話）
+        const { storeManagerId = '' } = req.query || {};
+        const targetManagerId = storeManagerId || userId;
         
-        // 2. 檢查是否為店長
-        const isManager = await userToRoleService.isStoreManager(userId);
+        console.log("[getMattressInventory] userId:", userId, "targetManagerId:", targetManagerId);
+        
+        // 3. 檢查是否為店長
+        const isManager = await userToRoleService.isStoreManager(targetManagerId);
         if (!isManager) {
-            return res.status(403).json({ result: '403', message: '權限不足：您不是店長' });
+            return res.status(403).json({ result: '403', message: '權限不足：該使用者不是店長' });
         }
         
-        // 3. 取得該店長管理的所有店面
-        const stores = await storeService.getStoresByStoreManagerId(userId);
+        // 4. 取得該店長管理的所有店面
+        const stores = await storeService.getStoresByStoreManagerId(targetManagerId);
         console.log("[getMattressInventory] 找到", stores.length, "個店面");
         
         if (stores.length === 0) {
@@ -94,8 +104,8 @@ exports.getMattressInventory = async (req, res) => {
             });
         }
         
-        // 4. 取得床墊商品庫存列表
-        const data = await stockService.getMattressInventoryByStoreManager(userId);
+        // 5. 取得床墊商品庫存列表
+        const data = await stockService.getMattressInventoryByStoreManager(targetManagerId);
         
         res.status(200).json({ result: '200', data });
     } catch (error) {

@@ -4,7 +4,13 @@ import logo from '../../assets.spine/logo.png';
 import { logout } from '../../api/auth';
 import {useNavigate} from 'react-router-dom';
 import { FaCog, FaUserTie } from 'react-icons/fa';
-import { getStoreManagerList } from '../../api/manager/authPermission';
+import { getStoreManagerList, checkIsGeneralManagerOrAdmin } from '../../api/manager/authPermission';
+import { 
+    getJwtToken, 
+    getSelectedStoreManagerId, 
+    setSelectedStoreManagerId, 
+    clearUserData 
+} from '../../utils/localStorage';
 
 function Header({ onToggleMenu }) {
     const navigate = useNavigate();
@@ -32,13 +38,29 @@ function Header({ onToggleMenu }) {
     useEffect(() => {
         const fetchStoreManagers = async () => {
             try {
+                // 檢查是否有 JWT token，沒有則不執行（避免登出後重新觸發）
+                const token = getJwtToken();
+                if (!token) {
+                    setShowStoreManagerSelect(false);
+                    return;
+                }
+
+                // 先檢查使用者角色權限
+                const hasPermission = await checkIsGeneralManagerOrAdmin();
+                
+                // 只有系統管理員(Admin)或總經理(GeneralManager)才能看到店長選單
+                if (!hasPermission) {
+                    setShowStoreManagerSelect(false);
+                    return;
+                }
+                
                 const response = await getStoreManagerList();
                 if (response.success && response.data && response.data.length > 0) {
                     setStoreManagerList(response.data);
                     setShowStoreManagerSelect(true);
                     
                     // 優先使用 localStorage 中已選擇的店長
-                    const savedManagerId = localStorage.getItem('selectedStoreManagerId');
+                    const savedManagerId = getSelectedStoreManagerId();
                     
                     if (savedManagerId) {
                         // 檢查已儲存的店長 ID 是否存在於列表中
@@ -49,13 +71,13 @@ function Header({ onToggleMenu }) {
                             // 如果已儲存的店長不存在，使用第一個店長
                             const firstManager = response.data[0];
                             setSelectedStoreManager(firstManager.userId);
-                            localStorage.setItem('selectedStoreManagerId', firstManager.userId);
+                            setSelectedStoreManagerId(firstManager.userId);
                         }
                     } else {
                         // 如果沒有儲存的店長，使用第一個店長
                         const firstManager = response.data[0];
                         setSelectedStoreManager(firstManager.userId);
-                        localStorage.setItem('selectedStoreManagerId', firstManager.userId);
+                        setSelectedStoreManagerId(firstManager.userId);
                     }
                 }
             } catch (error) {
@@ -77,9 +99,23 @@ function Header({ onToggleMenu }) {
     }
 
     const clickLogout = async () => {
+        // 先清除店長相關的狀態
+        setShowStoreManagerSelect(false);
+        setShowStoreManagerMenu(false);
+        setStoreManagerList([]);
+        setSelectedStoreManager('');
+        
+        // 清除所有使用者相關的 localStorage 資料
+        clearUserData();
+        
+        // 執行登出
         logout();
-        navigate('/auth/login');
+        
+        // 顯示登出訊息
         alert('登出成功');
+        
+        // 導航到登入頁面
+        navigate('/auth/login');
     }
 
     // 處理店長選擇變更
@@ -87,7 +123,7 @@ function Header({ onToggleMenu }) {
         const selectedManagerId = e.target.value;
         setSelectedStoreManager(selectedManagerId);
         // 儲存到 localStorage 供其他頁面使用
-        localStorage.setItem('selectedStoreManagerId', selectedManagerId);
+        setSelectedStoreManagerId(selectedManagerId);
         // 提示使用者切換成功，建議刷新頁面
         if (window.confirm('已切換店長，是否重新載入頁面以更新資料？')) {
             window.location.reload();
@@ -97,7 +133,7 @@ function Header({ onToggleMenu }) {
     // 處理手機版店長選單項目點擊
     const handleStoreManagerMenuClick = (managerId) => {
         setSelectedStoreManager(managerId);
-        localStorage.setItem('selectedStoreManagerId', managerId);
+        setSelectedStoreManagerId(managerId);
         setShowStoreManagerMenu(false);
         // 提示使用者切換成功，建議刷新頁面
         if (window.confirm('已切換店長，是否重新載入頁面以更新資料？')) {
