@@ -32,6 +32,13 @@ function Header({ onToggleMenu }) {
     useEffect(() => {
         const fetchStoreManagers = async () => {
             try {
+                // 檢查是否有 JWT token，沒有則不執行（避免登出後重新觸發）
+                const token = localStorage.getItem('jwt');
+                if (!token) {
+                    setShowStoreManagerSelect(false);
+                    return;
+                }
+
                 // 先檢查使用者角色權限
                 const hasPermission = await checkIsGeneralManagerOrAdmin();
                 
@@ -86,9 +93,23 @@ function Header({ onToggleMenu }) {
     }
 
     const clickLogout = async () => {
+        // 先清除店長相關的狀態
+        setShowStoreManagerSelect(false);
+        setShowStoreManagerMenu(false);
+        setStoreManagerList([]);
+        setSelectedStoreManager('');
+        
+        // 清除 localStorage 中的數據
+        localStorage.removeItem('selectedStoreManagerId');
+        
+        // 執行登出
         logout();
-        navigate('/auth/login');
+        
+        // 顯示登出訊息
         alert('登出成功');
+        
+        // 導航到登入頁面
+        navigate('/auth/login');
     }
 
     // 處理店長選擇變更
