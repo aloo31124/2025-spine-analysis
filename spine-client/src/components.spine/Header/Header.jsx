@@ -5,6 +5,12 @@ import { logout } from '../../api/auth';
 import {useNavigate} from 'react-router-dom';
 import { FaCog, FaUserTie } from 'react-icons/fa';
 import { getStoreManagerList, checkIsGeneralManagerOrAdmin } from '../../api/manager/authPermission';
+import { 
+    getJwtToken, 
+    getSelectedStoreManagerId, 
+    setSelectedStoreManagerId, 
+    clearUserData 
+} from '../../utils/localStorage';
 
 function Header({ onToggleMenu }) {
     const navigate = useNavigate();
@@ -33,7 +39,7 @@ function Header({ onToggleMenu }) {
         const fetchStoreManagers = async () => {
             try {
                 // 檢查是否有 JWT token，沒有則不執行（避免登出後重新觸發）
-                const token = localStorage.getItem('jwt');
+                const token = getJwtToken();
                 if (!token) {
                     setShowStoreManagerSelect(false);
                     return;
@@ -54,7 +60,7 @@ function Header({ onToggleMenu }) {
                     setShowStoreManagerSelect(true);
                     
                     // 優先使用 localStorage 中已選擇的店長
-                    const savedManagerId = localStorage.getItem('selectedStoreManagerId');
+                    const savedManagerId = getSelectedStoreManagerId();
                     
                     if (savedManagerId) {
                         // 檢查已儲存的店長 ID 是否存在於列表中
@@ -65,13 +71,13 @@ function Header({ onToggleMenu }) {
                             // 如果已儲存的店長不存在，使用第一個店長
                             const firstManager = response.data[0];
                             setSelectedStoreManager(firstManager.userId);
-                            localStorage.setItem('selectedStoreManagerId', firstManager.userId);
+                            setSelectedStoreManagerId(firstManager.userId);
                         }
                     } else {
                         // 如果沒有儲存的店長，使用第一個店長
                         const firstManager = response.data[0];
                         setSelectedStoreManager(firstManager.userId);
-                        localStorage.setItem('selectedStoreManagerId', firstManager.userId);
+                        setSelectedStoreManagerId(firstManager.userId);
                     }
                 }
             } catch (error) {
@@ -99,8 +105,8 @@ function Header({ onToggleMenu }) {
         setStoreManagerList([]);
         setSelectedStoreManager('');
         
-        // 清除 localStorage 中的數據
-        localStorage.removeItem('selectedStoreManagerId');
+        // 清除所有使用者相關的 localStorage 資料
+        clearUserData();
         
         // 執行登出
         logout();
@@ -117,7 +123,7 @@ function Header({ onToggleMenu }) {
         const selectedManagerId = e.target.value;
         setSelectedStoreManager(selectedManagerId);
         // 儲存到 localStorage 供其他頁面使用
-        localStorage.setItem('selectedStoreManagerId', selectedManagerId);
+        setSelectedStoreManagerId(selectedManagerId);
         // 提示使用者切換成功，建議刷新頁面
         if (window.confirm('已切換店長，是否重新載入頁面以更新資料？')) {
             window.location.reload();
@@ -127,7 +133,7 @@ function Header({ onToggleMenu }) {
     // 處理手機版店長選單項目點擊
     const handleStoreManagerMenuClick = (managerId) => {
         setSelectedStoreManager(managerId);
-        localStorage.setItem('selectedStoreManagerId', managerId);
+        setSelectedStoreManagerId(managerId);
         setShowStoreManagerMenu(false);
         // 提示使用者切換成功，建議刷新頁面
         if (window.confirm('已切換店長，是否重新載入頁面以更新資料？')) {
