@@ -155,7 +155,7 @@ function RoleManagementPage() {
 
     return (
         <div className={styles.roleManagementContainer}>
-            <h2 className={styles.pageTitle}>分權設定</h2>
+            <h2 className={styles.pageTitle}>店長設定</h2>
 
             {/* 新增店長表單 */}
             <div className={styles.addSection}>

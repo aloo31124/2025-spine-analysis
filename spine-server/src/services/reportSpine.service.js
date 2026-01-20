@@ -1,5 +1,6 @@
 const ReportSpineModel = require('../models/reportSpine.model');
 const UserToRoleService = require('./userToRole.service');
+const AuthPermissionService = require('./authPermission.service');
 
 const DEFAULT_TIME_RANGE = 'day';
 
@@ -10,20 +11,32 @@ const RANGE_CONFIG = {
 	quarter: { count: 10 }
 };
 
-exports.getRevenueLineChartData = async ({ timeRange = DEFAULT_TIME_RANGE, productPillowId = 'all', userId = '', productType = 'all' }) => {
-	// 檢查是否為店長
-	const isManager = await UserToRoleService.isStoreManager(userId);
+exports.getRevenueLineChartData = async ({ timeRange = DEFAULT_TIME_RANGE, productPillowId = 'all', userId = '', productType = 'all', storeManagerId = '' }) => {
+	// 判斷當前用戶是否為Admin或GeneralManager
+	const isAdmin = await AuthPermissionService.isAdmin(userId);
+	const isGeneralManager = await AuthPermissionService.isGeneralManager(userId);
+	
+	// 決定使用哪個userId進行查詢
+	let targetUserId = userId;
+	if ((isAdmin || isGeneralManager) && storeManagerId) {
+		// 如果是Admin/GM且有指定storeManagerId，使用storeManagerId
+		targetUserId = storeManagerId;
+		console.log(`[getRevenueLineChartData] Admin/GM查詢店長 ${storeManagerId} 的營收`);
+	}
+	
+	// 檢查目標userId是否為店長
+	const isManager = await UserToRoleService.isStoreManager(targetUserId);
 	if (!isManager) {
 		throw new Error('權限不符');
 	}
 
 	// 取得店長所屬的商品 ID
-	const storeManagerProductIds = await ReportSpineModel.fetchStoreManagerProductIds(userId, productType);
+	const storeManagerProductIds = await ReportSpineModel.fetchStoreManagerProductIds(targetUserId, productType);
 
 	const { labels, data, timeRange: resolvedRange, filters, dateRange } = await buildLineChartDataset({
 		timeRange,
 		productPillowId,
-		userId,
+		userId: targetUserId,
 		productType,
 		storeManagerProductIds,
 		metricFn: record => (Number(record.price) || 0) * (Number(record.quantity) || 1)
@@ -43,20 +56,32 @@ exports.getRevenueLineChartData = async ({ timeRange = DEFAULT_TIME_RANGE, produ
 	};
 };
 
-exports.getSalesLineChartData = async ({ timeRange = DEFAULT_TIME_RANGE, productPillowId = 'all', userId = '', productType = 'all' }) => {
-	// 檢查是否為店長
-	const isManager = await UserToRoleService.isStoreManager(userId);
+exports.getSalesLineChartData = async ({ timeRange = DEFAULT_TIME_RANGE, productPillowId = 'all', userId = '', productType = 'all', storeManagerId = '' }) => {
+	// 判斷當前用戶是否為Admin或GeneralManager
+	const isAdmin = await AuthPermissionService.isAdmin(userId);
+	const isGeneralManager = await AuthPermissionService.isGeneralManager(userId);
+	
+	// 決定使用哪個userId進行查詢
+	let targetUserId = userId;
+	if ((isAdmin || isGeneralManager) && storeManagerId) {
+		// 如果是Admin/GM且有指定storeManagerId，使用storeManagerId
+		targetUserId = storeManagerId;
+		console.log(`[getSalesLineChartData] Admin/GM查詢店長 ${storeManagerId} 的銷量`);
+	}
+	
+	// 檢查目標userId是否為店長
+	const isManager = await UserToRoleService.isStoreManager(targetUserId);
 	if (!isManager) {
 		throw new Error('權限不符');
 	}
 
 	// 取得店長所屬的商品 ID
-	const storeManagerProductIds = await ReportSpineModel.fetchStoreManagerProductIds(userId, productType);
+	const storeManagerProductIds = await ReportSpineModel.fetchStoreManagerProductIds(targetUserId, productType);
 
 	const { labels, data, timeRange: resolvedRange, filters, dateRange } = await buildLineChartDataset({
 		timeRange,
 		productPillowId,
-		userId,
+		userId: targetUserId,
 		productType,
 		storeManagerProductIds,
 		metricFn: record => Number(record.quantity) || 0

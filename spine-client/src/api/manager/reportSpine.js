@@ -10,9 +10,10 @@ const BASE_URL = HOST + CONTEXT;
  * @param {string} productPillowId - 商品ID ('all' 或特定ID)
  * @param {string} userId - 使用者ID
  * @param {string} productType - 商品類型 ('all', 'pillow', 'mattress')
+ * @param {string} storeManagerId - 店長ID（總經理/Admin選擇的店長）
  * @returns {Promise} API回傳
  */
-export const getRevenueLineChartData = async (timeRange = 'day', productPillowId = 'all', userId = '', productType = 'all') => {
+export const getRevenueLineChartData = async (timeRange = 'day', productPillowId = 'all', userId = '', productType = 'all', storeManagerId = '') => {
     const token = localStorage.getItem('jwt');
     if (!token) {
         throw new Error('未登入');
@@ -25,7 +26,8 @@ export const getRevenueLineChartData = async (timeRange = 'day', productPillowId
                 timeRange,
                 productPillowId,
                 userId,
-                productType
+                productType,
+                storeManagerId
             },
             {
                 headers: {
@@ -46,8 +48,9 @@ export const getRevenueLineChartData = async (timeRange = 'day', productPillowId
  * @param {string} productPillowId - 商品 ID ('all' 或特定 ID)
  * @param {string} userId - 使用者ID
  * @param {string} productType - 商品類型 ('all', 'pillow', 'mattress')
+ * @param {string} storeManagerId - 店長ID（總經理/Admin選擇的店長）
  */
-export const getSalesLineChartData = async (timeRange = 'day', productPillowId = 'all', userId = '', productType = 'all') => {
+export const getSalesLineChartData = async (timeRange = 'day', productPillowId = 'all', userId = '', productType = 'all', storeManagerId = '') => {
     const token = localStorage.getItem('jwt');
     if (!token) {
         throw new Error('未登入');
@@ -60,7 +63,8 @@ export const getSalesLineChartData = async (timeRange = 'day', productPillowId =
                 timeRange,
                 productPillowId,
                 userId,
-                productType
+                productType,
+                storeManagerId
             },
             {
                 headers: {
