@@ -57,6 +57,10 @@ function ProductInventoryPage() {
             if (pillowRes.data.result === '200' && pillowRes.data.data) {
                 setPillowList(pillowRes.data.data.pillowList || []);
                 setStores(pillowRes.data.data.stores || []);
+                // 檢查是否沒有綁定店面
+                if (pillowRes.data.data.stores && pillowRes.data.data.stores.length === 0 && pillowRes.data.message) {
+                    setError(pillowRes.data.message);
+                }
             } else if (pillowRes.data.result === '403') {
                 setError(pillowRes.data.message || '權限不足');
             }
@@ -66,6 +70,10 @@ function ProductInventoryPage() {
                 // 店面列表以枕頭的為準（應該相同）
                 if (stores.length === 0) {
                     setStores(mattressRes.data.data.stores || []);
+                    // 檢查是否沒有綁定店面
+                    if (mattressRes.data.data.stores && mattressRes.data.data.stores.length === 0 && mattressRes.data.message) {
+                        setError(mattressRes.data.message);
+                    }
                 }
             } else if (mattressRes.data.result === '403') {
                 setError(mattressRes.data.message || '權限不足');
