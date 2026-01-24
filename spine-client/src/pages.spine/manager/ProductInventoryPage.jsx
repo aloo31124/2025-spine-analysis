@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './ProductInventoryPage.module.css';
-import { getPillowInventoryList, getMattressInventoryList, updatePillowStock, updateMattressStock } from '../../api/manager/productInventory';
+import { getPillowInventory, getMattressInventory, updateStoreStock } from '../../api/manager/stock';
 
 /**
- * 商品庫存頁面
- * 顯示當前使用者擁有的枕頭商品與床墊商品庫存清單
- * 使用 Tab 切換枕頭與床墊商品列表
+ * 商品庫存頁面 (重構版)
+ * 顯示店長管理的所有店面的商品庫存
+ * 每個商品列出所有店面的庫存數量
  */
 function ProductInventoryPage() {
     const navigate = useNavigate();
@@ -14,17 +14,19 @@ function ProductInventoryPage() {
     // 當前 Tab: 'pillow' 或 'mattress'
     const [activeTab, setActiveTab] = useState('pillow');
     
-    // 枕頭商品庫存清單
+    // 枕頭商品庫存清單 (包含各店面庫存)
     const [pillowList, setPillowList] = useState([]);
-    // 床墊商品庫存清單
+    // 床墊商品庫存清單 (包含各店面庫存)
     const [mattressList, setMattressList] = useState([]);
+    // 店面列表
+    const [stores, setStores] = useState([]);
     
     // 載入狀態
     const [isLoading, setIsLoading] = useState(false);
     // 錯誤訊息
     const [error, setError] = useState(null);
     
-    // 編輯中的庫存 (key: productId, value: 編輯中的庫存數量)
+    // 編輯中的庫存 (key: `${productId}_${storeId}`, value: 編輯中的庫存數量)
     const [editingStock, setEditingStock] = useState({});
 
     // 頁面載入時取得庫存資料
@@ -39,17 +41,46 @@ function ProductInventoryPage() {
         setIsLoading(true);
         setError(null);
         try {
+            // 從localStorage取得選中的店長ID和當前用戶ID
+            const selectedManagerId = localStorage.getItem('selectedStoreManagerId');
+            const userId = localStorage.getItem('userId') || '';
+            
             // 同時取得枕頭與床墊庫存
             const [pillowRes, mattressRes] = await Promise.all([
-                getPillowInventoryList(),
-                getMattressInventoryList()
+                getPillowInventory(selectedManagerId || ''),
+                getMattressInventory(selectedManagerId || '')
             ]);
             
-            setPillowList(pillowRes.data.result || []);
-            setMattressList(mattressRes.data.result || []);
+            console.log('枕頭庫存回應:', pillowRes.data);
+            console.log('床墊庫存回應:', mattressRes.data);
+            
+            if (pillowRes.data.result === '200' && pillowRes.data.data) {
+                setPillowList(pillowRes.data.data.pillowList || []);
+                setStores(pillowRes.data.data.stores || []);
+                // 檢查是否沒有綁定店面
+                if (pillowRes.data.data.stores && pillowRes.data.data.stores.length === 0 && pillowRes.data.message) {
+                    setError(pillowRes.data.message);
+                }
+            } else if (pillowRes.data.result === '403') {
+                setError(pillowRes.data.message || '權限不足');
+            }
+            
+            if (mattressRes.data.result === '200' && mattressRes.data.data) {
+                setMattressList(mattressRes.data.data.mattressList || []);
+                // 店面列表以枕頭的為準（應該相同）
+                if (stores.length === 0) {
+                    setStores(mattressRes.data.data.stores || []);
+                    // 檢查是否沒有綁定店面
+                    if (mattressRes.data.data.stores && mattressRes.data.data.stores.length === 0 && mattressRes.data.message) {
+                        setError(mattressRes.data.message);
+                    }
+                }
+            } else if (mattressRes.data.result === '403') {
+                setError(mattressRes.data.message || '權限不足');
+            }
         } catch (err) {
             console.error('取得庫存資料失敗:', err);
-            setError('取得庫存資料失敗，請稍後再試');
+            setError(err.response?.data?.message || '取得庫存資料失敗');
         } finally {
             setIsLoading(false);
         }
@@ -58,20 +89,22 @@ function ProductInventoryPage() {
     /**
      * 開始編輯庫存
      */
-    const handleStartEdit = (productId, currentStock) => {
+    const handleStartEdit = (productId, storeId, currentStock) => {
+        const key = `${productId}_${storeId}`;
         setEditingStock(prev => ({
             ...prev,
-            [productId]: currentStock
+            [key]: currentStock
         }));
     };
 
     /**
      * 取消編輯
      */
-    const handleCancelEdit = (productId) => {
+    const handleCancelEdit = (productId, storeId) => {
+        const key = `${productId}_${storeId}`;
         setEditingStock(prev => {
             const newState = { ...prev };
-            delete newState[productId];
+            delete newState[key];
             return newState;
         });
     };
@@ -79,54 +112,63 @@ function ProductInventoryPage() {
     /**
      * 庫存輸入變更
      */
-    const handleStockChange = (productId, value) => {
+    const handleStockChange = (productId, storeId, value) => {
+        const key = `${productId}_${storeId}`;
         setEditingStock(prev => ({
             ...prev,
-            [productId]: value
+            [key]: value
         }));
     };
 
     /**
      * 儲存庫存
      */
-    const handleSaveStock = async (productId, isPillow) => {
-        const newStock = editingStock[productId];
-        if (newStock === undefined || newStock === '') return;
+    const handleSaveStock = async (productId, storeId, productType) => {
+        const key = `${productId}_${storeId}`;
+        const newStock = editingStock[key];
+        
+        if (newStock === undefined || newStock === '') {
+            alert('請輸入庫存數量');
+            return;
+        }
         
         try {
-            if (isPillow) {
-                await updatePillowStock(productId, Number(newStock));
-                // 更新本地資料
-                setPillowList(prev => prev.map(item => 
-                    item.id === productId ? { ...item, stock: Number(newStock) } : item
-                ));
-            } else {
-                await updateMattressStock(productId, Number(newStock));
-                // 更新本地資料
-                setMattressList(prev => prev.map(item => 
-                    item.id === productId ? { ...item, stock: Number(newStock) } : item
-                ));
-            }
+            setIsLoading(true);
+            await updateStoreStock({
+                productId,
+                productType,
+                storeId,
+                stock: Number(newStock)
+            });
             
-            // 清除編輯狀態
-            handleCancelEdit(productId);
+            // 取消編輯狀態
+            handleCancelEdit(productId, storeId);
+            
+            // 重新整理資料
+            await fetchInventoryData();
+            
+            alert('庫存更新成功');
         } catch (err) {
             console.error('更新庫存失敗:', err);
-            alert('更新庫存失敗，請稍後再試');
+            alert(err.response?.data?.message || '更新庫存失敗');
+        } finally {
+            setIsLoading(false);
         }
     };
 
     /**
-     * 渲染庫存表格
+     * 渲染庫存表格 (桌面版)
      */
     const renderInventoryTable = (dataList, isPillow) => {
         if (dataList.length === 0) {
             return (
                 <div className={styles.emptyState}>
-                    <p>尚無{isPillow ? '枕頭' : '床墊'}商品資料</p>
+                    <p>目前沒有商品</p>
                 </div>
             );
         }
+
+        const productType = isPillow ? 'Pillow' : 'Mattress';
 
         return (
             <table className={styles.inventoryTable}>
@@ -134,8 +176,8 @@ function ProductInventoryPage() {
                     <tr>
                         <th>商品名稱</th>
                         <th>商品編號</th>
-                        <th>庫存數量</th>
-                        <th>操作</th>
+                        <th>總庫存</th>
+                        <th>分店面庫存</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -144,44 +186,58 @@ function ProductInventoryPage() {
                             <td>{item.name || '-'}</td>
                             <td>{isPillow ? item.type : item.model || '-'}</td>
                             <td>
-                                {editingStock[item.id] !== undefined ? (
-                                    <input
-                                        type="number"
-                                        min="0"
-                                        className={styles.stockInput}
-                                        value={editingStock[item.id]}
-                                        onChange={(e) => handleStockChange(item.id, e.target.value)}
-                                    />
-                                ) : (
-                                    <span className={item.stock <= 0 ? styles.lowStock : ''}>
-                                        {item.stock || 0}
-                                    </span>
-                                )}
+                                <span className={item.totalStock <= 0 ? styles.lowStock : ''}>
+                                    {item.totalStock || 0}
+                                </span>
                             </td>
                             <td>
-                                {editingStock[item.id] !== undefined ? (
-                                    <div className={styles.actionButtons}>
-                                        <button 
-                                            className={styles.saveBtn}
-                                            onClick={() => handleSaveStock(item.id, isPillow)}
-                                        >
-                                            儲存
-                                        </button>
-                                        <button 
-                                            className={styles.cancelBtn}
-                                            onClick={() => handleCancelEdit(item.id)}
-                                        >
-                                            取消
-                                        </button>
-                                    </div>
-                                ) : (
-                                    <button 
-                                        className={styles.editBtn}
-                                        onClick={() => handleStartEdit(item.id, item.stock || 0)}
-                                    >
-                                        編輯
-                                    </button>
-                                )}
+                                <div className={styles.storeStocksVertical}>
+                                    {item.storeStocks && item.storeStocks.map(storeStock => {
+                                        const key = `${item.id}_${storeStock.storeId}`;
+                                        const isEditing = editingStock[key] !== undefined;
+                                        
+                                        return (
+                                            <div key={storeStock.storeId} className={styles.storeStockRow}>
+                                                <span className={styles.storeName}>{storeStock.storeName}</span>
+                                                {isEditing ? (
+                                                    <div className={styles.editCell}>
+                                                        <input
+                                                            type="number"
+                                                            min="0"
+                                                            className={styles.stockInput}
+                                                            value={editingStock[key]}
+                                                            onChange={(e) => handleStockChange(item.id, storeStock.storeId, e.target.value)}
+                                                        />
+                                                        <button 
+                                                            className={styles.saveBtn}
+                                                            onClick={() => handleSaveStock(item.id, storeStock.storeId, productType)}
+                                                        >
+                                                            ✓
+                                                        </button>
+                                                        <button 
+                                                            className={styles.cancelBtn}
+                                                            onClick={() => handleCancelEdit(item.id, storeStock.storeId)}
+                                                        >
+                                                            ✗
+                                                        </button>
+                                                    </div>
+                                                ) : (
+                                                    <div className={styles.viewCell}>
+                                                        <span className={storeStock.stock <= 0 ? styles.lowStock : ''}>
+                                                            {storeStock.stock || 0}
+                                                        </span>
+                                                        <button 
+                                                            className={styles.editIconBtn}
+                                                            onClick={() => handleStartEdit(item.id, storeStock.storeId, storeStock.stock || 0)}
+                                                        >
+                                                            ✎
+                                                        </button>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
                             </td>
                         </tr>
                     ))}
@@ -197,66 +253,78 @@ function ProductInventoryPage() {
         if (dataList.length === 0) {
             return (
                 <div className={styles.emptyState}>
-                    <p>尚無{isPillow ? '枕頭' : '床墊'}商品資料</p>
+                    <p>目前沒有商品</p>
                 </div>
             );
         }
 
+        const productType = isPillow ? 'Pillow' : 'Mattress';
+
         return (
-            <div className={styles.cardContainer}>
+            <div className={styles.mobileCardsContainer}>
                 {dataList.map(item => (
-                    <div key={item.id} className={styles.inventoryCard}>
+                    <div key={item.id} className={styles.productCard}>
                         <div className={styles.cardHeader}>
-                            <span className={styles.cardTitle}>{item.name || '-'}</span>
+                            <h3>{item.name || '-'}</h3>
+                            <span className={styles.productType}>
+                                {isPillow ? item.type : item.model || '-'}
+                            </span>
                         </div>
-                        <div className={styles.cardBody}>
-                            <div className={styles.cardRow}>
-                                <span className={styles.cardLabel}>商品編號：</span>
-                                <span className={styles.cardValue}>
-                                    {isPillow ? item.type : item.model || '-'}
-                                </span>
-                            </div>
-                            <div className={styles.cardRow}>
-                                <span className={styles.cardLabel}>庫存數量：</span>
-                                {editingStock[item.id] !== undefined ? (
-                                    <input
-                                        type="number"
-                                        min="0"
-                                        className={styles.stockInput}
-                                        value={editingStock[item.id]}
-                                        onChange={(e) => handleStockChange(item.id, e.target.value)}
-                                    />
-                                ) : (
-                                    <span className={`${styles.cardValue} ${item.stock <= 0 ? styles.lowStock : ''}`}>
-                                        {item.stock || 0}
-                                    </span>
-                                )}
-                            </div>
+                        
+                        <div className={styles.totalStock}>
+                            <span className={styles.label}>總庫存：</span>
+                            <span className={item.totalStock <= 0 ? styles.lowStock : styles.stockValue}>
+                                {item.totalStock || 0}
+                            </span>
                         </div>
-                        <div className={styles.cardActions}>
-                            {editingStock[item.id] !== undefined ? (
-                                <>
-                                    <button 
-                                        className={styles.saveBtn}
-                                        onClick={() => handleSaveStock(item.id, isPillow)}
-                                    >
-                                        儲存
-                                    </button>
-                                    <button 
-                                        className={styles.cancelBtn}
-                                        onClick={() => handleCancelEdit(item.id)}
-                                    >
-                                        取消
-                                    </button>
-                                </>
-                            ) : (
-                                <button 
-                                    className={styles.editBtn}
-                                    onClick={() => handleStartEdit(item.id, item.stock || 0)}
-                                >
-                                    編輯庫存
-                                </button>
-                            )}
+
+                        <div className={styles.storeStocksSection}>
+                            <h4>各店面庫存：</h4>
+                            {item.storeStocks && item.storeStocks.map(storeStock => {
+                                const key = `${item.id}_${storeStock.storeId}`;
+                                const isEditing = editingStock[key] !== undefined;
+                                
+                                return (
+                                    <div key={storeStock.storeId} className={styles.storeStockRow}>
+                                        <span className={styles.storeName}>{storeStock.storeName}：</span>
+                                        {isEditing ? (
+                                            <div className={styles.editCell}>
+                                                <input
+                                                    type="number"
+                                                    min="0"
+                                                    className={styles.stockInput}
+                                                    value={editingStock[key]}
+                                                    onChange={(e) => handleStockChange(item.id, storeStock.storeId, e.target.value)}
+                                                />
+                                                <button 
+                                                    className={styles.saveBtn}
+                                                    onClick={() => handleSaveStock(item.id, storeStock.storeId, productType)}
+                                                >
+                                                    儲存
+                                                </button>
+                                                <button 
+                                                    className={styles.cancelBtn}
+                                                    onClick={() => handleCancelEdit(item.id, storeStock.storeId)}
+                                                >
+                                                    取消
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <div className={styles.viewCell}>
+                                                <span className={storeStock.stock <= 0 ? styles.lowStock : ''}>
+                                                    {storeStock.stock || 0}
+                                                </span>
+                                                <button 
+                                                    className={styles.editBtn}
+                                                    onClick={() => handleStartEdit(item.id, storeStock.storeId, storeStock.stock || 0)}
+                                                >
+                                                    編輯
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })}
                         </div>
                     </div>
                 ))}
@@ -268,8 +336,8 @@ function ProductInventoryPage() {
         <div className={styles.container}>
             <div className={styles.header}>
                 <h1 className={styles.pageTitle}>商品庫存</h1>
-                <p>
-                    該庫存綁定當前使用者id (userId)
+                <p className={styles.description}>
+                    管理您店面的商品庫存 - 每個商品可在不同店面設定不同庫存數量
                 </p>
                 <button 
                     className={styles.refreshBtn}
@@ -303,7 +371,7 @@ function ProductInventoryPage() {
                 </div>
             )}
 
-            {/* 載入中 */}
+            {/* 內容區 */}
             {isLoading ? (
                 <div className={styles.loadingState}>
                     <p>載入中...</p>
@@ -342,9 +410,15 @@ function ProductInventoryPage() {
                     <span className={styles.statLabel}>總庫存量：</span>
                     <span className={styles.statValue}>
                         {activeTab === 'pillow' 
-                            ? pillowList.reduce((sum, item) => sum + (item.stock || 0), 0)
-                            : mattressList.reduce((sum, item) => sum + (item.stock || 0), 0)
+                            ? pillowList.reduce((sum, item) => sum + (item.totalStock || 0), 0)
+                            : mattressList.reduce((sum, item) => sum + (item.totalStock || 0), 0)
                         }
+                    </span>
+                </div>
+                <div className={styles.statItem}>
+                    <span className={styles.statLabel}>管理店面數：</span>
+                    <span className={styles.statValue}>
+                        {stores.length}
                     </span>
                 </div>
             </div>

@@ -85,12 +85,14 @@ function AppRouterVerify({ element: Component, node="" }) {
       // 將角色信息存儲到 localStorage 以供 MenuLeft 使用
       localStorage.setItem('userRoles', JSON.stringify(userToRoleList));
 
+      /* 隱藏 新商城 原本 卡控設計
       if (userToRoleList.some(u2r => u2r.role === 'seller' || u2r.role === 'system')) {
         return userToRoleList;
       }
 
       alert("角色(權限)不足，請購買方案。");
       navigate('/account/payment/select');
+      */
       return null;
 
     } catch (error) {

@@ -258,6 +258,59 @@
     justify-content: flex-end;
 }
 
+/* 縱向店面庫存 */
+.storeStocksVertical {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.storeStockRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 8px;
+    background-color: #f9f9f9;
+    border-radius: 4px;
+    min-height: 36px;
+}
+
+.storeName {
+    font-size: 14px;
+    color: #666;
+    margin-right: 12px;
+    min-width: 100px;
+}
+
+.editCell {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.viewCell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.editIconBtn {
+    padding: 4px 8px;
+    background-color: transparent;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #666;
+    transition: all 0.2s;
+}
+
+.editIconBtn:hover {
+    background-color: #4a90d9;
+    border-color: #4a90d9;
+    color: white;
+}
+
 /* 統計資訊 */
 .statsContainer {
     display: flex;

@@ -119,6 +119,32 @@ exports.searchProductMattress = async (searchParam, pagingParam, userId = null) 
 
 /* 新增床墊商品 */
 exports.addProductMattress = async (productMattress) => {
+    const storeManagerToOperatorService = require('./storeManagerToOperator.service');
+    const userToRoleService = require('./userToRole.service');
+    
+    // 檢查是否為操作員
+    const isOperator = await storeManagerToOperatorService.isOperator(productMattress.userId);
+    
+    if (isOperator) {
+        // 如果是操作員，取得綁定的店長ID
+        const storeManagerId = await storeManagerToOperatorService.getStoreManagerIdByOperatorId(productMattress.userId);
+        
+        if (!storeManagerId) {
+            throw new Error('操作員未綁定店長');
+        }
+        
+        // 保存操作員ID作為 createId（實際創建者）
+        const createId = productMattress.userId;
+        
+        // 將商品的 userId 設置為店長ID（商品所屬者）
+        return ProductMattress.addProductMattress({
+            ...productMattress,
+            userId: storeManagerId,
+            createId: createId
+        });
+    }
+    
+    // 如果不是操作員，正常新增商品
     return ProductMattress.addProductMattress(productMattress);
 }
 

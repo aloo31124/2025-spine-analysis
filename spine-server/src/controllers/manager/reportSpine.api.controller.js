@@ -6,9 +6,15 @@ const ERROR_HEADER = '[reportSpine.api.controller.js]';
 exports.getRevenueLineChartData = async (req, res) => {
 	console.log(`${ERROR_HEADER} getRevenueLineChartData start`, req.body);
 	try {
-		const { timeRange = 'day', productPillowId = 'all', productType = 'all' } = req.body || {};
+		const { timeRange = 'day', productPillowId = 'all', productType = 'all', storeManagerId = '' } = req.body || {};
 		const payload = authService.verifyJwt(req);
-		const result = await reportSpineService.getRevenueLineChartData({ timeRange, productPillowId, userId: payload?.userId, productType });
+		const result = await reportSpineService.getRevenueLineChartData({ 
+			timeRange, 
+			productPillowId, 
+			userId: payload?.userId, 
+			productType,
+			storeManagerId
+		});
 		res.status(200).json({ result });
 	} catch (error) {
 		console.error(`${ERROR_HEADER} getRevenueLineChartData error:`, error);
@@ -19,9 +25,15 @@ exports.getRevenueLineChartData = async (req, res) => {
 exports.getSalesLineChartData = async (req, res) => {
 	console.log(`${ERROR_HEADER} getSalesLineChartData start`, req.body);
 	try {
-		const { timeRange = 'day', productPillowId = 'all', productType = 'all' } = req.body || {};
+		const { timeRange = 'day', productPillowId = 'all', productType = 'all', storeManagerId = '' } = req.body || {};
 		const payload = authService.verifyJwt(req);
-		const result = await reportSpineService.getSalesLineChartData({ timeRange, productPillowId, userId: payload?.userId, productType });
+		const result = await reportSpineService.getSalesLineChartData({ 
+			timeRange, 
+			productPillowId, 
+			userId: payload?.userId, 
+			productType,
+			storeManagerId
+		});
 		res.status(200).json({ result });
 	} catch (error) {
 		console.error(`${ERROR_HEADER} getSalesLineChartData error:`, error);

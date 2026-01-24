@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>五點座標距離計算</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      margin: 0;
+      background: #f5f5f5;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .form, .results {
+      background: #fff;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    .form label {
+      display: block;
+      margin-top: 10px;
+    }
+
+    .form input {
+      width: 80px;
+      padding: 5px;
+      margin: 10px;
+      border-radius: 10px;
+      border: 2px solid #88bcf3;
+    }
+
+    button {
+      margin-top: 15px;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 8px;
+      background: #007bff;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+
+    .results ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .results li {
+      margin: 5px 0;
+    }
+
+    canvas {
+      width: 100%;
+      height: 400px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    /* RWD */
+    @media (max-width: 768px) {
+      .container {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h2>五點座標距離計算與圖形展示</h2>
+
+  <div class="container">
+    <!-- 輸入表單 -->
+    <div class="form">
+      <h3>輸入點座標</h3>
+      <div id="points"></div>
+      <button onclick="calculateDistances()">計算距離</button>
+    </div>
+
+    <!-- 計算結果 -->
+    <div class="results">
+      <h3>計算結果</h3>
+      <ul id="resultList"></ul>
+    </div>
+  </div>
+
+  <!-- 繪圖區域 -->
+  <h3 style="margin-top: 30px;">座標圖</h3>
+  <canvas id="canvas"></canvas>
+
+  <script>
+    const pointNames = ['A', 'B', 'C', 'D', 'E'];
+
+    // 動態建立輸入框
+    const pointsDiv = document.getElementById('points');
+    pointNames.forEach(name => {
+      const label = document.createElement('label');
+      label.innerHTML = `${name} 座標: 
+      <div>
+        x:<input type="number" id="${name}x" value="0"> 
+        y:<input type="number" id="${name}y" value="0">
+      </div>`;
+      pointsDiv.appendChild(label);
+    });
+
+    // 計算距離
+    function calculateDistances() {
+      let coords = {};
+      pointNames.forEach(name => {
+        const x = parseFloat(document.getElementById(name + 'x').value);
+        const y = parseFloat(document.getElementById(name + 'y').value);
+        coords[name] = { x, y };
+      });
+
+      let results = [];
+      for (let i = 0; i < pointNames.length; i++) {
+        for (let j = i + 1; j < pointNames.length; j++) {
+          const p1 = coords[pointNames[i]];
+          const p2 = coords[pointNames[j]];
+          const dist = Math.sqrt(
+            Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2)
+          ).toFixed(2);
+          results.push(`${pointNames[i]}${pointNames[j]} 距離: ${dist}`);
+        }
+      }
+
+      // 顯示結果
+      const resultList = document.getElementById('resultList');
+      resultList.innerHTML = '';
+      results.forEach(r => {
+        const li = document.createElement('li');
+        li.textContent = r;
+        resultList.appendChild(li);
+      });
+
+      // 繪製座標圖
+      drawCanvas(coords);
+    }
+
+    function drawCanvas(coords) {
+      const canvas = document.getElementById('canvas');
+      const ctx = canvas.getContext('2d');
+
+      // 自適應大小
+      canvas.width = canvas.clientWidth;
+      canvas.height = 400;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // 繪製座標軸
+      ctx.strokeStyle = "#999";
+      ctx.beginPath();
+      ctx.moveTo(50, canvas.height - 50);
+      ctx.lineTo(canvas.width - 20, canvas.height - 50);
+      ctx.moveTo(50, canvas.height - 50);
+      ctx.lineTo(50, 20);
+      ctx.stroke();
+
+      // 找到最大範圍以縮放
+      let xs = pointNames.map(n => coords[n].x);
+      let ys = pointNames.map(n => coords[n].y);
+      let maxX = Math.max(...xs, 10);
+      let maxY = Math.max(...ys, 10);
+
+      const scaleX = (canvas.width - 100) / (maxX + 5);
+      const scaleY = (canvas.height - 100) / (maxY + 5);
+
+      // 繪製點
+      pointNames.forEach(name => {
+        const p = coords[name];
+        const px = 50 + p.x * scaleX;
+        const py = canvas.height - 50 - p.y * scaleY;
+
+        ctx.beginPath();
+        ctx.arc(px, py, 6, 0, 2 * Math.PI);
+        ctx.fillStyle = "#007bff";
+        ctx.fill();
+
+        ctx.fillStyle = "#000";
+        ctx.font = "14px Arial";
+        ctx.fillText(name, px + 8, py - 8);
+      });
+    }
+  </script>
+</body>
+</html>

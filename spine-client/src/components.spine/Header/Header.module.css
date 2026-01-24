@@ -16,6 +16,7 @@
     border-radius: 0 0 10px 10px;
     z-index: 1000;
     box-sizing: border-box;
+    gap: 10px;
 }
 
 .headerLogo {
@@ -23,14 +24,16 @@
     padding: 5px;
     cursor: pointer;
     margin-left: 50px;
+    flex-shrink: 0;
 }
 
 .headerInputSearch {
     border: none;
     border-radius: 20px;
     padding: 8px 20px;
-    width: 40%;
-    min-width: 100px;
+    flex: 1;
+    max-width: 400px;
+    min-width: 150px;
     font-size: 16px;
     background: rgba(255, 255, 255, 0.9);
 }
@@ -41,6 +44,119 @@
     align-items: center;
     font-size: 18px;
     padding: 10px;
+    gap: 15px;
+    flex-shrink: 0;
+}
+
+/* 店長選單包裝器 */
+.storeManagerButtonWrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.storeManagerSelectWrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.storeManagerLabel {
+    color: #fff;
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.storeManagerSelect {
+    padding: 6px 12px;
+    font-size: 14px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.95);
+    color: #333;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 150px;
+}
+
+.storeManagerSelect:hover {
+    border-color: rgba(255, 255, 255, 0.5);
+    background: #fff;
+}
+
+.storeManagerSelect:focus {
+    outline: none;
+    border-color: #fff;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+}
+
+/* 店長 icon */
+.storeManagerIcon {
+    font-size: 18px;
+    color: #fff;
+    transition: transform 0.3s ease;
+}
+
+.storeManagerIcon:hover {
+    transform: scale(1.1);
+}
+
+/* 手機版店長選單 */
+.storeManagerMenu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    min-width: 180px;
+    max-width: 250px;
+    background: #fff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+    padding: 8px 0;
+    z-index: 1100;
+    margin-top: 8px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.storeManagerMenuTitle {
+    padding: 8px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #666;
+    border-bottom: 1px solid #f0f0f0;
+    margin-bottom: 4px;
+}
+
+.storeManagerMenuItem {
+    background: none;
+    border: none;
+    text-align: left;
+    width: 100%;
+    padding: 10px 16px;
+    font-size: 14px;
+    cursor: pointer;
+    color: #333;
+    transition: background-color 0.2s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.storeManagerMenuItem:hover {
+    background-color: #f8f9fa;
+}
+
+.storeManagerMenuItem.active {
+    background-color: #e3f2fd;
+    color: #1976d2;
+    font-weight: 500;
+}
+
+.checkmark {
+    color: #1976d2;
+    font-weight: bold;
+    margin-left: 8px;
 }
 
 .headerButtonWrapper {
@@ -148,15 +264,47 @@
 
 /* RWD 響應式設計 */
 @media (max-width: 800px) {
+    .headerContainer {
+        gap: 8px;
+        padding: 8px;
+    }
+
+    .headerLogo {
+        max-width: 50px;
+        margin-left: 45px;
+    }
+
     .headerInputSearch {
-        width: 55%;
+        flex: 1;
+        max-width: none;
         min-width: 100px;
-        font-size: 18px;
+        font-size: 14px;
         padding: 6px 15px;
+    }
+
+    /* 手機版不需要 storeManagerSelectWrapper，因為改用 icon */
+    .storeManagerSelectWrapper {
+        display: none;
+    }
+
+    .storeManagerIcon {
+        font-size: 16px;
+    }
+
+    .storeManagerMenu {
+        min-width: 160px;
+        right: -10px;
+    }
+
+    .storeManagerMenuItem {
+        font-size: 13px;
+        padding: 9px 14px;
     }
     
     .headerRightSection {
         font-size: 14px;
+        padding: 5px;
+        gap: 10px;
     }
     
     .headerButton {
@@ -189,10 +337,39 @@
 }
 
 @media (max-width: 500px) {
+    .headerContainer {
+        gap: 5px;
+        padding: 6px;
+    }
     
     .headerLogo {
-        max-width: 50px;
-        margin-left: 45px;
+        max-width: 45px;
+        margin-left: 40px;
+    }
+
+    .headerInputSearch {
+        font-size: 12px;
+        padding: 5px 10px;
+        min-width: 80px;
+    }
+
+    .storeManagerIcon {
+        font-size: 14px;
+    }
+
+    .storeManagerMenu {
+        min-width: 140px;
+        right: -15px;
+    }
+
+    .storeManagerMenuItem {
+        font-size: 12px;
+        padding: 8px 12px;
+    }
+
+    .headerRightSection {
+        gap: 5px;
+        padding: 3px;
     }
     
     .headerButton {
