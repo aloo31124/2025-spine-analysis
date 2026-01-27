@@ -197,19 +197,20 @@ function ProductMattressListPage() {
                     <th>名稱</th>
                     <th>型號</th>
                     <th>價格</th>
+                    <th>創建者</th>
                     <th>操作</th>
                 </tr>
             </thead>
             <tbody>
                 {isLoading ? (
                     <tr>
-                        <td colSpan="5" className={styles.loadingContainer}>
+                        <td colSpan="6" className={styles.loadingContainer}>
                             <img src={loadingGif} alt="Loading..." />
                         </td>
                     </tr>
                 ) : productMattressList.length === 0 ? (
                     <tr>
-                        <td colSpan="5" className={styles.emptyState}>
+                        <td colSpan="6" className={styles.emptyState}>
                             查無資料
                         </td>
                     </tr>
@@ -225,6 +226,11 @@ function ProductMattressListPage() {
                             <td>
                                 <div className={styles.productPrice}>
                                     NT$ {productMattress.price?.toLocaleString()}
+                                </div>
+                            </td>
+                            <td>
+                                <div className={styles.creatorName} title={productMattress.creatorEmail || ''}>
+                                    {productMattress.creatorName || '-'}
                                 </div>
                             </td>
                             <td>
@@ -287,6 +293,13 @@ function ProductMattressListPage() {
                                 <span className={styles.cardLabel}>狀態：</span>
                                 <span className={getStatusClass(productMattress.state)}>
                                     {productMattress.state}
+                                </span>
+                            </div>
+
+                            <div className={styles.cardRow}>
+                                <span className={styles.cardLabel}>創建者：</span>
+                                <span className={styles.cardValue}>
+                                    {productMattress.creatorName || '-'}
                                 </span>
                             </div>
                         </div>

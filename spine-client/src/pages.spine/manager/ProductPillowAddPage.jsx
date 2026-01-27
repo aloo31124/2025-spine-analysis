@@ -24,7 +24,13 @@ function ProductPillowAddPage() {
             }
         } catch (error) {
             console.error("新增枕頭商品發生錯誤:", error);
-            alert("枕頭商品新增失敗");
+            // 處理操作員未綁定店長的錯誤
+            const errorMessage = error.response?.data?.message || error.message || '未知錯誤';
+            if (errorMessage.includes('操作員未綁定店長')) {
+                alert('新增失敗：您是操作員但尚未綁定店長，請聯繫管理員先完成綁定');
+            } else {
+                alert(`枕頭商品新增失敗：${errorMessage}`);
+            }
         }
     }
 

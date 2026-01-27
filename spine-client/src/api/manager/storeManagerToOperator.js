@@ -51,3 +51,16 @@ export const searchBinding = async (searchParam, pagingParam) => {
         }
     });
 }
+
+/**
+ * 取得當前操作員綁定的店長資訊
+ * 操作員專用 API - 用於在設定頁顯示所屬店長
+ */
+export const getStoreManagerInfo = async () => {
+    const token = localStorage.getItem('jwt');
+    return axios.get(`${BASE_URL}/store-manager-info`, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+}

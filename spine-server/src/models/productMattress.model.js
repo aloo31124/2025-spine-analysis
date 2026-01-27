@@ -9,14 +9,26 @@ const COLLECTION_NAME = 'ProductMattress';
 
 
 class ProductMattress {
-    constructor(id, name, price, state, model, userId, stock) {
+    /**
+     * 床墊商品建構子
+     * @param {string} id - 商品 ID
+     * @param {string} name - 床墊名稱
+     * @param {string} price - 床墊價錢
+     * @param {string} state - 狀態
+     * @param {string} model - 床墊型號
+     * @param {string} userId - 商品所有者 ID（店長 ID）
+     * @param {number} stock - 庫存數量
+     * @param {string} createId - 實際創建者 ID（操作員創建時為操作員 ID，否則等於 userId）
+     */
+    constructor(id, name, price, state, model, userId, stock, createId) {
         this.id = id || "";
         this.name = name || "";          // 床墊名稱
         this.price = price || "";        // 床墊價錢
         this.state = state || "";        // 狀態
         this.model = model || "";        // 床墊型號
-        this.userId = userId || "";      // 用戶ID
+        this.userId = userId || "";      // 商品所有者 ID（店長 ID）
         this.stock = stock || 0;         // 庫存數量
+        this.createId = createId || userId || ""; // 實際創建者 ID（預設為 userId，確保舊資料相容）
     }
 
     /** 匯入 所有 床墊商品資訊 進入空表, 不卡控, 使用於備份還原。 */
