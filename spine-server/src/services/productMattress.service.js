@@ -19,8 +19,10 @@ exports.importAllProductMattress = async (productMattressList) => {
     }
 }
 
-/* 取得床墊商品列表 */
+/* 取得床墊商品列表（含創建者資訊） */
 exports.getProductMattressList = async (userId = null) => {
+    const User = require('../models/user.model');
+    
     try {
         console.log("[getProductMattressList] start :");
         let productMattressList = await ProductMattress.getAllProductMattressList();
@@ -30,7 +32,25 @@ exports.getProductMattressList = async (userId = null) => {
             productMattressList = productMattressList.filter(p => p.userId === userId);
         }
         
-        console.log("[getProductMattressList] end , result :", productMattressList);
+        // 取得所有用戶資料用於查詢創建者名稱
+        const allUsers = await User.getAllUserList();
+        const userMap = new Map(allUsers.map(u => [u.id, u]));
+        
+        // 為每個商品添加創建者資訊
+        productMattressList = productMattressList.map(product => {
+            // 如果沒有 createId，使用 userId 作為預設值（舊資料相容）
+            const createId = product.createId || product.userId;
+            const creator = userMap.get(createId);
+            
+            return {
+                ...product,
+                createId: createId,
+                creatorName: creator?.account || creator?.mail || createId,
+                creatorEmail: creator?.mail || ''
+            };
+        });
+        
+        console.log("[getProductMattressList] end , result count:", productMattressList.length);
         return productMattressList;
     } catch (error) {
         console.error("[getProductMattressList] error :", error);
@@ -117,26 +137,41 @@ exports.searchProductMattress = async (searchParam, pagingParam, userId = null) 
 }
 
 
-/* 新增床墊商品 */
+/**
+ * 新增床墊商品
+ * 
+ * 【操作員商品綁定邏輯】
+ * 1. 如果創建者是操作員：
+ *    - userId（商品所有者）= 操作員綁定的店長ID
+ *    - createId（實際創建者）= 操作員ID
+ * 2. 如果創建者不是操作員（店長或其他角色）：
+ *    - userId = createId = 創建者自己的ID
+ * 
+ * @param {Object} productMattress - 床墊商品資料
+ * @throws {Error} 如果操作員未綁定店長
+ */
 exports.addProductMattress = async (productMattress) => {
     const storeManagerToOperatorService = require('./storeManagerToOperator.service');
     const userToRoleService = require('./userToRole.service');
     
-    // 檢查是否為操作員
+    // 步驟1: 檢查當前用戶是否為操作員角色
     const isOperator = await storeManagerToOperatorService.isOperator(productMattress.userId);
     
     if (isOperator) {
-        // 如果是操作員，取得綁定的店長ID
+        // 步驟2: 操作員必須綁定店長才能創建商品
         const storeManagerId = await storeManagerToOperatorService.getStoreManagerIdByOperatorId(productMattress.userId);
         
         if (!storeManagerId) {
+            // 操作員未綁定店長，拒絕創建商品
             throw new Error('操作員未綁定店長');
         }
         
-        // 保存操作員ID作為 createId（實際創建者）
+        // 步驟3: 設置商品歸屬關係
+        // - createId: 保存操作員ID作為實際創建者
+        // - userId: 設置為店長ID作為商品所有者
         const createId = productMattress.userId;
         
-        // 將商品的 userId 設置為店長ID（商品所屬者）
+        console.log(`[操作員創建床墊商品] 操作員ID: ${createId}, 店長ID: ${storeManagerId}`);
         return ProductMattress.addProductMattress({
             ...productMattress,
             userId: storeManagerId,
@@ -144,8 +179,12 @@ exports.addProductMattress = async (productMattress) => {
         });
     }
     
-    // 如果不是操作員，正常新增商品
-    return ProductMattress.addProductMattress(productMattress);
+    // 非操作員（店長或其他角色）：createId 與 userId 相同
+    console.log(`[非操作員創建床墊商品] userId/createId: ${productMattress.userId}`);
+    return ProductMattress.addProductMattress({
+        ...productMattress,
+        createId: productMattress.userId
+    });
 }
 
 /* 取得床墊商品 */

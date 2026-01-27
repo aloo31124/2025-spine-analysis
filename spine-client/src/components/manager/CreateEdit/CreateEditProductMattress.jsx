@@ -234,6 +234,32 @@ function CreateEditProductMattress({ typePage, productMattress,
                     style={{ width: '100%', minHeight: '100px', padding: '10px' }}
                 />
             </div>
+
+            {/* 創建者資訊（僅在編輯模式顯示） */}
+            {typePage === typePageList.EDIT && productMattress?.createId && (
+                <div className={style.CreateEditProductContainer}>
+                    <h2>創建者資訊</h2>
+                    <div className={style.CreateEditProductRow}>
+                        <label>創建者：</label>
+                        <span style={{ color: '#333' }}>
+                            {productMattress.creatorName || productMattress.createId || '-'}
+                        </span>
+                    </div>
+                    {productMattress.creatorEmail && (
+                        <div className={style.CreateEditProductRow}>
+                            <label>Email：</label>
+                            <span style={{ color: '#666' }}>{productMattress.creatorEmail}</span>
+                        </div>
+                    )}
+                    {productMattress.createId !== productMattress.userId && (
+                        <div className={style.CreateEditProductRow}>
+                            <p style={{ color: '#888', fontSize: '12px', fontStyle: 'italic' }}>
+                                * 此商品由操作員創建
+                            </p>
+                        </div>
+                    )}
+                </div>
+            )}
         </div>
     );
 }

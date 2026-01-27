@@ -6,6 +6,7 @@ const ERROR_HEADER = "[storeManagerToOperator.service.js]";
 
 /**
  * 根據店長ID獲取其綁定的所有操作員列表
+ * 返回結果包含操作員資訊及其綁定的店長資訊
  */
 exports.getOperatorListByStoreManager = async (storeManagerId) => {
     console.log(`${ERROR_HEADER}[getOperatorListByStoreManager] 開始 storeManagerId:`, storeManagerId);
@@ -18,26 +19,35 @@ exports.getOperatorListByStoreManager = async (storeManagerId) => {
             return [];
         }
         
-        // 2. 取得所有操作員的用戶資料
-        const operatorIds = bindingList.map(b => b.operatorId);
+        // 2. 取得所有用戶資料（包含操作員和店長）
         const pagingParam = { pageIndex: 1, pageSize: 1000, sort: "asc", pageTotal: -1, dataTotal: -1 };
         const userList = (await User.search({}, pagingParam)).userList;
         
-        // 3. 組合結果
+        // 建立用戶 Map 方便查找
+        const userMap = new Map(userList.map(u => [u.id, u]));
+        
+        // 3. 取得店長資訊
+        const storeManager = userMap.get(storeManagerId);
+        
+        // 4. 組合結果，包含綁定店長資訊
         const operatorList = bindingList.map((binding) => {
-            const user = userList.find((u) => u.id === binding.operatorId);
+            const user = userMap.get(binding.operatorId);
             if (!user) {
                 console.warn(`${ERROR_HEADER} 找不到 userId=${binding.operatorId} 的用戶`);
                 return null;
             }
             return {
-                id: binding.id,              // StoreManagerToOperator 的 id
-                userId: user.id,             // User 的 id（operatorId）
-                operatorId: user.id,         // 操作員 userId
-                userName: user.mail,         // 顯示名稱
-                userEmail: user.mail,        // 操作員 email
-                userAccount: user.account,   // 操作員帳號
-                createdAt: binding.createdAt
+                id: binding.id,                      // StoreManagerToOperator 的 id
+                userId: user.id,                     // User 的 id（operatorId）
+                operatorId: user.id,                 // 操作員 userId
+                userName: user.mail,                 // 顯示名稱
+                userEmail: user.mail,                // 操作員 email
+                userAccount: user.account,           // 操作員帳號
+                createdAt: binding.createdAt,
+                // 新增：綁定店長資訊
+                boundStoreManagerId: storeManagerId,
+                boundStoreManagerName: storeManager?.account || storeManager?.mail || '-',
+                boundStoreManagerEmail: storeManager?.mail || '-'
             };
         }).filter((item) => item !== null);
         
@@ -166,6 +176,43 @@ exports.searchBinding = async (searchParam, pagingParam) => {
         return await StoreManagerToOperator.search(searchParam, pagingParam);
     } catch (error) {
         console.error(`${ERROR_HEADER}[searchBinding] 失敗:`, error);
+        throw error;
+    }
+};
+
+/**
+ * 根據操作員ID獲取其綁定店長的完整資訊
+ * @param {string} operatorId - 操作員的用戶ID
+ * @returns {Promise<Object|null>} 店長資訊（包含 id, name, email, account）或 null
+ */
+exports.getStoreManagerInfoByOperatorId = async (operatorId) => {
+    console.log(`${ERROR_HEADER}[getStoreManagerInfoByOperatorId] 開始 operatorId:`, operatorId);
+    try {
+        // 1. 查找操作員的綁定關係
+        const binding = await StoreManagerToOperator.findByOperatorId(operatorId);
+        if (!binding) {
+            console.log(`${ERROR_HEADER} 操作員 ${operatorId} 未綁定任何店長`);
+            return null;
+        }
+
+        // 2. 根據 storeManagerId 查詢店長的用戶資料
+        const storeManager = await User.findById(binding.storeManagerId);
+        if (!storeManager) {
+            console.warn(`${ERROR_HEADER} 找不到店長用戶 storeManagerId=${binding.storeManagerId}`);
+            return null;
+        }
+
+        // 3. 返回店長完整資訊
+        return {
+            id: storeManager.id,
+            name: storeManager.account || storeManager.mail,
+            email: storeManager.mail,
+            account: storeManager.account,
+            bindingId: binding.id,
+            boundAt: binding.createdAt
+        };
+    } catch (error) {
+        console.error(`${ERROR_HEADER}[getStoreManagerInfoByOperatorId] 失敗:`, error);
         throw error;
     }
 };

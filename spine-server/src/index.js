@@ -104,6 +104,7 @@ app.get('/api/account/store-manager-to-operator/list', storeManagerToOperatorApi
 app.post('/api/account/store-manager-to-operator/add', storeManagerToOperatorApiController.addOperator);
 app.delete('/api/account/store-manager-to-operator/delete/:id', storeManagerToOperatorApiController.deleteOperator);
 app.post('/api/account/store-manager-to-operator/search', storeManagerToOperatorApiController.searchBinding);
+app.get('/api/account/store-manager-to-operator/store-manager-info', storeManagerToOperatorApiController.getStoreManagerInfo);
 // [權限管理] 檢查角色權限、取得店長列表 api
 app.get('/api/manager/auth-permission/check-role', authPermissionApiController.checkUserRole);
 app.get('/api/manager/auth-permission/store-manager-list', authPermissionApiController.getStoreManagerList);

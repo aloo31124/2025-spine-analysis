@@ -163,6 +163,7 @@ function OperatorManagementPage() {
                                 <tr>
                                     <th>帳號名稱</th>
                                     <th>電子郵件</th>
+                                    <th>綁定店長</th>
                                     <th>操作員ID</th>
                                     <th>操作</th>
                                 </tr>
@@ -172,6 +173,11 @@ function OperatorManagementPage() {
                                     <tr key={operator.id}>
                                         <td>{operator.userAccount || '-'}</td>
                                         <td>{operator.userEmail}</td>
+                                        <td>
+                                            <span title={operator.boundStoreManagerEmail || ''}>
+                                                {operator.boundStoreManagerName || '-'}
+                                            </span>
+                                        </td>
                                         <td>{operator.userId}</td>
                                         <td>
                                             <button
