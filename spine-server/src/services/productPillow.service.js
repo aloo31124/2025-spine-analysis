@@ -333,26 +333,8 @@ exports.updateProductPillow = async (productPillow, currentUserId) => {
         };
         
         // 步驟5: 使用交易更新商品
-        const docRef = db.collection('ProductPillow').doc(productPillow.id);
-        await db.runTransaction(async (transaction) => {
-            const doc = await transaction.get(docRef);
-            if (!doc.exists) {
-                throw new Error('商品不存在');
-            }
-            
-            // 再次檢查版本（防止交易期間的併發修改）
-            const currentData = doc.data();
-            if (productPillow.version !== undefined && currentData.version !== productPillow.version) {
-                const error = new Error('商品已被其他用戶修改，請重新載入');
-                error.code = 'VERSION_CONFLICT';
-                throw error;
-            }
-            
-            transaction.update(docRef, updateData);
-        });
-        
         // 步驟6: 取得更新後的商品資料
-        const updatedProduct = await ProductPillow.getProductPillow(productPillow.id);
+        const updatedProduct = await ProductPillow.updateProductPillow(productPillow);
         
         // 步驟7: 記錄更新操作
         await loggerService.logProductAction('UPDATE', productPillow.id, currentUserId, existingProduct, updatedProduct);
