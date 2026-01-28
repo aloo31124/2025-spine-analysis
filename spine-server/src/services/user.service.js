@@ -84,3 +84,63 @@ exports.login = async (email, password) => {
     return await user.password === password;
 }
 
+/**
+ * 取得用戶資訊（含離職狀態）
+ * @param {string} userId - 用戶 ID
+ * @returns {object} { userId, name, email, isDeleted } 或 null
+ */
+exports.getUserInfo = async (userId) => {
+    try {
+        if (!userId) {
+            return null;
+        }
+
+        const user = await User.getUser(userId);
+        
+        if (!user) {
+            console.warn(`[getUserInfo] 用戶不存在: ${userId}`);
+            return null;
+        }
+
+        return {
+            userId: user.id || userId,
+            name: user.account || user.mail || '未知用戶',
+            email: user.mail || '',
+            isDeleted: user.isDeleted || false
+        };
+    } catch (error) {
+        console.error('[getUserInfo] 查詢失敗:', error);
+        return null;
+    }
+};
+
+/**
+ * 批次取得多個用戶資訊
+ * @param {Array<string>} userIds - 用戶 ID 陣列
+ * @returns {Map<string, object>} userId -> userInfo 的映射
+ */
+exports.getUserInfoBatch = async (userIds) => {
+    try {
+        if (!userIds || userIds.length === 0) {
+            return new Map();
+        }
+
+        const uniqueIds = [...new Set(userIds)];
+        const userMap = new Map();
+
+        // 並行查詢所有用戶
+        await Promise.all(
+            uniqueIds.map(async (userId) => {
+                const userInfo = await exports.getUserInfo(userId);
+                if (userInfo) {
+                    userMap.set(userId, userInfo);
+                }
+            })
+        );
+
+        return userMap;
+    } catch (error) {
+        console.error('[getUserInfoBatch] 批次查詢失敗:', error);
+        return new Map();
+    }
+};

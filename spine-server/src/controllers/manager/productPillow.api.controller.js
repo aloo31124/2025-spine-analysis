@@ -57,10 +57,25 @@ exports.getProductPillow = async (req, res) => {
 exports.updateProductPillow = async (req, res) => {
     console.log("[updateProductPillow] start : updateData =", req.body.updateProductPillow);
     try {
-        const updatedProductPillow = await productPillowService.updateProductPillow(req.body.updateProductPillow);
+        const payload = authService.verifyJwt(req);
+        const updatedProductPillow = await productPillowService.updateProductPillow(
+            req.body.updateProductPillow, 
+            payload.userId
+        );
         res.status(200).json({ result: '200', updatedProductPillow });
     } catch (error) {
         console.error("[updateProductPillow] error :", error);
+        
+        // 處理版本衝突錯誤（樂觀鎖）
+        if (error.code === 'VERSION_CONFLICT') {
+            res.status(409).json({ 
+                result: '409', 
+                error: error.message,
+                latestProduct: error.latestProduct
+            });
+            return;
+        }
+        
         res.status(500).json({ result: '500', error: error.message });
     }
 };
@@ -69,10 +84,21 @@ exports.updateProductPillow = async (req, res) => {
 exports.deleteProductPillow = async (req, res) => {
     console.log("[deleteProductPillow] start : productPillowId =", req.params.id);
     try {
-        await productPillowService.deleteProductPillow(req.params.id);
+        const payload = authService.verifyJwt(req);
+        await productPillowService.deleteProductPillow(req.params.id, payload.userId);
         res.status(200).json({ result: '200', message: '枕頭商品刪除成功' });
     } catch (error) {
         console.error("[deleteProductPillow] error :", error);
+        
+        // 處理操作員無刪除權限錯誤
+        if (error.code === 'OPERATOR_CANNOT_DELETE') {
+            res.status(403).json({ 
+                result: '403', 
+                error: error.message
+            });
+            return;
+        }
+        
         res.status(500).json({ result: '500', error: error.message });
     }
 };
