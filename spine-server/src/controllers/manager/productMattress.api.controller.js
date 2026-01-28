@@ -57,10 +57,25 @@ exports.getProductMattress = async (req, res) => {
 exports.updateProductMattress = async (req, res) => {
     console.log("[updateProductMattress] start : updateData =", req.body.updateProductMattress);
     try {
-        const updatedProductMattress = await productMattressService.updateProductMattress(req.body.updateProductMattress);
+        const payload = authService.verifyJwt(req);
+        const updatedProductMattress = await productMattressService.updateProductMattress(
+            req.body.updateProductMattress,
+            payload.userId
+        );
         res.status(200).json({ result: '200', updatedProductMattress });
     } catch (error) {
         console.error("[updateProductMattress] error :", error);
+        
+        // 處理版本衝突錯誤（樂觀鎖）
+        if (error.code === 'VERSION_CONFLICT') {
+            res.status(409).json({ 
+                result: '409', 
+                error: error.message,
+                latestProduct: error.latestProduct
+            });
+            return;
+        }
+        
         res.status(500).json({ result: '500', error: error.message });
     }
 };
@@ -69,10 +84,21 @@ exports.updateProductMattress = async (req, res) => {
 exports.deleteProductMattress = async (req, res) => {
     console.log("[deleteProductMattress] start : productMattressId =", req.params.id);
     try {
-        await productMattressService.deleteProductMattress(req.params.id);
+        const payload = authService.verifyJwt(req);
+        await productMattressService.deleteProductMattress(req.params.id, payload.userId);
         res.status(200).json({ result: '200', message: '床墊商品刪除成功' });
     } catch (error) {
         console.error("[deleteProductMattress] error :", error);
+        
+        // 處理操作員無刪除權限錯誤
+        if (error.code === 'OPERATOR_CANNOT_DELETE') {
+            res.status(403).json({ 
+                result: '403', 
+                error: error.message
+            });
+            return;
+        }
+        
         res.status(500).json({ result: '500', error: error.message });
     }
 };

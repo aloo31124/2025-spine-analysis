@@ -19,8 +19,11 @@ class ProductMattress {
      * @param {string} userId - 商品所有者 ID（店長 ID）
      * @param {number} stock - 庫存數量
      * @param {string} createId - 實際創建者 ID（操作員創建時為操作員 ID，否則等於 userId）
+     * @param {string} lastEditId - 最後編輯者 ID
+     * @param {Timestamp} lastEditTime - 最後編輯時間
+     * @param {number} version - 樂觀鎖版本號（用於並發控制）
      */
-    constructor(id, name, price, state, model, userId, stock, createId) {
+    constructor(id, name, price, state, model, userId, stock, createId, lastEditId, lastEditTime, version) {
         this.id = id || "";
         this.name = name || "";          // 床墊名稱
         this.price = price || "";        // 床墊價錢
@@ -29,6 +32,9 @@ class ProductMattress {
         this.userId = userId || "";      // 商品所有者 ID（店長 ID）
         this.stock = stock || 0;         // 庫存數量
         this.createId = createId || userId || ""; // 實際創建者 ID（預設為 userId，確保舊資料相容）
+        this.lastEditId = lastEditId || createId || userId || ""; // 最後編輯者 ID（預設為創建者）
+        this.lastEditTime = lastEditTime || null;  // 最後編輯時間
+        this.version = version || 1;               // 樂觀鎖版本號（預設為 1）
     }
 
     /** 匯入 所有 床墊商品資訊 進入空表, 不卡控, 使用於備份還原。 */
