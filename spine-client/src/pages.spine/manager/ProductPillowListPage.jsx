@@ -207,19 +207,20 @@ function ProductPillowListPage() {
                     <th>短弧度</th>
                     <th>中弧度</th>
                     <th>長弧度</th>
+                    <th>創建者</th>
                     <th>操作</th>
                 </tr>
             </thead>
             <tbody>
                 {isLoading ? (
                     <tr>
-                        <td colSpan="10" className={styles.loadingContainer}>
+                        <td colSpan="11" className={styles.loadingContainer}>
                             <img src={loadingGif} alt="Loading..." />
                         </td>
                     </tr>
                 ) : productPillowList.length === 0 ? (
                     <tr>
-                        <td colSpan="10" className={styles.emptyState}>
+                        <td colSpan="11" className={styles.emptyState}>
                             查無資料
                         </td>
                     </tr>
@@ -242,6 +243,11 @@ function ProductPillowListPage() {
                             <td>{productPillow.shortCurvature}°</td>
                             <td>{productPillow.mediumCurvature}°</td>
                             <td>{productPillow.longCurvature}°</td>
+                            <td>
+                                <div className={styles.creatorName} title={productPillow.creatorEmail || ''}>
+                                    {productPillow.creatorName || '-'}
+                                </div>
+                            </td>
                             <td>
                                 <div className={styles.actionButtons}>
                                     <button
@@ -316,6 +322,13 @@ function ProductPillowListPage() {
                                 <span className={styles.cardLabel}>狀態：</span>
                                 <span className={getStatusClass(productPillow.state)}>
                                     {productPillow.state}
+                                </span>
+                            </div>
+
+                            <div className={styles.cardRow}>
+                                <span className={styles.cardLabel}>創建者：</span>
+                                <span className={styles.cardValue}>
+                                    {productPillow.creatorName || '-'}
                                 </span>
                             </div>
                         </div>
