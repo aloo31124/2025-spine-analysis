@@ -7,6 +7,13 @@ import { getCustomerList } from '../../api/manager/customer';
 import ScaleIndicator from '../../components/ScaleIndicator';
 import { formatPxCmText } from '../../utils/scaleConversion';
 import { formatDistanceWithMode } from '../../utils/screenConversion';
+import { 
+    applyPointConstraints, 
+    initializePoints, 
+    initializePointsFromRelative,
+    getPointName,
+    validatePointConstraints 
+} from '../../utils/pointConstraints';
 
 function AnalysisSpine() {
     const navigate = useNavigate();
@@ -22,15 +29,6 @@ function AnalysisSpine() {
     const minScale = 0.5;
     const maxScale = 2.0;
     const scaleStep = 0.1;
-    
-    // 五個點的初始位置（相對於容器的比例位置）
-    const initialPointPositions = [
-        { x: 0.3, y: 0.1 },   // 頂部
-        { x: 0.35, y: 0.2 },  // 左側
-        { x: 0.37, y: 0.3 },  // 右側
-        { x: 0.3, y: 0.41 },  // 左下
-        { x: 0.24, y: 0.52 }  // 右下
-    ];
     
     const [points, setPoints] = useState([]);
     const [currentPointIndex, setCurrentPointIndex] = useState(0);
@@ -98,12 +96,8 @@ function AnalysisSpine() {
         const container = neckContainerRef.current;
         if (!container) return;
 
-        const newPoints = initialPointPositions.map((pos, index) => ({
-            id: index,
-            x: pos.x * container.offsetWidth,
-            y: pos.y * container.offsetHeight,
-            isDraggable: index === 0
-        }));
+        // 使用工具函數初始化點位（含第六點位）
+        const newPoints = initializePoints(container.offsetWidth, container.offsetHeight);
         
         setPoints(newPoints);
         setCurrentPointIndex(0);
@@ -117,51 +111,13 @@ function AnalysisSpine() {
         const container = neckContainerRef.current;
         if (!container) return;
 
-        // 如果没有图片尺寸信息，使用简单的转换（向后兼容）
-        if (!imageSize || !imageSize.width || !imageSize.height) {
-            const newPoints = relativePoints.map((pos, index) => ({
-                id: index,
-                x: pos.x * container.offsetWidth,
-                y: pos.y * container.offsetHeight,
-                isDraggable: index === 0
-            }));
-            setPoints(newPoints);
-            setCurrentPointIndex(0);
-            setLines([]);
-            setIntersectionPoints([]);
-            setCalculationResults([]);
-            return;
-        }
-
-        // 计算图片在容器中的实际显示尺寸（考虑 object-fit: contain）
-        const containerWidth = container.offsetWidth;
-        const containerHeight = container.offsetHeight;
-        const imageAspect = imageSize.width / imageSize.height;
-        const containerAspect = containerWidth / containerHeight;
-        
-        let displayWidth, displayHeight, offsetX, offsetY;
-        
-        if (containerAspect > imageAspect) {
-            // 容器更宽，图片以高度为准
-            displayHeight = containerHeight;
-            displayWidth = displayHeight * imageAspect;
-            offsetX = (containerWidth - displayWidth) / 2;
-            offsetY = 0;
-        } else {
-            // 容器更高，图片以宽度为准
-            displayWidth = containerWidth;
-            displayHeight = displayWidth / imageAspect;
-            offsetX = 0;
-            offsetY = (containerHeight - displayHeight) / 2;
-        }
-
-        // 将相对位置（0-1）转换为容器内的绝对位置
-        const newPoints = relativePoints.map((pos, index) => ({
-            id: index,
-            x: pos.x * displayWidth + offsetX,
-            y: pos.y * displayHeight + offsetY,
-            isDraggable: index === 0
-        }));
+        // 使用工具函數初始化點位
+        const newPoints = initializePointsFromRelative(
+            relativePoints, 
+            imageSize, 
+            container.offsetWidth, 
+            container.offsetHeight
+        );
         
         setPoints(newPoints);
         setCurrentPointIndex(0);
@@ -222,11 +178,21 @@ function AnalysisSpine() {
         newX = Math.max(0, Math.min(container.offsetWidth - 10, newX));
         newY = Math.max(0, Math.min(container.offsetHeight - 10, newY));
         
-        setPoints(prevPoints =>
-            prevPoints.map((point, index) =>
-                index === currentPointIndex ? { ...point, x: newX, y: newY } : point
-            )
-        );
+        setPoints(prevPoints => {
+            // 獲取當前點的位置（用於計算偏移量）
+            const previousPoint = prevPoints[currentPointIndex];
+            
+            // 應用點位約束（處理聯動邏輯）
+            const updatedPoints = applyPointConstraints(
+                prevPoints,
+                currentPointIndex,
+                newX,
+                newY,
+                previousPoint
+            );
+            
+            return updatedPoints;
+        });
     };
 
     // 停止拖拽
