@@ -33,6 +33,8 @@ const storeApiController = require('./controllers/manager/store.api.controller')
 const storeManagerToOperatorApiController = require('./controllers/manager/storeManagerToOperator.api.controller');
 const authPermissionApiController = require('./controllers/manager/authPermission.api.controller');
 const generalManagerApiController = require('./controllers/manager/generalManager.api.controller');
+const districtManagerApiController = require('./controllers/manager/districtManager.api.controller');
+const districtApiController = require('./controllers/manager/district.api.controller');
 //const productImgApiController = require('./controllers/manager/productImg.api.controller')
 const shopApiController = require('./controllers/shop/shop.api.controller');
 const shopPayLogisticsApiController = require('./controllers/shop/shopPayLogistics.api.controller')
@@ -112,6 +114,20 @@ app.get('/api/manager/auth-permission/store-manager-list', authPermissionApiCont
 app.get('/api/manager/general-manager/list', generalManagerApiController.getGeneralManagerList);
 app.post('/api/manager/general-manager/add', generalManagerApiController.addGeneralManagerByEmail);
 app.delete('/api/manager/general-manager/delete/:roleId', generalManagerApiController.deleteGeneralManager);
+// [區經理管理] 區經理增刪查 api
+app.get('/api/manager/district-manager/list', districtManagerApiController.getDistrictManagerList);
+app.post('/api/manager/district-manager/add', districtManagerApiController.addDistrictManagerByEmail);
+app.delete('/api/manager/district-manager/delete/:roleId', districtManagerApiController.deleteDistrictManager);
+// [區域管理] 區域增刪改查、綁定店長與區經理 api
+app.get('/api/manager/district/list', districtApiController.getAllDistrictList);
+app.post('/api/manager/district/add', districtApiController.addDistrict);
+app.patch('/api/manager/district/update', districtApiController.updateDistrict);
+app.delete('/api/manager/district/delete/:districtId', districtApiController.deleteDistrict);
+app.get('/api/manager/district/:districtId/store-managers', districtApiController.getDistrictWithStoreManagers);
+app.post('/api/manager/district/bind-store-manager', districtApiController.bindStoreManagerToDistrict);
+app.delete('/api/manager/district/unbind-store-manager/:bindingId', districtApiController.unbindStoreManagerFromDistrict);
+app.post('/api/manager/district/bind-district-manager', districtApiController.bindDistrictManagerToDistrict);
+app.delete('/api/manager/district/unbind-district-manager/:bindingId', districtApiController.unbindDistrictManagerFromDistrict);
 app.get('/api/account/payment/userId/:userId', accountApiController.getUserPaymentByUserId);
 app.get('/api/account/payment/paymentId/:paymentId', accountApiController.getPaymentByPaymentid);
 app.post('/api/account/payment/search', accountApiController.searchPayment);

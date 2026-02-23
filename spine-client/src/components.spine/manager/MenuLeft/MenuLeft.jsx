@@ -36,6 +36,7 @@ function MenuLeft({ isOpen, isHidden, onClose }) {
             'product-inventory', // 商品庫存
             'revenue',          // 營收管理
             'manager-setting',  // 經理設定
+            'district-manager-setting', // 區經理設定
             'store-management'  // 店面管理
         ];
         // 如果是總經理，只能訪問白名單內的頁面
@@ -166,6 +167,13 @@ function MenuLeft({ isOpen, isHidden, onClose }) {
                         onClick={e => navigate('/manager/manager-setting') }
                     >
                         經理設定
+                    </button>
+                )}
+                {(hasRole('Admin') || hasRole('GeneralManager')) && (
+                    <button className={`${style.MenuLeftButton} ${location.pathname.startsWith('/manager/district-manager-setting') ? style.active : ''}`}
+                        onClick={e => navigate('/manager/district-manager-setting') }
+                    >
+                        區經理設定
                     </button>
                 )}
                 {hasRole('Admin') && (
