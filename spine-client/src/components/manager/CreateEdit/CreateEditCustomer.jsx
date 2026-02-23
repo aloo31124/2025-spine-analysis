@@ -35,6 +35,38 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
     // 床墊推薦彈窗狀態
     const [showMattressRecommendationModal, setShowMattressRecommendationModal] = useState(false);
 
+    /* 計算年齡 - 根據生日計算實際年齡 */
+    const calculateAge = (birthdayDate) => {
+        if (!birthdayDate) return '';
+        
+        const birthDate = new Date(birthdayDate);
+        const today = new Date();
+        let calculatedAge = today.getFullYear() - birthDate.getFullYear();
+        const monthDiff = today.getMonth() - birthDate.getMonth();
+        
+        // 如果還沒到生日月份，或是同月但還沒到生日日期，年齡減1
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+            calculatedAge--;
+        }
+        
+        return calculatedAge.toString();
+    };
+
+    /* 驗證年齡與生日的一致性 */
+    const validateAgeAndBirthday = () => {
+        // 如果沒有生日，跳過驗證
+        if (!birthday) return true;
+        
+        const calculatedAge = calculateAge(birthday);
+        
+        // 如果有手動輸入的年齡，且與計算出的年齡不一致
+        if (age && calculatedAge && age !== calculatedAge) {
+            return false;
+        }
+        
+        return true;
+    };
+
     /* 初始客戶, 編輯客戶資訊 */
     useEffect(() => {
         console.log("useEffect customer");
@@ -43,11 +75,19 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
             setEmail(customer.email || '');
             setPhone(customer.phone || '');
             setAddress(customer.address || '');
-            setBirthday(customer.birthday || '');
+            const birthdayValue = customer.birthday || '';
+            setBirthday(birthdayValue);
             setGender(customer.gender || '');
             setState(customer.state || '正常');
             setNotes(customer.notes || '');
-            setAge(customer.age || '');
+            
+            // 每次開啟頁面時，根據生日重新計算年齡
+            if (birthdayValue) {
+                const calculatedAge = calculateAge(birthdayValue);
+                setAge(calculatedAge);
+            } else {
+                setAge(customer.age || '');
+            }
             
             // 載入客戶的購買商品
             if (customer.id) {
@@ -55,6 +95,14 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
             }
         }
     }, [customer]);
+
+    /* 當生日改變時自動計算年齡 */
+    useEffect(() => {
+        if (birthday) {
+            const calculatedAge = calculateAge(birthday);
+            setAge(calculatedAge);
+        }
+    }, [birthday]);
 
     /* 檢查是否從商品頁面購買成功返回 */
     useEffect(() => {
@@ -153,6 +201,14 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
             alert('請填寫必要欄位：姓名、電子郵件、電話');
             return;
         }
+        
+        // 驗證年齡與生日的一致性
+        if (!validateAgeAndBirthday()) {
+            const calculatedAge = calculateAge(birthday);
+            alert(`年齡與生日不一致！\n根據生日 ${birthday} 計算的年齡應為 ${calculatedAge} 歲，但您輸入的年齡是 ${age} 歲。\n請修正年齡欄位或重新輸入生日。`);
+            return;
+        }
+        
         handleAddCustomer({name, email, phone, address, birthday, gender, state, notes, age});
     }
 
@@ -163,6 +219,14 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
             alert('請填寫必要欄位：姓名、電子郵件、電話');
             return;
         }
+        
+        // 驗證年齡與生日的一致性
+        if (!validateAgeAndBirthday()) {
+            const calculatedAge = calculateAge(birthday);
+            alert(`年齡與生日不一致！\n根據生日 ${birthday} 計算的年齡應為 ${calculatedAge} 歲，但您輸入的年齡是 ${age} 歲。\n請修正年齡欄位或重新輸入生日。`);
+            return;
+        }
+        
         handleUpdateCustomer({name, email, phone, address, birthday, gender, state, notes, age});
     }
 
@@ -401,6 +465,14 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
             <div className={style.CreateEditProductContainer}>
                 <h2>個人資訊</h2>
                 <div className={style.CreateEditProductRow}>
+                    <label>生日:</label>
+                    <input
+                        type="date"
+                        value={birthday}
+                        onChange={e => setBirthday(e.target.value)}
+                    />
+                </div>
+                <div className={style.CreateEditProductRow}>
                     <label>年齡:</label>
                     <input
                         type="number"
@@ -410,14 +482,10 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
                         min="0"
                         max="150"
                     />
-                </div>
-                <div className={style.CreateEditProductRow}>
-                    <label>生日:</label>
-                    <input
-                        type="date"
-                        value={birthday}
-                        onChange={e => setBirthday(e.target.value)}
-                    />
+                    <small style={{ marginLeft: '10px', color: '#666' }}>
+                        {birthday && `(根據生日計算: ${calculateAge(birthday)} 歲)`}
+                        {!birthday && '(輸入生日後將自動計算)'}
+                    </small>
                 </div>
                 <div className={style.CreateEditProductRow}>
                     <label>性別:</label>
