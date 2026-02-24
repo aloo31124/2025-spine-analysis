@@ -157,3 +157,39 @@ exports.searchBinding = async (req, res) => {
         res.status(500).json({ result: '500', error: error.message });
     }
 };
+
+/**
+ * 取得當前操作員綁定的店長資訊
+ * 操作員專用 API - 用於在設定頁顯示所屬店長
+ */
+exports.getStoreManagerInfo = async (req, res) => {
+    try {
+        console.log(`${ERROR_HEADER}[getStoreManagerInfo] start`);
+        
+        // 驗證 JWT 並取得當前使用者 ID
+        const payload = authService.verifyJwt(req);
+        const userId = payload?.userId;
+        
+        if (!userId) {
+            return res.status(401).json({ result: '401', error: '未授權' });
+        }
+        
+        // 檢查是否為操作員
+        const isOperator = await storeManagerToOperatorService.isOperator(userId);
+        if (!isOperator) {
+            return res.status(403).json({ result: '403', error: '權限不足：非操作員身份' });
+        }
+        
+        // 取得綁定的店長資訊
+        const storeManagerInfo = await storeManagerToOperatorService.getStoreManagerInfoByOperatorId(userId);
+        
+        if (!storeManagerInfo) {
+            return res.status(404).json({ result: '404', error: '尚未綁定店長' });
+        }
+        
+        res.status(200).json({ result: '200', storeManagerInfo });
+    } catch (error) {
+        console.error(`${ERROR_HEADER}[getStoreManagerInfo] error:`, error);
+        res.status(500).json({ result: '500', error: error.message });
+    }
+};

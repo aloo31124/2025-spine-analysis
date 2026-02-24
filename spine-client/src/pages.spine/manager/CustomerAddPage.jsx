@@ -24,7 +24,9 @@ function CustomerAddPage() {
         gender: '',
         state: '正常',
         notes: '',
-        age: ''
+        age: '',
+        height: '',
+        weight: ''
     });
     // 待綁定的分析結果
     const [pendingAnalysisResult, setPendingAnalysisResult] = useState(null);

@@ -6,6 +6,12 @@ import PillowRecommendationModal from '../ProductRecommendation/PillowRecommenda
 import MattressRecommendationModal from '../ProductRecommendation/MattressRecommendationModal';
 import { getCustomerToProductPillowByCustomerId } from '../../../api/manager/customerToProductPillow';
 import { getCustomerToProductMattressByCustomerId } from '../../../api/manager/customerToProductMattress';
+import { 
+    calculateDefaultHeight, 
+    formatDefaultHeight,
+    calculateAdjustedDefaultHeight,
+    calculateStandardWeight
+} from '../../../utils/calculateDefaultHeight';
 
 function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCustomer, handleAddCustomer, onRefreshAnalysisResults, isAnalysisLoading = false}) {
     const navigate = useNavigate();
@@ -23,6 +29,13 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
     const [state, setState] = useState("正常");
     const [notes, setNotes] = useState('');
     const [age, setAge] = useState('');
+    const [height, setHeight] = useState('');
+    const [weight, setWeight] = useState('');
+    const [defaultHeight, setDefaultHeight] = useState(null);
+    const [baseHeight, setBaseHeight] = useState(null);
+    const [standardWeight, setStandardWeight] = useState(null);
+    const [weightDeviation, setWeightDeviation] = useState(null);
+    const [heightAdjustment, setHeightAdjustment] = useState(0);
     
     // 購買商品相關狀態
     const [purchasedProducts, setPurchasedProducts] = useState([]);
@@ -35,6 +48,38 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
     // 床墊推薦彈窗狀態
     const [showMattressRecommendationModal, setShowMattressRecommendationModal] = useState(false);
 
+    /* 計算年齡 - 根據生日計算實際年齡 */
+    const calculateAge = (birthdayDate) => {
+        if (!birthdayDate) return '';
+        
+        const birthDate = new Date(birthdayDate);
+        const today = new Date();
+        let calculatedAge = today.getFullYear() - birthDate.getFullYear();
+        const monthDiff = today.getMonth() - birthDate.getMonth();
+        
+        // 如果還沒到生日月份，或是同月但還沒到生日日期，年齡減1
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+            calculatedAge--;
+        }
+        
+        return calculatedAge.toString();
+    };
+
+    /* 驗證年齡與生日的一致性 */
+    const validateAgeAndBirthday = () => {
+        // 如果沒有生日，跳過驗證
+        if (!birthday) return true;
+        
+        const calculatedAge = calculateAge(birthday);
+        
+        // 如果有手動輸入的年齡，且與計算出的年齡不一致
+        if (age && calculatedAge && age !== calculatedAge) {
+            return false;
+        }
+        
+        return true;
+    };
+
     /* 初始客戶, 編輯客戶資訊 */
     useEffect(() => {
         console.log("useEffect customer");
@@ -43,11 +88,23 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
             setEmail(customer.email || '');
             setPhone(customer.phone || '');
             setAddress(customer.address || '');
-            setBirthday(customer.birthday || '');
+            const birthdayValue = customer.birthday || '';
+            setBirthday(birthdayValue);
             setGender(customer.gender || '');
             setState(customer.state || '正常');
             setNotes(customer.notes || '');
-            setAge(customer.age || '');
+            
+            // 每次開啟頁面時，根據生日重新計算年齡
+            if (birthdayValue) {
+                const calculatedAge = calculateAge(birthdayValue);
+                setAge(calculatedAge);
+            } else {
+                setAge(customer.age || '');
+            }
+            
+            // 設定身高和體重
+            setHeight(customer.height || '');
+            setWeight(customer.weight || '');
             
             // 載入客戶的購買商品
             if (customer.id) {
@@ -55,6 +112,25 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
             }
         }
     }, [customer]);
+
+    /* 當生日改變時自動計算年齡 */
+    useEffect(() => {
+        if (birthday) {
+            const calculatedAge = calculateAge(birthday);
+            setAge(calculatedAge);
+        }
+    }, [birthday]);
+
+    /* 當年齡、身高、性別或體重改變時自動計算初始高度 */
+    useEffect(() => {
+        const result = calculateAdjustedDefaultHeight(age, height, gender, weight);
+        
+        setBaseHeight(result.baseHeight);
+        setStandardWeight(result.standardWeight);
+        setWeightDeviation(result.weightDeviation);
+        setHeightAdjustment(result.heightAdjustment);
+        setDefaultHeight(result.finalHeight);
+    }, [age, height, gender, weight]);
 
     /* 檢查是否從商品頁面購買成功返回 */
     useEffect(() => {
@@ -153,7 +229,15 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
             alert('請填寫必要欄位：姓名、電子郵件、電話');
             return;
         }
-        handleAddCustomer({name, email, phone, address, birthday, gender, state, notes, age});
+        
+        // 驗證年齡與生日的一致性
+        if (!validateAgeAndBirthday()) {
+            const calculatedAge = calculateAge(birthday);
+            alert(`年齡與生日不一致！\n根據生日 ${birthday} 計算的年齡應為 ${calculatedAge} 歲，但您輸入的年齡是 ${age} 歲。\n請修正年齡欄位或重新輸入生日。`);
+            return;
+        }
+        
+        handleAddCustomer({name, email, phone, address, birthday, gender, state, notes, age, height, weight});
     }
 
     /* 編輯客戶, 更新編輯客戶 */
@@ -163,7 +247,15 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
             alert('請填寫必要欄位：姓名、電子郵件、電話');
             return;
         }
-        handleUpdateCustomer({name, email, phone, address, birthday, gender, state, notes, age});
+        
+        // 驗證年齡與生日的一致性
+        if (!validateAgeAndBirthday()) {
+            const calculatedAge = calculateAge(birthday);
+            alert(`年齡與生日不一致！\n根據生日 ${birthday} 計算的年齡應為 ${calculatedAge} 歲，但您輸入的年齡是 ${age} 歲。\n請修正年齡欄位或重新輸入生日。`);
+            return;
+        }
+        
+        handleUpdateCustomer({name, email, phone, address, birthday, gender, state, notes, age, height, weight});
     }
 
     /* 處理分析結果刪除 */
@@ -188,6 +280,8 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
             state,
             notes,
             age,
+            height,
+            defaultHeight,
             analysisResults
         };
         
@@ -214,6 +308,8 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
             state,
             notes,
             age,
+            height,
+            defaultHeight,
             analysisResults
         };
         
@@ -282,6 +378,8 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
                         state,
                         notes,
                         age,
+                        height,
+                        defaultHeight,
                         analysisResults
                     }}
                 />
@@ -301,6 +399,8 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
                         state,
                         notes,
                         age,
+                        height,
+                        defaultHeight,
                         analysisResults
                     }}
                 />
@@ -401,6 +501,14 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
             <div className={style.CreateEditProductContainer}>
                 <h2>個人資訊</h2>
                 <div className={style.CreateEditProductRow}>
+                    <label>生日:</label>
+                    <input
+                        type="date"
+                        value={birthday}
+                        onChange={e => setBirthday(e.target.value)}
+                    />
+                </div>
+                <div className={style.CreateEditProductRow}>
                     <label>年齡:</label>
                     <input
                         type="number"
@@ -410,14 +518,10 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
                         min="0"
                         max="150"
                     />
-                </div>
-                <div className={style.CreateEditProductRow}>
-                    <label>生日:</label>
-                    <input
-                        type="date"
-                        value={birthday}
-                        onChange={e => setBirthday(e.target.value)}
-                    />
+                    <small style={{ marginLeft: '10px', color: '#666' }}>
+                        {birthday && `(根據生日計算: ${calculateAge(birthday)} 歲)`}
+                        {!birthday && '(輸入生日後將自動計算)'}
+                    </small>
                 </div>
                 <div className={style.CreateEditProductRow}>
                     <label>性別:</label>
@@ -428,6 +532,90 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
                         <option value="其他">其他</option>
                     </select>
                 </div>
+                <div className={style.CreateEditProductRow}>
+                    <label>身高 (cm):</label>
+                    <input
+                        type="number"
+                        placeholder="請輸入身高（公分）"
+                        value={height}
+                        onChange={e => setHeight(e.target.value)}
+                        min="0"
+                        max="300"
+                    />
+                </div>
+                <div className={style.CreateEditProductRow}>
+                    <label>體重 (kg):</label>
+                    <input
+                        type="number"
+                        placeholder="請輸入體重（公斤）"
+                        value={weight}
+                        onChange={e => setWeight(e.target.value)}
+                        min="0"
+                        max="500"
+                        step="0.1"
+                    />
+                </div>
+                <div className={style.CreateEditProductRow}>
+                    <label>標準體重 (kg):</label>
+                    <input
+                        type="text"
+                        value={standardWeight !== null ? `${standardWeight.toFixed(1)} kg` : '請輸入身高及性別'}
+                        readOnly
+                        style={{ backgroundColor: '#f0f0f0', cursor: 'not-allowed' }}
+                        placeholder="自動計算"
+                    />
+                    <small style={{ marginLeft: '10px', color: '#666' }}>
+                        {gender === '男' && '(身高 - 80) × 70%'}
+                        {gender === '女' && '(身高 - 70) × 60%'}
+                        {!gender && '(需選擇性別)'}
+                    </small>
+                </div>
+                <div className={style.CreateEditProductRow}>
+                    <label>體重偏差 (kg):</label>
+                    <input
+                        type="text"
+                        value={
+                            weightDeviation !== null 
+                                ? `${weightDeviation > 0 ? '+' : ''}${weightDeviation.toFixed(1)} kg` 
+                                : '請輸入體重'
+                        }
+                        readOnly
+                        style={{ 
+                            backgroundColor: '#f0f0f0', 
+                            cursor: 'not-allowed',
+                            color: weightDeviation > 4 ? '#d9534f' : weightDeviation < -4 ? '#5bc0de' : '#666'
+                        }}
+                        placeholder="自動計算"
+                    />
+                    <small style={{ marginLeft: '10px', color: '#666' }}>
+                        (實際體重 - 標準體重)
+                    </small>
+                </div>
+                <div className={style.CreateEditProductRow}>
+                    <label>初始高度:</label>
+                    <input
+                        type="text"
+                        value={formatDefaultHeight(defaultHeight)}
+                        readOnly
+                        style={{ backgroundColor: '#f0f0f0', cursor: 'not-allowed' }}
+                        placeholder="自動計算"
+                    />
+                </div>
+                {baseHeight !== null && (
+                    <div className={style.CreateEditProductRow}>
+                        <label></label>
+                        <small style={{ color: '#666' }}>
+                            基準高度: {baseHeight} cm
+                            {heightAdjustment !== 0 && (
+                                <>
+                                    {' '} + 體重調整: {heightAdjustment > 0 ? '+' : ''}{heightAdjustment} cm
+                                    {' '} = 最終高度: {defaultHeight} cm
+                                </>
+                            )}
+                            {heightAdjustment === 0 && ' (無需調整)'}
+                        </small>
+                    </div>
+                )}
             </div>
 
             <div className={style.CreateEditProductContainer}>

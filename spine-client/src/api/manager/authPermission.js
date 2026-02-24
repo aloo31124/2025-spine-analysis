@@ -60,3 +60,24 @@ export const checkIsGeneralManagerOrAdmin = async () => {
         return false;
     }
 };
+/**
+ * 檢查是否為區經理、總經理或系統管理員
+ * @returns {Promise<boolean>} 是否有權限查看店長列表
+ */
+export const checkCanViewStoreManagerList = async () => {
+    console.log(`${ERROR_HEADER}[checkCanViewStoreManagerList] 開始檢查權限`);
+    try {
+        const roleData = await checkUserRole();
+        const roles = roleData.roles || [];
+        const hasPermission = roles.some(r => 
+            r.role === 'DistrictManager' || 
+            r.role === 'GeneralManager' || 
+            r.role === 'Admin'
+        );
+        console.log(`${ERROR_HEADER}[checkCanViewStoreManagerList] 結果:`, hasPermission);
+        return hasPermission;
+    } catch (error) {
+        console.error(`${ERROR_HEADER}[checkCanViewStoreManagerList] 失敗:`, error);
+        return false;
+    }
+};

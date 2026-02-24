@@ -9,7 +9,26 @@ const COLLECTION_NAME = 'ProductPillow';
 
 
 class ProductPillow {
-    constructor(id, name, price, state, type, userId, shortHeight, longHeight, shortCurvature, mediumCurvature, longCurvature, stock) {
+    /**
+     * 枕頭商品建構子
+     * @param {string} id - 商品 ID
+     * @param {string} name - 商品名稱
+     * @param {string} price - 商品價格
+     * @param {string} state - 商品狀態
+     * @param {string} type - 商品類型
+     * @param {string} userId - 商品所有者 ID（店長 ID）
+     * @param {number} shortHeight - 短高度
+     * @param {number} longHeight - 長高度
+     * @param {number} shortCurvature - 短弧度
+     * @param {number} mediumCurvature - 中弧度
+     * @param {number} longCurvature - 長弧度
+     * @param {number} stock - 庫存數量
+     * @param {string} createId - 實際創建者 ID（操作員創建時為操作員 ID，否則等於 userId）
+     * @param {string} lastEditId - 最後編輯者 ID
+     * @param {Timestamp} lastEditTime - 最後編輯時間
+     * @param {number} version - 樂觀鎖版本號（用於並發控制）
+     */
+    constructor(id, name, price, state, type, userId, shortHeight, longHeight, shortCurvature, mediumCurvature, longCurvature, stock, createId, lastEditId, lastEditTime, version) {
         this.id = id || "";
         this.name = name || "";
         this.price = price || "";
@@ -22,6 +41,10 @@ class ProductPillow {
         this.mediumCurvature = mediumCurvature || 0; // 中弧度
         this.longCurvature = longCurvature || 0;   // 長弧度
         this.stock = stock || 0;                   // 庫存數量
+        this.createId = createId || userId || ""; // 實際創建者 ID（預設為 userId，確保舊資料相容）
+        this.lastEditId = lastEditId || createId || userId || ""; // 最後編輯者 ID（預設為創建者）
+        this.lastEditTime = lastEditTime || null;  // 最後編輯時間
+        this.version = version || 1;               // 樂觀鎖版本號（預設為 1）
     }
 
     /** 匯入 所有 枕頭商品資訊 進入空表, 不卡控, 使用於備份還原。 */

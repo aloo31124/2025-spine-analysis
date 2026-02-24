@@ -102,6 +102,7 @@ import ReportSpineSalesLineChart from './pages.spine/manager/ReportSpineSalesLin
 import RoleManagementPage from './pages.spine/manager/RoleManagementPage';
 import OperatorManagementPage from './pages.spine/manager/OperatorManagementPage';
 import ManagerSettingPage from './pages.spine/manager/ManagerSettingPage';
+import DistrictManagerSettingPage from './pages.spine/manager/DistrictManagerSettingPage';
 
 // 店面管理頁
 import StoreListPage from './pages.spine/manager/StoreListPage';
@@ -206,6 +207,9 @@ const AppRouter = () => (
       
       {/* 經理設定 */}
       <Route path="manager-setting" element={<AppRouterVerify element={ManagerSettingPage} node="manager-setting" />} />
+      
+      {/* 區經理設定 */}
+      <Route path="district-manager-setting" element={<AppRouterVerify element={DistrictManagerSettingPage} node="district-manager-setting" />} />
       
       {/* 店面管理 */}
       <Route path="store/list" element={<AppRouterVerify element={StoreListPage} node="store" />} />

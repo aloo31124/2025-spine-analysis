@@ -4,7 +4,7 @@ import logo from '../../assets.spine/logo.png';
 import { logout } from '../../api/auth';
 import {useNavigate} from 'react-router-dom';
 import { FaCog, FaUserTie } from 'react-icons/fa';
-import { getStoreManagerList, checkIsGeneralManagerOrAdmin } from '../../api/manager/authPermission';
+import { getStoreManagerList, checkCanViewStoreManagerList } from '../../api/manager/authPermission';
 import { 
     getJwtToken, 
     getSelectedStoreManagerId, 
@@ -46,9 +46,9 @@ function Header({ onToggleMenu }) {
                 }
 
                 // 先檢查使用者角色權限
-                const hasPermission = await checkIsGeneralManagerOrAdmin();
+                const hasPermission = await checkCanViewStoreManagerList();
                 
-                // 只有系統管理員(Admin)或總經理(GeneralManager)才能看到店長選單
+                // 只有系統管理員(Admin)、總經理(GeneralManager)或區經理(DistrictManager)才能看到店長選單
                 if (!hasPermission) {
                     setShowStoreManagerSelect(false);
                     return;
