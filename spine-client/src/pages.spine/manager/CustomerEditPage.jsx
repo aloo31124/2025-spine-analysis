@@ -36,6 +36,8 @@ function CustomerEditPage() {
                 const state = customer.state || "正常";
                 const notes = customer.notes || '';
                 const age = customer.age || '';
+                const height = customer.height || '';
+                const weight = customer.weight || '';
                 
                 setCustomerParam({
                     id,
@@ -47,7 +49,9 @@ function CustomerEditPage() {
                     gender,
                     state,
                     notes,
-                    age
+                    age,
+                    height,
+                    weight
                 });
                 
                 // 取得客戶分析結果
