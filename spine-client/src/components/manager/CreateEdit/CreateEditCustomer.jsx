@@ -102,8 +102,9 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
                 setAge(customer.age || '');
             }
             
-            // 設定身高
+            // 設定身高和體重
             setHeight(customer.height || '');
+            setWeight(customer.weight || '');
             
             // 載入客戶的購買商品
             if (customer.id) {
@@ -236,7 +237,7 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
             return;
         }
         
-        handleAddCustomer({name, email, phone, address, birthday, gender, state, notes, age, height});
+        handleAddCustomer({name, email, phone, address, birthday, gender, state, notes, age, height, weight});
     }
 
     /* 編輯客戶, 更新編輯客戶 */
@@ -254,7 +255,7 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
             return;
         }
         
-        handleUpdateCustomer({name, email, phone, address, birthday, gender, state, notes, age, height});
+        handleUpdateCustomer({name, email, phone, address, birthday, gender, state, notes, age, height, weight});
     }
 
     /* 處理分析結果刪除 */
