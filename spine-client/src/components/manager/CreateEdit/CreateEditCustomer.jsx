@@ -6,6 +6,7 @@ import PillowRecommendationModal from '../ProductRecommendation/PillowRecommenda
 import MattressRecommendationModal from '../ProductRecommendation/MattressRecommendationModal';
 import { getCustomerToProductPillowByCustomerId } from '../../../api/manager/customerToProductPillow';
 import { getCustomerToProductMattressByCustomerId } from '../../../api/manager/customerToProductMattress';
+import { calculateDefaultHeight, formatDefaultHeight } from '../../../utils/calculateDefaultHeight';
 
 function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCustomer, handleAddCustomer, onRefreshAnalysisResults, isAnalysisLoading = false}) {
     const navigate = useNavigate();
@@ -23,6 +24,8 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
     const [state, setState] = useState("正常");
     const [notes, setNotes] = useState('');
     const [age, setAge] = useState('');
+    const [height, setHeight] = useState('');
+    const [defaultHeight, setDefaultHeight] = useState(null);
     
     // 購買商品相關狀態
     const [purchasedProducts, setPurchasedProducts] = useState([]);
@@ -89,6 +92,9 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
                 setAge(customer.age || '');
             }
             
+            // 設定身高
+            setHeight(customer.height || '');
+            
             // 載入客戶的購買商品
             if (customer.id) {
                 fetchPurchasedProducts(customer.id);
@@ -103,6 +109,12 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
             setAge(calculatedAge);
         }
     }, [birthday]);
+
+    /* 當年齡或身高改變時自動計算初始高度 */
+    useEffect(() => {
+        const calculatedDefaultHeight = calculateDefaultHeight(age, height);
+        setDefaultHeight(calculatedDefaultHeight);
+    }, [age, height]);
 
     /* 檢查是否從商品頁面購買成功返回 */
     useEffect(() => {
@@ -209,7 +221,7 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
             return;
         }
         
-        handleAddCustomer({name, email, phone, address, birthday, gender, state, notes, age});
+        handleAddCustomer({name, email, phone, address, birthday, gender, state, notes, age, height});
     }
 
     /* 編輯客戶, 更新編輯客戶 */
@@ -227,7 +239,7 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
             return;
         }
         
-        handleUpdateCustomer({name, email, phone, address, birthday, gender, state, notes, age});
+        handleUpdateCustomer({name, email, phone, address, birthday, gender, state, notes, age, height});
     }
 
     /* 處理分析結果刪除 */
@@ -252,6 +264,8 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
             state,
             notes,
             age,
+            height,
+            defaultHeight,
             analysisResults
         };
         
@@ -278,6 +292,8 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
             state,
             notes,
             age,
+            height,
+            defaultHeight,
             analysisResults
         };
         
@@ -346,6 +362,8 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
                         state,
                         notes,
                         age,
+                        height,
+                        defaultHeight,
                         analysisResults
                     }}
                 />
@@ -365,6 +383,8 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
                         state,
                         notes,
                         age,
+                        height,
+                        defaultHeight,
                         analysisResults
                     }}
                 />
@@ -485,6 +505,30 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
                     <small style={{ marginLeft: '10px', color: '#666' }}>
                         {birthday && `(根據生日計算: ${calculateAge(birthday)} 歲)`}
                         {!birthday && '(輸入生日後將自動計算)'}
+                    </small>
+                </div>
+                <div className={style.CreateEditProductRow}>
+                    <label>身高 (cm):</label>
+                    <input
+                        type="number"
+                        placeholder="請輸入身高（公分）"
+                        value={height}
+                        onChange={e => setHeight(e.target.value)}
+                        min="0"
+                        max="300"
+                    />
+                </div>
+                <div className={style.CreateEditProductRow}>
+                    <label>初始高度:</label>
+                    <input
+                        type="text"
+                        value={formatDefaultHeight(defaultHeight)}
+                        readOnly
+                        style={{ backgroundColor: '#f0f0f0', cursor: 'not-allowed' }}
+                        placeholder="自動計算"
+                    />
+                    <small style={{ marginLeft: '10px', color: '#666' }}>
+                        (根據年齡與身高自動計算)
                     </small>
                 </div>
                 <div className={style.CreateEditProductRow}>
