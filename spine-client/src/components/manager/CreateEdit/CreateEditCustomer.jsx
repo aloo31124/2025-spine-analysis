@@ -6,7 +6,12 @@ import PillowRecommendationModal from '../ProductRecommendation/PillowRecommenda
 import MattressRecommendationModal from '../ProductRecommendation/MattressRecommendationModal';
 import { getCustomerToProductPillowByCustomerId } from '../../../api/manager/customerToProductPillow';
 import { getCustomerToProductMattressByCustomerId } from '../../../api/manager/customerToProductMattress';
-import { calculateDefaultHeight, formatDefaultHeight } from '../../../utils/calculateDefaultHeight';
+import { 
+    calculateDefaultHeight, 
+    formatDefaultHeight,
+    calculateAdjustedDefaultHeight,
+    calculateStandardWeight
+} from '../../../utils/calculateDefaultHeight';
 
 function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCustomer, handleAddCustomer, onRefreshAnalysisResults, isAnalysisLoading = false}) {
     const navigate = useNavigate();
@@ -25,7 +30,12 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
     const [notes, setNotes] = useState('');
     const [age, setAge] = useState('');
     const [height, setHeight] = useState('');
+    const [weight, setWeight] = useState('');
     const [defaultHeight, setDefaultHeight] = useState(null);
+    const [baseHeight, setBaseHeight] = useState(null);
+    const [standardWeight, setStandardWeight] = useState(null);
+    const [weightDeviation, setWeightDeviation] = useState(null);
+    const [heightAdjustment, setHeightAdjustment] = useState(0);
     
     // 購買商品相關狀態
     const [purchasedProducts, setPurchasedProducts] = useState([]);
@@ -110,11 +120,16 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
         }
     }, [birthday]);
 
-    /* 當年齡或身高改變時自動計算初始高度 */
+    /* 當年齡、身高、性別或體重改變時自動計算初始高度 */
     useEffect(() => {
-        const calculatedDefaultHeight = calculateDefaultHeight(age, height);
-        setDefaultHeight(calculatedDefaultHeight);
-    }, [age, height]);
+        const result = calculateAdjustedDefaultHeight(age, height, gender, weight);
+        
+        setBaseHeight(result.baseHeight);
+        setStandardWeight(result.standardWeight);
+        setWeightDeviation(result.weightDeviation);
+        setHeightAdjustment(result.heightAdjustment);
+        setDefaultHeight(result.finalHeight);
+    }, [age, height, gender, weight]);
 
     /* 檢查是否從商品頁面購買成功返回 */
     useEffect(() => {
@@ -519,6 +534,54 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
                     />
                 </div>
                 <div className={style.CreateEditProductRow}>
+                    <label>體重 (kg):</label>
+                    <input
+                        type="number"
+                        placeholder="請輸入體重（公斤）"
+                        value={weight}
+                        onChange={e => setWeight(e.target.value)}
+                        min="0"
+                        max="500"
+                        step="0.1"
+                    />
+                </div>
+                <div className={style.CreateEditProductRow}>
+                    <label>標準體重 (kg):</label>
+                    <input
+                        type="text"
+                        value={standardWeight !== null ? `${standardWeight.toFixed(1)} kg` : '請輸入身高及性別'}
+                        readOnly
+                        style={{ backgroundColor: '#f0f0f0', cursor: 'not-allowed' }}
+                        placeholder="自動計算"
+                    />
+                    <small style={{ marginLeft: '10px', color: '#666' }}>
+                        {gender === '男' && '(身高 - 80) × 70%'}
+                        {gender === '女' && '(身高 - 70) × 60%'}
+                        {!gender && '(需選擇性別)'}
+                    </small>
+                </div>
+                <div className={style.CreateEditProductRow}>
+                    <label>體重偏差 (kg):</label>
+                    <input
+                        type="text"
+                        value={
+                            weightDeviation !== null 
+                                ? `${weightDeviation > 0 ? '+' : ''}${weightDeviation.toFixed(1)} kg` 
+                                : '請輸入體重'
+                        }
+                        readOnly
+                        style={{ 
+                            backgroundColor: '#f0f0f0', 
+                            cursor: 'not-allowed',
+                            color: weightDeviation > 4 ? '#d9534f' : weightDeviation < -4 ? '#5bc0de' : '#666'
+                        }}
+                        placeholder="自動計算"
+                    />
+                    <small style={{ marginLeft: '10px', color: '#666' }}>
+                        (實際體重 - 標準體重)
+                    </small>
+                </div>
+                <div className={style.CreateEditProductRow}>
                     <label>初始高度:</label>
                     <input
                         type="text"
@@ -527,10 +590,22 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
                         style={{ backgroundColor: '#f0f0f0', cursor: 'not-allowed' }}
                         placeholder="自動計算"
                     />
-                    <small style={{ marginLeft: '10px', color: '#666' }}>
-                        (根據年齡與身高自動計算)
-                    </small>
                 </div>
+                {baseHeight !== null && (
+                    <div className={style.CreateEditProductRow}>
+                        <label></label>
+                        <small style={{ color: '#666' }}>
+                            基準高度: {baseHeight} cm
+                            {heightAdjustment !== 0 && (
+                                <>
+                                    {' '} + 體重調整: {heightAdjustment > 0 ? '+' : ''}{heightAdjustment} cm
+                                    {' '} = 最終高度: {defaultHeight} cm
+                                </>
+                            )}
+                            {heightAdjustment === 0 && ' (無需調整)'}
+                        </small>
+                    </div>
+                )}
                 <div className={style.CreateEditProductRow}>
                     <label>性別:</label>
                     <select value={gender} onChange={e => setGender(e.target.value)}>
