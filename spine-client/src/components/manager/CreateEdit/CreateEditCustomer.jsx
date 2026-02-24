@@ -524,6 +524,15 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
                     </small>
                 </div>
                 <div className={style.CreateEditProductRow}>
+                    <label>性別:</label>
+                    <select value={gender} onChange={e => setGender(e.target.value)}>
+                        <option value="">請選擇</option>
+                        <option value="男">男</option>
+                        <option value="女">女</option>
+                        <option value="其他">其他</option>
+                    </select>
+                </div>
+                <div className={style.CreateEditProductRow}>
                     <label>身高 (cm):</label>
                     <input
                         type="number"
@@ -607,15 +616,6 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
                         </small>
                     </div>
                 )}
-                <div className={style.CreateEditProductRow}>
-                    <label>性別:</label>
-                    <select value={gender} onChange={e => setGender(e.target.value)}>
-                        <option value="">請選擇</option>
-                        <option value="男">男</option>
-                        <option value="女">女</option>
-                        <option value="其他">其他</option>
-                    </select>
-                </div>
             </div>
 
             <div className={style.CreateEditProductContainer}>
