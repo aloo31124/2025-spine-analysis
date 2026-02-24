@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/static/css/main.b3e156b5.css",
-    "main.js": "/static/js/main.e0a19c96.js",
+    "main.css": "/static/css/main.b3870a34.css",
+    "main.js": "/static/js/main.eac6d2e0.js",
     "static/js/488.2ea39770.chunk.js": "/static/js/488.2ea39770.chunk.js",
     "static/media/病患側面.png": "/static/media/病患側面.6e95957c4757061e3b8e.png",
     "static/media/shoppingBag1.png": "/static/media/shoppingBag1.b773f790598e31169a6f.png",
@@ -15,12 +15,12 @@
     "index.html": "/index.html",
     "static/media/message.svg": "/static/media/message.40779fc2e8ff2483efbd03d2b1cfe13f.svg",
     "static/media/filter.svg": "/static/media/filter.02c00012084038db4244bcd1efbb9ddc.svg",
-    "main.b3e156b5.css.map": "/static/css/main.b3e156b5.css.map",
-    "main.e0a19c96.js.map": "/static/js/main.e0a19c96.js.map",
+    "main.b3870a34.css.map": "/static/css/main.b3870a34.css.map",
+    "main.eac6d2e0.js.map": "/static/js/main.eac6d2e0.js.map",
     "488.2ea39770.chunk.js.map": "/static/js/488.2ea39770.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.b3e156b5.css",
-    "static/js/main.e0a19c96.js"
+    "static/css/main.b3870a34.css",
+    "static/js/main.eac6d2e0.js"
   ]
 }
