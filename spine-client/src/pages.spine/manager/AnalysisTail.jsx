@@ -7,6 +7,7 @@ import { getCustomerList } from '../../api/manager/customer';
 import ScaleIndicator from '../../components/ScaleIndicator';
 import { convertPxToCm, formatPxCmText } from '../../utils/scaleConversion';
 import { formatDistanceWithMode } from '../../utils/screenConversion';
+import { applyTailPointConstraints } from '../../utils/pointConstraints';
 
 function AnalysisTail() {
     const navigate = useNavigate();
@@ -212,11 +213,16 @@ function AnalysisTail() {
         newX = Math.max(0, Math.min(container.offsetWidth - 10, newX));
         newY = Math.max(0, Math.min(container.offsetHeight - 10, newY));
 
-        setPoints(prevPoints =>
-            prevPoints.map((point, index) =>
-                index === currentPointIndex ? { ...point, x: newX, y: newY } : point
-            )
-        );
+        setPoints(prevPoints => {
+            const previousPoint = prevPoints[currentPointIndex];
+            return applyTailPointConstraints(
+                prevPoints,
+                currentPointIndex,
+                newX,
+                newY,
+                previousPoint
+            );
+        });
     };
 
     const handleMouseUp = () => {
