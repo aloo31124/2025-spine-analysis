@@ -1,651 +1,215 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import './AnalysisSpine.css';
 import neckPatientImage from '../../assets.spine/images/病患側面.png';
-import { addCustomerAnalysisResult } from '../../api/manager/customerAnalysisResult';
-import { getCustomerList } from '../../api/manager/customer';
 import ScaleIndicator from '../../components/ScaleIndicator';
+import AnalysisBottomBar from '../../components/AnalysisBottomBar';
+import AnalysisModals from '../../components/AnalysisModals';
+import { useAnalysisDrag } from '../../hooks/useAnalysisDrag';
+import { useAnalysisPhoto } from '../../hooks/useAnalysisPhoto';
+import { useAnalysisZoom } from '../../hooks/useAnalysisZoom';
+import { useAnalysisSave } from '../../hooks/useAnalysisSave';
 import { formatPxCmText } from '../../utils/scaleConversion';
 import { formatDistanceWithMode } from '../../utils/screenConversion';
-import { 
-    applyPointConstraints, 
-    initializePoints, 
-    initializePointsFromRelative,
-    getPointName,
-    validatePointConstraints 
+import { calculateDistance, calculateAngle } from '../../utils/geometry';
+import {
+    applyPointConstraints,
+    initializePoints,
+    initializePointsFromRelative
 } from '../../utils/pointConstraints';
 
 function AnalysisSpine() {
     const navigate = useNavigate();
     const location = useLocation();
-    const neckContainerRef = useRef(null);
-    const neckContainerWrapperRef = useRef(null);
-    
-    // 背景圖片狀態
-    const [backgroundImage, setBackgroundImage] = useState(neckPatientImage);
-    
-    // 縮放比例變量
-    const [currentScale, setCurrentScale] = useState(1);
-    const minScale = 0.5;
-    const maxScale = 2.0;
-    const scaleStep = 0.1;
-    
-    const [points, setPoints] = useState([]);
-    const [currentPointIndex, setCurrentPointIndex] = useState(0);
-    const [isDragging, setIsDragging] = useState(false);
-    const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-    const [lines, setLines] = useState([]);
-    const [intersectionPoints, setIntersectionPoints] = useState([]);
-    const [calculationResults, setCalculationResults] = useState([]);
-    
-    // 新增狀態：保存結果相關
-    const [showSaveOptions, setShowSaveOptions] = useState(false);
-    const [showCustomerModal, setShowCustomerModal] = useState(false);
-    const [customerList, setCustomerList] = useState([]);
-    const [selectedCustomer, setSelectedCustomer] = useState(null);
-    const [isCalculated, setIsCalculated] = useState(false);
-    const [showBlankScreen, setShowBlankScreen] = useState(false);
-    
-    // 比例尺縮放因子狀態（預設為 1.0）
+    const containerRef = useRef(null);
+    const wrapperRef = useRef(null);
+
+    // 比例尺縮放因子
     const [scaleFactorState, setScaleFactorState] = useState(1.0);
+
+    /* ========== 共用 Hooks ========== */
+
+    const drag = useAnalysisDrag({ containerRef, constraintFn: applyPointConstraints });
+
+    const photo = useAnalysisPhoto({
+        defaultImage: neckPatientImage,
+        defaultBgPosition: 'center top',
+        locationState: location.state,
+        onPointsReceived: (relativePoints, imageSize) => {
+            const container = containerRef.current;
+            if (!container) return;
+            const newPoints = initializePointsFromRelative(
+                relativePoints, imageSize, container.offsetWidth, container.offsetHeight
+            );
+            drag.resetPoints(newPoints);
+        }
+    });
+
+    const zoom = useAnalysisZoom({ wrapperRef, minScale: 0.5, maxScale: 2.0, scaleStep: 0.1 });
+
+    const save = useAnalysisSave({
+        buildPayloadFn: () => ({
+            analysisType: 'spine',
+            analysisData: {
+                scale: zoom.currentScale,
+                timestamp: new Date().toISOString()
+            },
+            points: drag.points,
+            lines: drag.lines,
+            intersectionPoints: drag.intersectionPoints,
+            calculationResults: drag.calculationResults,
+            backgroundImage: photo.backgroundImage !== neckPatientImage ? photo.backgroundImage : ''
+        }),
+        navigate
+    });
 
     // 初始化點位
     useEffect(() => {
-        initPoints();
+        const container = containerRef.current;
+        if (!container) return;
+        drag.resetPoints(initializePoints(container.offsetWidth, container.offsetHeight));
     }, []);
 
-    // 從 React Router state 或 localStorage 接收拍照頁面傳來的數據
-    useEffect(() => {
-        // 優先檢查 localStorage 中的照片數據（來自 PhotoCapture）
-        const storedPhoto = localStorage.getItem('spineAnalysisPhoto');
-        const storedTimestamp = localStorage.getItem('spineAnalysisPhotoTimestamp');
-        
-        if (storedPhoto && storedTimestamp) {
-            // 檢查照片是否在 5 分鐘內上傳（避免使用過期的照片）
-            const timestamp = parseInt(storedTimestamp, 10);
-            const now = Date.now();
-            const fiveMinutes = 5 * 60 * 1000;
-            
-            if (now - timestamp < fiveMinutes) {
-                setBackgroundImage(storedPhoto);
-                // 清除已使用的照片數據
-                localStorage.removeItem('spineAnalysisPhoto');
-                localStorage.removeItem('spineAnalysisPhotoTimestamp');
-                return;
-            }
-        }
-        
-        // 如果 localStorage 沒有數據，則檢查 location.state（來自 PhotoCaptureDrag）
-        const analysisData = location.state;
-        
-        if (analysisData && analysisData.photo && analysisData.points) {
-            // 使用傳遞過來的照片
-            setBackgroundImage(analysisData.photo);
-            
-            // 使用傳遞過來的點位數據初始化
-            if (analysisData.points && Array.isArray(analysisData.points) && analysisData.points.length > 0) {
-                // 等待容器渲染完成後再初始化點位
-                setTimeout(() => {
-                    initPointsFromRelative(analysisData.points, analysisData.imageSize);
-                }, 100);
-            }
-        }
-    }, [location.state]);
+    /* ========== Spine 專有：計算邏輯 ========== */
 
-    const initPoints = () => {
-        const container = neckContainerRef.current;
-        if (!container) return;
-
-        // 使用工具函數初始化點位（含第六點位）
-        const newPoints = initializePoints(container.offsetWidth, container.offsetHeight);
-        
-        setPoints(newPoints);
-        setCurrentPointIndex(0);
-        setLines([]);
-        setIntersectionPoints([]);
-        setCalculationResults([]);
-    };
-
-    // 從相對位置初始化點位（用於從 PhotoCaptureDrag 接收數據）
-    const initPointsFromRelative = (relativePoints, imageSize) => {
-        const container = neckContainerRef.current;
-        if (!container) return;
-
-        // 使用工具函數初始化點位
-        const newPoints = initializePointsFromRelative(
-            relativePoints, 
-            imageSize, 
-            container.offsetWidth, 
-            container.offsetHeight
-        );
-        
-        setPoints(newPoints);
-        setCurrentPointIndex(0);
-        setLines([]);
-        setIntersectionPoints([]);
-        setCalculationResults([]);
-    };
-
-    // 設置當前可拖拽的點
-    const setDraggablePoint = (index) => {
-        setPoints(prevPoints => 
-            prevPoints.map((point, i) => ({
-                ...point,
-                isDraggable: i === index
-            }))
-        );
-        setCurrentPointIndex(index);
-    };
-
-    // 開始拖拽（點擊任意點位即可切換並拖曳）
-    const handleMouseDown = (e, pointIndex) => {
-        e.preventDefault();
-        
-        // 點擊任意點位時，先將該點位設為當前可拖曳的點位
-        if (points[pointIndex] && !points[pointIndex].isDraggable) {
-            setDraggablePoint(pointIndex);
-        }
-        
-        setIsDragging(true);
-        
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        
-        const container = neckContainerRef.current;
-        const rect = container.getBoundingClientRect();
-        
-        setDragStart({
-            x: clientX - rect.left - points[pointIndex].x,
-            y: clientY - rect.top - points[pointIndex].y
-        });
-    };
-
-    // 拖拽中
-    const handleMouseMove = (e) => {
-        if (!isDragging) return;
-        
-        e.preventDefault();
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        
-        const container = neckContainerRef.current;
-        const rect = container.getBoundingClientRect();
-        
-        let newX = clientX - rect.left - dragStart.x;
-        let newY = clientY - rect.top - dragStart.y;
-        
-        // 限制點在容器範圍內
-        newX = Math.max(0, Math.min(container.offsetWidth - 10, newX));
-        newY = Math.max(0, Math.min(container.offsetHeight - 10, newY));
-        
-        setPoints(prevPoints => {
-            // 獲取當前點的位置（用於計算偏移量）
-            const previousPoint = prevPoints[currentPointIndex];
-            
-            // 應用點位約束（處理聯動邏輯）
-            const updatedPoints = applyPointConstraints(
-                prevPoints,
-                currentPointIndex,
-                newX,
-                newY,
-                previousPoint
-            );
-            
-            return updatedPoints;
-        });
-    };
-
-    // 停止拖拽
-    const handleMouseUp = () => {
-        setIsDragging(false);
-    };
-
-    useEffect(() => {
-        if (isDragging) {
-            document.addEventListener('mousemove', handleMouseMove);
-            document.addEventListener('mouseup', handleMouseUp);
-            document.addEventListener('touchmove', handleMouseMove, { passive: false });
-            document.addEventListener('touchend', handleMouseUp);
-            
-            return () => {
-                document.removeEventListener('mousemove', handleMouseMove);
-                document.removeEventListener('mouseup', handleMouseUp);
-                document.removeEventListener('touchmove', handleMouseMove);
-                document.removeEventListener('touchend', handleMouseUp);
-            };
-        }
-    }, [isDragging, dragStart, currentPointIndex]);
-
-    // 上一個點
-    const handlePrevPoint = () => {
-        if (currentPointIndex > 0) {
-            setDraggablePoint(currentPointIndex - 1);
-        }
-    };
-
-    // 下一個點
-    const handleNextPoint = () => {
-        if (currentPointIndex < points.length - 1) {
-            setDraggablePoint(currentPointIndex + 1);
-        }
-    };
-
-    // 導航到拍照頁面
-    const handleGoToPhotoCapture = () => {
-        navigate('/manager/photo/capture');
-    };
-
-    // 計算功能
-    const handleCalculate = () => {
-        calculateSpecialLines();
-        calculateAllDistancesAndAngles();
-        setIsCalculated(true);
-    };
-    
-    // 處理比例尺縮放因子改變
     const handleScaleFactorChange = (newScaleFactor) => {
         setScaleFactorState(newScaleFactor);
-        // 如果已經計算過，則重新計算所有距離
-        if (isCalculated) {
+        if (drag.isCalculated) {
             calculateAllDistancesAndAngles(newScaleFactor);
         }
     };
 
+    const handleCalculate = () => {
+        calculateSpecialLines();
+        calculateAllDistancesAndAngles();
+        drag.setIsCalculated(true);
+    };
+
     // 計算所有點之間的距離和角度
-    // scaleFactor 參數為可選，如果沒有傳入則使用狀態中的值
     const calculateAllDistancesAndAngles = (scaleFactor) => {
-        const currentScaleFactor = scaleFactor !== undefined ? scaleFactor : scaleFactorState;
+        const sf = scaleFactor !== undefined ? scaleFactor : scaleFactorState;
+        const pts = drag.points;
         const results = [];
-        
-        // 計算所有點之間的距離
-        results.push("=== 點之間的距離 ===");
-        for (let i = 0; i < points.length; i++) {
-            for (let j = i + 1; j < points.length; j++) {
-                const distance = calculateDistance(points[i], points[j]);
-                // 使用共用的格式化函數，根據是否為空白畫面模式選擇轉換方式
-                const formattedDistance = formatDistanceWithMode(
-                    distance,
-                    showBlankScreen,  // 空白畫面模式使用螢幕實際 DPI 轉換
-                    (px) => formatPxCmText(px, currentScaleFactor)  // 傳入縮放因子到格式化函數
+
+        results.push('=== 點之間的距離 ===');
+        for (let i = 0; i < pts.length; i++) {
+            for (let j = i + 1; j < pts.length; j++) {
+                const dist = calculateDistance(pts[i], pts[j]);
+                const formatted = formatDistanceWithMode(
+                    dist,
+                    photo.showBlankScreen,
+                    (px) => formatPxCmText(px, sf)
                 );
-                results.push(`點${i + 1} 到 點${j + 1}: ${formattedDistance}`);
+                results.push(`點${i + 1} 到 點${j + 1}: ${formatted}`);
             }
         }
-        
-        results.push("");
-        results.push("=== 點之間的角度 ===");
-        
-        // 計算角度（以每個點為頂點，計算與其相鄰點的夾角）
-        for (let i = 0; i < points.length; i++) {
-            for (let j = 0; j < points.length; j++) {
-                for (let k = j + 1; k < points.length; k++) {
+
+        results.push('');
+        results.push('=== 點之間的角度 ===');
+        for (let i = 0; i < pts.length; i++) {
+            for (let j = 0; j < pts.length; j++) {
+                for (let k = j + 1; k < pts.length; k++) {
                     if (i !== j && i !== k && j !== k) {
-                        const angle = calculateAngleBetweenThreePoints(points[j], points[i], points[k]);
+                        const angle = calculateAngle(pts[j], pts[i], pts[k]);
                         results.push(`∠點${j + 1}-點${i + 1}-點${k + 1}: ${angle.toFixed(1)}°`);
                     }
                 }
             }
         }
-        
-        // 將結果存儲到狀態中以便顯示
-        setCalculationResults(results);
-    };
-
-    // 計算三點之間的角度
-    const calculateAngleBetweenThreePoints = (pointA, vertex, pointC) => {
-        const vectorAV = {
-            x: pointA.x - vertex.x,
-            y: pointA.y - vertex.y
-        };
-        
-        const vectorCV = {
-            x: pointC.x - vertex.x,
-            y: pointC.y - vertex.y
-        };
-        
-        const dotProduct = vectorAV.x * vectorCV.x + vectorAV.y * vectorCV.y;
-        const magnitudeAV = Math.sqrt(vectorAV.x * vectorAV.x + vectorAV.y * vectorAV.y);
-        const magnitudeCV = Math.sqrt(vectorCV.x * vectorCV.x + vectorCV.y * vectorCV.y);
-        
-        if (magnitudeAV === 0 || magnitudeCV === 0) {
-            return 0;
-        }
-        
-        const cosAngle = dotProduct / (magnitudeAV * magnitudeCV);
-        const clampedCosAngle = Math.max(-1, Math.min(1, cosAngle));
-        const angleRadians = Math.acos(clampedCosAngle);
-        const angleDegrees = angleRadians * 180 / Math.PI;
-        
-        return angleDegrees;
-    };
-
-    // 縮放功能
-    const applyScale = (scale) => {
-        const wrapper = neckContainerWrapperRef.current;
-        if (wrapper) {
-            wrapper.style.transform = `scale(${scale})`;
-            wrapper.style.transformOrigin = 'center top';
-            setCurrentScale(scale);
-        }
-    };
-
-    const handleZoomIn = () => {
-        const newScale = Math.min(currentScale + scaleStep, maxScale);
-        applyScale(newScale);
-    };
-
-    const handleZoomOut = () => {
-        const newScale = Math.max(currentScale - scaleStep, minScale);
-        applyScale(newScale);
+        drag.setCalculationResults(results);
     };
 
     // 計算特殊線條和交點
     const calculateSpecialLines = () => {
+        const pts = drag.points;
         const newLines = [];
         const newIntersectionPoints = [];
 
-        // 1. 畫點1與點4的連線
-        const line14 = {
-            id: 'line14',
-            type: 'diagonal',
-            start: points[0],
-            end: points[3]
-        };
-        newLines.push(line14);
+        // 點1→點4 連線
+        newLines.push({ id: 'line14', type: 'diagonal', start: pts[0], end: pts[3] });
+        // 點3 水平線
+        newLines.push({ id: 'horizontal3', type: 'horizontal', point: pts[2] });
+        // 點5 垂直線
+        newLines.push({ id: 'vertical5', type: 'vertical', point: pts[4] });
 
-        // 2. 畫點3的水平線
-        const horizontalLine = {
-            id: 'horizontal3',
-            type: 'horizontal',
-            point: points[2]
-        };
-        newLines.push(horizontalLine);
-
-        // 3. 畫點5的垂直線
-        const verticalLine = {
-            id: 'vertical5',
-            type: 'vertical',
-            point: points[4]
-        };
-        newLines.push(verticalLine);
-
-        // 4. 計算水平線3與線14的交點（點6）
-        const intersection6 = calculateLineIntersection(
-            points[2], 'horizontal',
-            points[0], points[3]
-        );
+        // 水平線3 與 線14 的交點（點6）
+        const intersection6 = calculateLineIntersection(pts[2], 'horizontal', pts[0], pts[3]);
         if (intersection6) {
             newIntersectionPoints.push({ id: '6', ...intersection6 });
         }
+        // 水平線3 與 垂直線5 的交點（點7）
+        newIntersectionPoints.push({ id: '7', x: pts[4].x, y: pts[2].y });
 
-        // 5. 計算水平線3與垂直線5的交點（點7）
-        const intersection7 = {
-            x: points[4].x,
-            y: points[2].y
-        };
-        newIntersectionPoints.push({ id: '7', ...intersection7 });
-
-        // 6. 畫點5與點6的連線
+        // 點5→點6 連線
         if (intersection6) {
-            const line56 = {
-                id: 'line56',
-                type: 'diagonal',
-                start: points[4],
-                end: intersection6
-            };
-            newLines.push(line56);
+            newLines.push({ id: 'line56', type: 'diagonal', start: pts[4], end: intersection6 });
         }
 
-        setLines(newLines);
-        setIntersectionPoints(newIntersectionPoints);
+        drag.setLines(newLines);
+        drag.setIntersectionPoints(newIntersectionPoints);
     };
 
-    // 計算線段交點
     const calculateLineIntersection = (horizontalPoint, horizontalType, diagonalPoint1, diagonalPoint2) => {
         if (horizontalType === 'horizontal') {
             const y = horizontalPoint.y;
             const dx = diagonalPoint2.x - diagonalPoint1.x;
             const dy = diagonalPoint2.y - diagonalPoint1.y;
-            
             if (dy === 0) return null;
-            
             const t = (y - diagonalPoint1.y) / dy;
-            
             if (t >= 0 && t <= 1) {
-                const x = diagonalPoint1.x + t * dx;
-                return { x, y };
+                return { x: diagonalPoint1.x + t * dx, y };
             }
         }
         return null;
     };
 
-    // 計算角度756
-    const calculateAngle756 = (point7, point5, point6) => {
-        const vector57 = {
-            x: point7.x - point5.x,
-            y: point7.y - point5.y
-        };
-        
-        const vector56 = {
-            x: point6.x - point5.x,
-            y: point6.y - point5.y
-        };
-        
-        const dotProduct = vector57.x * vector56.x + vector57.y * vector56.y;
-        const magnitude57 = Math.sqrt(vector57.x * vector57.x + vector57.y * vector57.y);
-        const magnitude56 = Math.sqrt(vector56.x * vector56.x + vector56.y * vector56.y);
-        
-        if (magnitude57 === 0 || magnitude56 === 0) {
-            return 0;
-        }
-        
-        const cosAngle = dotProduct / (magnitude57 * magnitude56);
-        const clampedCosAngle = Math.max(-1, Math.min(1, cosAngle));
-        const angleRadians = Math.acos(clampedCosAngle);
-        const angleDegrees = angleRadians * 180 / Math.PI;
-        
-        return angleDegrees;
-    };
-
-    // 計算兩點距離
-    const calculateDistance = (point1, point2) => {
-        const dx = point2.x - point1.x;
-        const dy = point2.y - point1.y;
-        return Math.sqrt(dx * dx + dy * dy);
-    };
-
-    // 顯示保存選項對話框
-    const handleSaveResult = () => {
-        setShowSaveOptions(true);
-    };
-
-    // 處理綁定客戶
-    const handleBindCustomer = async () => {
-        try {
-            // 取得客戶列表
-            const searchParam = {};
-            const pagingParam = { pageIndex: 1, pageSize: 1000 };
-            const response = await getCustomerList(searchParam, pagingParam);
-            if (response.status === 200) {
-                setCustomerList(response.data.result.customerList || []);
-                setShowSaveOptions(false);
-                setShowCustomerModal(true);
-            }
-        } catch (error) {
-            console.error('取得客戶列表錯誤:', error);
-            alert('取得客戶列表失敗');
-        }
-    };
-
-    // 處理新建客戶
-    const handleCreateNewCustomer = async () => {
-        try {
-            const userId = localStorage.getItem('userId') || 'default_user';
-            
-            // 將分析結果資料暫時保存到localStorage，不存入資料庫
-            const pendingAnalysisData = {
-                analysisType: 'spine',
-                analysisData: {
-                    scale: currentScale,
-                    timestamp: new Date().toISOString()
-                },
-                points: points,
-                lines: lines,
-                intersectionPoints: intersectionPoints,
-                calculationResults: calculationResults,
-                backgroundImage: backgroundImage !== neckPatientImage ? backgroundImage : '',
-                userId: userId,
-                createdAt: new Date().toISOString()
-            };
-            
-            // 將待綁定的分析結果存儲到localStorage
-            localStorage.setItem('pendingAnalysisData', JSON.stringify(pendingAnalysisData));
-            
-            setShowSaveOptions(false);
-            navigate('/manager/customer/add');
-        } catch (error) {
-            console.error('處理新建客戶錯誤:', error);
-            alert('處理新建客戶失敗', error);
-        }
-    };
-
-    // 選擇客戶並保存結果
-    const handleSelectCustomer = async (customer) => {
-        try {
-            await saveAnalysisResult(customer.id);
-            setShowCustomerModal(false);
-            navigate('/manager/customer/edit/' + customer.id, { state: { customer } });
-        } catch (error) {
-            console.error('保存分析結果錯誤:', error);
-            alert('保存分析結果失敗');
-        }
-    };
-
-    // 保存分析結果到數據庫
-    const saveAnalysisResult = async (customerId) => {
-        try {
-            const userId = localStorage.getItem('userId') || 'default_user';
-            const analysisData = {
-                customerId: customerId,
-                userId: userId,
-                analysisType: 'spine',
-                analysisData: {
-                    scale: currentScale,
-                    timestamp: new Date().toISOString()
-                },
-                points: points,
-                lines: lines,
-                intersectionPoints: intersectionPoints,
-                calculationResults: calculationResults,
-                backgroundImage: backgroundImage !== neckPatientImage ? backgroundImage : ''
-            };
-
-            const response = await addCustomerAnalysisResult(analysisData);
-            if (response.status === 200) {
-                console.log('分析結果保存成功:', response.data);
-                return response.data;
-            }
-        } catch (error) {
-            console.error('保存分析結果錯誤:', error);
-            throw error;
-        }
-    };
-
-    // 關閉對話框
-    const handleCloseModals = () => {
-        setShowSaveOptions(false);
-        setShowCustomerModal(false);
-    };
-
-    
-    
-    const getContainerStyle = () => {
-        // 如果顯示空白畫面，返回白色背景
-        if (showBlankScreen) {
-            return {
-                backgroundColor: 'white',
-                backgroundImage: 'none'
-            };
-        }
-
-        const style = {
-            backgroundImage: `url(${backgroundImage})`
-        };
-
-        if (backgroundImage === neckPatientImage) {
-            return {
-                ...style,
-                backgroundPosition: 'center top',
-                backgroundSize: 'auto 135%'
-            };
-        }
-
-        return {
-            ...style,
-            backgroundPosition: 'center',
-            backgroundSize: 'cover'
-        };
-    };
-
-    // 切換空白畫面
-    const handleToggleBlankScreen = () => {
-        if(!showBlankScreen) {
-            alert('切換為空白畫面模式，距離計算將依照螢幕實際尺寸(公分)進行。請受測者身體緊貼於螢幕，確保測量準確。');
-        }
-        setShowBlankScreen(!showBlankScreen);
-    };
+    /* ========== JSX ========== */
 
     return (
         <div className="analysis-spine">
             <div className="analysis-content">
-                <div className="neck-container-wrapper" ref={neckContainerWrapperRef}>
+                <div className="neck-container-wrapper" ref={wrapperRef}>
                     <div className="neck-calculation-results">
-                        {calculationResults.length > 0 && (
+                        {drag.calculationResults.length > 0 && (
                             <div className="calculation-results-content">
                                 <h3>計算結果</h3>
                                 <div className="results-list">
-                                    {calculationResults.map((result, index) => (
-                                        <div key={index} className="result-item">
-                                            {result}
-                                        </div>
+                                    {drag.calculationResults.map((result, index) => (
+                                        <div key={index} className="result-item">{result}</div>
                                     ))}
                                 </div>
                             </div>
                         )}
                     </div>
-                    <div 
-                        className="neck-container" 
-                        ref={neckContainerRef}
-                        style={getContainerStyle()}
+                    <div
+                        className="neck-container"
+                        ref={containerRef}
+                        style={photo.getContainerStyle()}
                     >
                         {/* 渲染點位 */}
-                        {points.map((point, index) => (
+                        {drag.points.map((point, index) => (
                             <div
                                 key={point.id}
                                 className={`point ${point.isDraggable ? 'draggable' : ''}`}
-                                style={{
-                                    left: `${point.x}px`,
-                                    top: `${point.y}px`
-                                }}
-                                onMouseDown={(e) => handleMouseDown(e, index)}
-                                onTouchStart={(e) => handleMouseDown(e, index)}
+                                style={{ left: `${point.x}px`, top: `${point.y}px` }}
+                                onMouseDown={(e) => drag.handleMouseDown(e, index)}
+                                onTouchStart={(e) => drag.handleMouseDown(e, index)}
                             >
                                 {index + 1}
                             </div>
                         ))}
 
                         {/* 渲染線條 */}
-                        {lines.map(line => {
+                        {drag.lines.map(line => {
                             if (line.type === 'diagonal') {
                                 const length = Math.sqrt(
-                                    Math.pow(line.end.x - line.start.x, 2) + 
+                                    Math.pow(line.end.x - line.start.x, 2) +
                                     Math.pow(line.end.y - line.start.y, 2)
                                 );
                                 const angle = Math.atan2(
-                                    line.end.y - line.start.y, 
+                                    line.end.y - line.start.y,
                                     line.end.x - line.start.x
                                 ) * 180 / Math.PI;
-
                                 return (
                                     <div
                                         key={line.id}
@@ -663,11 +227,7 @@ function AnalysisSpine() {
                                     <div
                                         key={line.id}
                                         className="special-line horizontal-line"
-                                        style={{
-                                            left: '0px',
-                                            top: `${line.point.y}px`,
-                                            width: '100%'
-                                        }}
+                                        style={{ left: '0px', top: `${line.point.y}px`, width: '100%' }}
                                     />
                                 );
                             } else if (line.type === 'vertical') {
@@ -675,11 +235,7 @@ function AnalysisSpine() {
                                     <div
                                         key={line.id}
                                         className="special-line vertical-line"
-                                        style={{
-                                            left: `${line.point.x}px`,
-                                            top: '0px',
-                                            height: '100%'
-                                        }}
+                                        style={{ left: `${line.point.x}px`, top: '0px', height: '100%' }}
                                     />
                                 );
                             }
@@ -687,113 +243,48 @@ function AnalysisSpine() {
                         })}
 
                         {/* 渲染交點 */}
-                        {intersectionPoints.map(point => (
+                        {drag.intersectionPoints.map(point => (
                             <div
                                 key={point.id}
                                 className="intersection-point"
-                                style={{
-                                    left: `${point.x}px`,
-                                    top: `${point.y}px`
-                                }}
+                                style={{ left: `${point.x}px`, top: `${point.y}px` }}
                             >
                                 {point.id}
                             </div>
                         ))}
 
-                        <ScaleIndicator 
+                        <ScaleIndicator
                             scaleFactor={scaleFactorState}
                             onScaleFactorChange={handleScaleFactorChange}
-                            useScreenDPI={showBlankScreen}
+                            useScreenDPI={photo.showBlankScreen}
                         />
                     </div>
                 </div>
             </div>
 
-            {/* 縮放控制按鈕（點位切換已改為直接點擊點位標記） */}
-            <div className="menu-bottom-second">
-                <button 
-                    onClick={handleZoomIn}
-                    disabled={currentScale >= maxScale}
-                >
-                    +
-                </button>
-                <button 
-                    onClick={handleZoomOut}
-                    disabled={currentScale <= minScale}
-                >
-                    -
-                </button>
-            </div>
+            <AnalysisBottomBar
+                isCalculated={drag.isCalculated}
+                onCalculate={handleCalculate}
+                onSave={save.handleSaveResult}
+                onPhoto={() => navigate('/manager/photo/capture')}
+                onToggleBlank={photo.handleToggleBlankScreen}
+                showBlankScreen={photo.showBlankScreen}
+                currentScale={zoom.currentScale}
+                minScale={zoom.minScale}
+                maxScale={zoom.maxScale}
+                onZoomIn={zoom.handleZoomIn}
+                onZoomOut={zoom.handleZoomOut}
+            />
 
-            <div className="menu-bottom">
-                {!isCalculated ? (
-                    <button onClick={handleCalculate} className="action-btn">
-                        計算 
-                    </button>
-                ) : (
-                    <button onClick={handleSaveResult} className="action-btn">
-                        儲存結果
-                    </button>
-                )}
-                <span>&nbsp;&nbsp;&nbsp;</span>
-                <button onClick={handleGoToPhotoCapture} className="action-btn">
-                    拍攝新照片
-                </button>                <span>&nbsp;&nbsp;&nbsp;</span>
-                <button onClick={handleToggleBlankScreen} className="action-btn">
-                    {showBlankScreen ? '還原圖片' : '切換空白畫面'}
-                </button>
-            </div>
-
-            {/* 保存選項對話框 */}
-            {showSaveOptions && (
-                <div className="modal-overlay">
-                    <div className="modal-content">
-                        <h3>選擇保存方式</h3>
-                        <div className="modal-buttons">
-                            <button onClick={handleBindCustomer} className="action-btn">
-                                綁定客戶
-                            </button>
-                            <button onClick={handleCreateNewCustomer} className="action-btn">
-                                新建客戶
-                            </button>
-                            <button onClick={handleCloseModals} className="cancel-btn">
-                                取消
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* 客戶選擇對話框 */}
-            {showCustomerModal && (
-                <div className="modal-overlay">
-                    <div className="modal-content customer-modal">
-                        <h3>選擇客戶</h3>
-                        <div className="customer-list">
-                            {customerList.map(customer => (
-                                <div 
-                                    key={customer.id} 
-                                    className="customer-item"
-                                    onClick={() => handleSelectCustomer(customer)}
-                                >
-                                    <div className="customer-info">
-                                        <div className="customer-name">{customer.name}</div>
-                                        <div className="customer-details">
-                                            {customer.phone && <span>電話: {customer.phone}</span>}
-                                            {customer.email && <span>信箱: {customer.email}</span>}
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                        <div className="modal-buttons">
-                            <button onClick={handleCloseModals} className="cancel-btn">
-                                取消
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <AnalysisModals
+                showSaveOptions={save.showSaveOptions}
+                showCustomerModal={save.showCustomerModal}
+                customerList={save.customerList}
+                onBindCustomer={save.handleBindCustomer}
+                onCreateNew={save.handleCreateNewCustomer}
+                onSelectCustomer={save.handleSelectCustomer}
+                onClose={save.handleCloseModals}
+            />
         </div>
     );
 }
