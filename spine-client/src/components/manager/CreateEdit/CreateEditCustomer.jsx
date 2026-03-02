@@ -13,6 +13,7 @@ import {
     calculateStandardWeight
 } from '../../../utils/calculateDefaultHeight';
 import { extractSpineRecommendation } from '../../../utils/spineRecommendation';
+import { calculateSpine36Adjustment, calculateSpine37Adjustment } from '../../../utils/spineSpecialAdjustment';
 
 function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCustomer, handleAddCustomer, onRefreshAnalysisResults, isAnalysisLoading = false}) {
     const navigate = useNavigate();
@@ -41,6 +42,10 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
     // 頸椎分析推薦相關狀態
     const [spinePoint24Distance, setSpinePoint24Distance] = useState(null);
     const [spinePillowRecommendation, setSpinePillowRecommendation] = useState('');
+
+    // 機械測量相關狀態
+    const [spine36Measurement, setSpine36Measurement] = useState('');   // 頸椎凹點至後腦勺 (3-6)
+    const [spine37Excess, setSpine37Excess] = useState('');              // 頸椎凹點至背部凸點 (3-7) 超過標準的距離
     
     // 購買商品相關狀態
     const [purchasedProducts, setPurchasedProducts] = useState([]);
@@ -678,6 +683,76 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
                         )}
                     </small>
                 </div>
+
+                <h2>脊椎曲線特殊調整 (機械測量)</h2>
+                <div className={style.CreateEditProductRow}>
+                    <small style={{ color: '#999', fontStyle: 'italic', marginBottom: '10px', display: 'block' }}>
+                        ※ 根據機械量測之垂直平行距離進行最終微調
+                    </small>
+                </div>
+
+                {/* 測量指標一: 頸椎凹點至後腦勺 (3-6) */}
+                <div className={style.CreateEditProductRow}>
+                    <label>頸椎凹點至後腦勺 (3-6) (cm):</label>
+                    <input
+                        type="number"
+                        placeholder="請輸入測量距離（公分）"
+                        value={spine36Measurement}
+                        onChange={e => setSpine36Measurement(e.target.value)}
+                        min="0"
+                        step="0.1"
+                    />
+                </div>
+                {spine36Measurement !== '' && (() => {
+                    const result = calculateSpine36Adjustment(spine36Measurement);
+                    if (!result) return null;
+                    const bgColor = result.level === 'danger' ? '#f8d7da' : result.level === 'warn' ? '#fff3cd' : '#d4edda';
+                    const borderColor = result.level === 'danger' ? '#f5c6cb' : result.level === 'warn' ? '#ffeaa7' : '#c3e6cb';
+                    const textColor = result.level === 'danger' ? '#721c24' : result.level === 'warn' ? '#856404' : '#155724';
+                    return (
+                        <div className={style.CreateEditProductRow}>
+                            <label>調整方案:</label>
+                            <div style={{ padding: '8px 12px', borderRadius: '4px', backgroundColor: bgColor, border: `1px solid ${borderColor}`, flex: 1 }}>
+                                <div style={{ fontWeight: 'bold', color: textColor }}>{result.adjustment}</div>
+                                {result.modelNote && (
+                                    <small style={{ color: '#666', display: 'block', marginTop: '4px' }}>{result.modelNote}</small>
+                                )}
+                            </div>
+                        </div>
+                    );
+                })()}
+
+                {/* 測量指標二: 頸椎凹點至背部凸點 (3-7) */}
+                <div className={style.CreateEditProductRow}>
+                    <label>頸椎凹點至背部凸點 (3-7) 超過標準 (cm):</label>
+                    <input
+                        type="number"
+                        placeholder="請輸入超過標準的距離（公分）"
+                        value={spine37Excess}
+                        onChange={e => setSpine37Excess(e.target.value)}
+                        min="0"
+                        step="0.1"
+                    />
+                    <small style={{ marginLeft: '10px', color: '#666' }}>(輸入實際測量距離超過標準的公分數)</small>
+                </div>
+                {spine37Excess !== '' && (() => {
+                    const result = calculateSpine37Adjustment(spine37Excess);
+                    if (!result) return null;
+                    const bgColor = result.level === 'warn' ? '#fff3cd' : '#d4edda';
+                    const borderColor = result.level === 'warn' ? '#ffeaa7' : '#c3e6cb';
+                    const textColor = result.level === 'warn' ? '#856404' : '#155724';
+                    return (
+                        <div className={style.CreateEditProductRow}>
+                            <label>調整方案:</label>
+                            <div style={{ padding: '8px 12px', borderRadius: '4px', backgroundColor: bgColor, border: `1px solid ${borderColor}`, flex: 1 }}>
+                                <div style={{ fontWeight: 'bold', color: textColor }}>{result.adjustment}</div>
+                                {result.modelNote && (
+                                    <small style={{ color: '#666', display: 'block', marginTop: '4px' }}>{result.modelNote}</small>
+                                )}
+                            </div>
+                        </div>
+                    );
+                })()}
             </div>
 
             <div className={style.CreateEditProductContainer}>
