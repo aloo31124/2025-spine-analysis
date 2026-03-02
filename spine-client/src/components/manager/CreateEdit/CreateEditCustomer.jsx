@@ -12,6 +12,7 @@ import {
     calculateAdjustedDefaultHeight,
     calculateStandardWeight
 } from '../../../utils/calculateDefaultHeight';
+import { extractSpineRecommendation } from '../../../utils/spineRecommendation';
 
 function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCustomer, handleAddCustomer, onRefreshAnalysisResults, isAnalysisLoading = false}) {
     const navigate = useNavigate();
@@ -36,6 +37,10 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
     const [standardWeight, setStandardWeight] = useState(null);
     const [weightDeviation, setWeightDeviation] = useState(null);
     const [heightAdjustment, setHeightAdjustment] = useState(0);
+    
+    // 頸椎分析推薦相關狀態
+    const [spinePoint24Distance, setSpinePoint24Distance] = useState(null);
+    const [spinePillowRecommendation, setSpinePillowRecommendation] = useState('');
     
     // 購買商品相關狀態
     const [purchasedProducts, setPurchasedProducts] = useState([]);
@@ -131,6 +136,19 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
         setHeightAdjustment(result.heightAdjustment);
         setDefaultHeight(result.finalHeight);
     }, [age, height, gender, weight]);
+
+    /* 當分析結果改變時，計算頸椎點2-4距離和推薦型號 */
+    useEffect(() => {
+        const spineRecommendation = extractSpineRecommendation(analysisResults);
+        
+        if (spineRecommendation) {
+            setSpinePoint24Distance(spineRecommendation.distance);
+            setSpinePillowRecommendation(spineRecommendation.recommendation);
+        } else {
+            setSpinePoint24Distance(null);
+            setSpinePillowRecommendation('');
+        }
+    }, [analysisResults]);
 
     /* 檢查是否從商品頁面購買成功返回 */
     useEffect(() => {
@@ -616,6 +634,50 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
                         </small>
                     </div>
                 )}
+                
+                <h2>頸椎分析推薦</h2>
+                <div className={style.CreateEditProductRow}>
+                    <small style={{ color: '#999', fontStyle: 'italic', marginBottom: '10px', display: 'block' }}>
+                        ※ 以下數據自動從最新的頸椎分析結果中提取
+                    </small>
+                </div>
+                <div className={style.CreateEditProductRow}>
+                    <label>點2-4距離 (cm):</label>
+                    <input
+                        type="text"
+                        value={spinePoint24Distance !== null ? `${spinePoint24Distance.toFixed(2)} cm` : '無頸椎分析數據'}
+                        readOnly
+                        style={{ backgroundColor: '#f0f0f0', cursor: 'not-allowed' }}
+                        placeholder="需要頸椎分析結果"
+                    />
+                    <small style={{ marginLeft: '10px', color: '#666' }}>
+                        (枕骨至第七頸椎的距離)
+                    </small>
+                </div>
+                <div className={style.CreateEditProductRow}>
+                    <label>推薦枕頭型號:</label>
+                    <input
+                        type="text"
+                        value={spinePillowRecommendation || '無推薦'}
+                        readOnly
+                        style={{ 
+                            backgroundColor: '#f0f0f0', 
+                            cursor: 'not-allowed',
+                            color: spinePillowRecommendation ? '#5cb85c' : '#666',
+                            fontWeight: spinePillowRecommendation ? 'bold' : 'normal'
+                        }}
+                        placeholder="需要頸椎分析結果"
+                    />
+                    <small style={{ marginLeft: '10px', color: '#666' }}>
+                        {spinePoint24Distance !== null && (
+                            <>
+                                {spinePoint24Distance <= 8.4 && '(≤ 8.4 cm → B 型枕)'}
+                                {spinePoint24Distance >= 8.5 && spinePoint24Distance <= 10.0 && '(8.5 - 10 cm → A 型枕)'}
+                                {spinePoint24Distance >= 10.1 && '(≥ 10.1 cm → AA 型枕)'}
+                            </>
+                        )}
+                    </small>
+                </div>
             </div>
 
             <div className={style.CreateEditProductContainer}>
