@@ -12,7 +12,7 @@ import {
     calculateAdjustedDefaultHeight,
     calculateStandardWeight
 } from '../../../utils/calculateDefaultHeight';
-import { extractSpineRecommendation } from '../../../utils/spineRecommendation';
+import { extractSpineRecommendation, extractSpinePointDistances, computeShimAdjustment, computeExtra58Height } from '../../../utils/spineRecommendation';
 
 function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCustomer, handleAddCustomer, onRefreshAnalysisResults, isAnalysisLoading = false}) {
     const navigate = useNavigate();
@@ -41,6 +41,11 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
     // 頸椎分析推薦相關狀態
     const [spinePoint24Distance, setSpinePoint24Distance] = useState(null);
     const [spinePillowRecommendation, setSpinePillowRecommendation] = useState('');
+
+    // 脊椎曲線特殊調整 — 點位距離
+    const [spinePoint37Distance, setSpinePoint37Distance] = useState(null);
+    const [spinePoint58Distance, setSpinePoint58Distance] = useState(null);
+    const [spine58StandardLength, setSpine58StandardLength] = useState(25);
     
     // 購買商品相關狀態
     const [purchasedProducts, setPurchasedProducts] = useState([]);
@@ -137,7 +142,7 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
         setDefaultHeight(result.finalHeight);
     }, [age, height, gender, weight]);
 
-    /* 當分析結果改變時，計算頸椎點2-4距離和推薦型號 */
+    /* 當分析結果改變時，計算頸椎點2-4距離和推薦型號，以及點3-7、5-8距離 */
     useEffect(() => {
         const spineRecommendation = extractSpineRecommendation(analysisResults);
         
@@ -147,6 +152,15 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
         } else {
             setSpinePoint24Distance(null);
             setSpinePillowRecommendation('');
+        }
+
+        const spineDistances = extractSpinePointDistances(analysisResults);
+        if (spineDistances) {
+            setSpinePoint37Distance(spineDistances.dist37);
+            setSpinePoint58Distance(spineDistances.dist58);
+        } else {
+            setSpinePoint37Distance(null);
+            setSpinePoint58Distance(null);
         }
     }, [analysisResults]);
 
@@ -678,6 +692,126 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
                         )}
                     </small>
                 </div>
+            </div>
+
+            <div className={style.CreateEditProductContainer}>
+                <h2>脊椎曲線特殊調整規則 (墊片與加高)</h2>
+                <div className={style.CreateEditProductRow}>
+                    <small style={{ color: '#999', fontStyle: 'italic', marginBottom: '10px', display: 'block' }}>
+                        ※ 根據頸椎分析點位距離進行最終微調，數據自動從最新頸椎分析提取
+                    </small>
+                </div>
+
+                {/* 點3-7 距離（頸椎凹點至後腦勺） */}
+                <div className={style.CreateEditProductRow}>
+                    <label>點3-7 距離 (cm):</label>
+                    <input
+                        type="text"
+                        value={spinePoint37Distance !== null ? `${spinePoint37Distance.toFixed(2)} cm` : '無頸椎分析數據'}
+                        readOnly
+                        style={{ backgroundColor: '#f0f0f0', cursor: 'not-allowed' }}
+                        placeholder="需要頸椎分析結果"
+                    />
+                    <small style={{ marginLeft: '10px', color: '#666' }}>(頸椎凹點至後腦勺)</small>
+                </div>
+
+                {/* 點5-8 距離（頸椎凹點至背部凸點） */}
+                <div className={style.CreateEditProductRow}>
+                    <label>點5-8 距離 (cm):</label>
+                    <input
+                        type="text"
+                        value={spinePoint58Distance !== null ? `${spinePoint58Distance.toFixed(2)} cm` : '無頸椎分析數據'}
+                        readOnly
+                        style={{ backgroundColor: '#f0f0f0', cursor: 'not-allowed' }}
+                        placeholder="需要頸椎分析結果"
+                    />
+                    <small style={{ marginLeft: '10px', color: '#666' }}>(頸椎凹點至背部凸點)</small>
+                </div>
+
+                {/* 5-8點標準長度（可編輯，預設 25 cm） */}
+                <div className={style.CreateEditProductRow}>
+                    <label>5-8點標準長度 (cm):</label>
+                    <input
+                        type="number"
+                        value={spine58StandardLength}
+                        onChange={e => setSpine58StandardLength(Number(e.target.value))}
+                        min="0"
+                        step="0.5"
+                        style={{ width: '100px' }}
+                    />
+                    <small style={{ marginLeft: '10px', color: '#666' }}>(預設 25 cm；超過標準每 0.5 cm 額外加高 0.5 cm)</small>
+                </div>
+
+                {/* 墊片調整建議（依點3-7距離） */}
+                {(() => {
+                    const shimAdj = computeShimAdjustment(spinePoint37Distance, heightAdjustment);
+                    const modelLabel = baseHeight !== null && shimAdj?.modelSuffix
+                        ? `型號: ${baseHeight}${shimAdj.modelSuffix}`
+                        : null;
+                    return (
+                        <div className={style.CreateEditProductRow}>
+                            <label>墊片調整建議:</label>
+                            <input
+                                type="text"
+                                value={
+                                    shimAdj
+                                        ? shimAdj.shimText + (modelLabel ? `　→　${modelLabel}` : '')
+                                        : '無頸椎分析數據'
+                                }
+                                readOnly
+                                style={{
+                                    backgroundColor: '#f0f0f0',
+                                    cursor: 'not-allowed',
+                                    color: shimAdj?.modelSuffix ? '#d9534f' : '#5cb85c',
+                                    fontWeight: shimAdj?.modelSuffix ? 'bold' : 'normal',
+                                    minWidth: '300px',
+                                }}
+                                placeholder="需要頸椎分析結果"
+                            />
+                            {spinePoint37Distance !== null && (
+                                <small style={{ marginLeft: '10px', color: '#666' }}>
+                                    {spinePoint37Distance < 1.6 && '(< 1.6 cm → 無需墊片)'}
+                                    {spinePoint37Distance >= 1.6 && spinePoint37Distance <= 2.1 && '(1.6 - 2.1 cm → 半張墊片，型號 X.5)'}
+                                    {spinePoint37Distance >= 2.2 && '(≥ 2.2 cm → 二個半張墊片，型號 X.2)'}
+                                </small>
+                            )}
+                        </div>
+                    );
+                })()}
+
+                {/* 5-8點加高調整建議 */}
+                {(() => {
+                    const extraH = computeExtra58Height(spinePoint58Distance, spine58StandardLength);
+                    return (
+                        <div className={style.CreateEditProductRow}>
+                            <label>5-8點加高調整 (cm):</label>
+                            <input
+                                type="text"
+                                value={
+                                    extraH !== null
+                                        ? extraH > 0
+                                            ? `額外加高 +${extraH} cm`
+                                            : '無需加高'
+                                        : '無頸椎分析數據'
+                                }
+                                readOnly
+                                style={{
+                                    backgroundColor: '#f0f0f0',
+                                    cursor: 'not-allowed',
+                                    color: extraH !== null && extraH > 0 ? '#d9534f' : '#5cb85c',
+                                    fontWeight: extraH !== null && extraH > 0 ? 'bold' : 'normal',
+                                }}
+                                placeholder="需要頸椎分析結果"
+                            />
+                            {spinePoint58Distance !== null && (
+                                <small style={{ marginLeft: '10px', color: '#666' }}>
+                                    (5-8點距離 {spinePoint58Distance.toFixed(2)} cm，標準 {spine58StandardLength} cm，
+                                    超出 {Math.max(0, spinePoint58Distance - spine58StandardLength).toFixed(2)} cm)
+                                </small>
+                            )}
+                        </div>
+                    );
+                })()}
             </div>
 
             <div className={style.CreateEditProductContainer}>
