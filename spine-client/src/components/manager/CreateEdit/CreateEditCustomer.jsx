@@ -814,6 +814,82 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
                 })()}
             </div>
 
+            {/* ── 型號建議 ─────────────────────────── */}
+            {(() => {
+                // 將數字高度轉換為中文（6.5 → 六點五公分）
+                const cnDigits = { '0': '零', '1': '一', '2': '二', '3': '三', '4': '四', '5': '五', '6': '六', '7': '七', '8': '八', '9': '九' };
+                const heightToChinese = (h) => {
+                    if (h === null || h === undefined) return null;
+                    return String(h).split('').map(c => c === '.' ? '點' : (cnDigits[c] || c)).join('') + '公分';
+                };
+
+                // 從 shimAdj.modelSuffix 取得墊片狀態標籤
+                const shimAdj = computeShimAdjustment(spinePoint37Distance, heightAdjustment);
+                const extractShimLabel = (adj) => {
+                    if (!adj) return null;
+                    if (!adj.modelSuffix) return '無墊片';
+                    if (adj.modelSuffix === '.5') return '半張墊片';
+                    if (adj.modelSuffix === '.2') return '二個半張墊片';
+                    return null;
+                };
+
+                // 從推薦型號取得弧度類型（'AA 型枕' → 'AA型'）
+                const extractArcLabel = (rec) => {
+                    if (!rec) return null;
+                    return rec.replace(/\s+/g, '').replace('枕', '');
+                };
+
+                const heightLabel = heightToChinese(defaultHeight);
+                const shimLabel   = extractShimLabel(shimAdj);
+                const arcLabel    = extractArcLabel(spinePillowRecommendation);
+
+                const allReady = heightLabel && shimLabel && arcLabel;
+                const modelName = allReady ? `${heightLabel}_${shimLabel}_${arcLabel}` : null;
+
+                return (
+                    <div className={style.CreateEditProductContainer}>
+                        <h2>型號建議</h2>
+                        <div className={style.CreateEditProductRow}>
+                            <small style={{ color: '#999', fontStyle: 'italic', marginBottom: '10px', display: 'block' }}>
+                                ※ 依據上方「初始高度」、「墊片調整建議」、「推薦枕頭型號」自動組合
+                            </small>
+                        </div>
+                        <div className={style.CreateEditProductRow}>
+                            <label>高度:</label>
+                            <input type="text" readOnly
+                                value={heightLabel ?? '請輸入年齡及身高'}
+                                style={{ backgroundColor: '#f0f0f0', cursor: 'not-allowed' }} />
+                        </div>
+                        <div className={style.CreateEditProductRow}>
+                            <label>墊片狀態:</label>
+                            <input type="text" readOnly
+                                value={shimLabel ?? '無頸椎分析數據'}
+                                style={{ backgroundColor: '#f0f0f0', cursor: 'not-allowed' }} />
+                        </div>
+                        <div className={style.CreateEditProductRow}>
+                            <label>弧度類型:</label>
+                            <input type="text" readOnly
+                                value={arcLabel ?? '無頸椎分析數據'}
+                                style={{ backgroundColor: '#f0f0f0', cursor: 'not-allowed' }} />
+                        </div>
+                        <div className={style.CreateEditProductRow}>
+                            <label>型號命名:</label>
+                            <input type="text" readOnly
+                                value={modelName ?? '資料不完整，請確認上方三項數值'}
+                                style={{
+                                    backgroundColor: modelName ? '#e8f5e9' : '#f0f0f0',
+                                    cursor: 'not-allowed',
+                                    color: modelName ? '#2e7d32' : '#999',
+                                    fontWeight: modelName ? 'bold' : 'normal',
+                                    minWidth: '320px',
+                                    fontSize: '1.05em',
+                                }}
+                            />
+                        </div>
+                    </div>
+                );
+            })()}
+
             <div className={style.CreateEditProductContainer}>
                 <h2>備註</h2>
                 <div className={style.CreateEditProductRow}>
