@@ -87,15 +87,15 @@ function AnalysisSpine() {
         // 點5 垂直線
         newLines.push({ id: 'vertical5', type: 'vertical', point: points[4] });
 
-        // 水平線3 與 線14 的交點（點6）
+        // 水平線3 與 線14 的交點（點7）
         const intersection6 = calculateLineIntersection(points[2], 'horizontal', points[0], points[3]);
         if (intersection6) {
-            newIntersectionPoints.push({ id: '6', ...intersection6 });
+            newIntersectionPoints.push({ id: '7', ...intersection6 });
             newLines.push({ id: 'line56', type: 'diagonal', start: points[4], end: intersection6 });
         }
 
-        // 水平線3 與 垂直線5 的交點（點7）
-        newIntersectionPoints.push({ id: '7', x: points[4].x, y: points[2].y });
+        // 水平線3 與 垂直線5 的交點（點8）
+        newIntersectionPoints.push({ id: '8', x: points[4].x, y: points[2].y });
 
         setLines(newLines);
         setIntersectionPoints(newIntersectionPoints);
@@ -116,6 +116,27 @@ function AnalysisSpine() {
                 results.push(`點${i + 1} 到 點${j + 1}: ${formatted}`);
             }
         }
+
+        // 點3-點7 距離（水平線3 與 線14 的交點）
+        const dy14 = points[3].y - points[0].y;
+        if (dy14 !== 0) {
+            const t7 = (points[2].y - points[0].y) / dy14;
+            if (t7 >= 0 && t7 <= 1) {
+                const intersection7 = {
+                    x: points[0].x + t7 * (points[3].x - points[0].x),
+                    y: points[2].y,
+                };
+                const dist37 = calculateDistance(points[2], intersection7);
+                const formatted37 = formatDistanceWithMode(dist37, showBlankScreen, (px) => formatPxCmText(px, sf));
+                results.push(`點3 到 點7: ${formatted37}`);
+            }
+        }
+
+        // 點5-點8 距離（水平線3 與 垂直線5 的交點）
+        const intersection8 = { x: points[4].x, y: points[2].y };
+        const dist58 = calculateDistance(points[4], intersection8);
+        const formatted58 = formatDistanceWithMode(dist58, showBlankScreen, (px) => formatPxCmText(px, sf));
+        results.push(`點5 到 點8: ${formatted58}`);
 
         results.push('');
         results.push('=== 點之間的角度 ===');
