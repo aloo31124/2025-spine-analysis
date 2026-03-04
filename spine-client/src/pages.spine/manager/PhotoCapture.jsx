@@ -1,23 +1,21 @@
 /**
  * PhotoCapture.jsx - 拍照上傳功能頁面
- * 
+ *
  * 功能說明：
  * - 支援移動設備相機拍攝 (HTML5 File Input API)
  * - 支援桌面設備網路攝像頭拍攝 (getUserMedia API)
- * - 提供照片編輯功能 (裁切)
  * - 響應式設計，適配不同設備
- * 
+ *
  * 技術特點：
  * - 自動檢測設備類型並使用相應的拍照方式
  * - React Hooks 狀態管理
- * - Canvas API 處理圖片裁切
  * - 完整的錯誤處理與權限提示
  */
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './PhotoCapture.css';
-import { FaCamera, FaUpload, FaCrop, FaSave, FaPlus, FaTimes, FaRedo } from 'react-icons/fa';
+import { FaCamera, FaUpload, FaPlus, FaRedo } from 'react-icons/fa';
 import ScaleIndicator from '../../components/ScaleIndicator';
 
 const MAX_IMAGE_DIMENSION = 1600;
@@ -39,7 +37,7 @@ function PhotoCapture() {
     const navigate = useNavigate();
 
     // === 狀態管理 ===
-    const [currentView, setCurrentView] = useState('main'); // 'main', 'preview', 'editor', 'result'
+    const [currentView, setCurrentView] = useState('main'); // 'main', 'preview'
     const [imageData, setImageData] = useState(null);
     const [previewUrl, setPreviewUrl] = useState(null);
     const [deviceInfo, setDeviceInfo] = useState('');
@@ -47,19 +45,12 @@ function PhotoCapture() {
     const [isMobileDevice, setIsMobileDevice] = useState(false);
     const [showAnalysisModal, setShowAnalysisModal] = useState(false);
     const [showCameraOverlay, setShowCameraOverlay] = useState(false);
-    
-    // === 編輯相關狀態 ===
-    const [cropArea, setCropArea] = useState({ x: 0, y: 0, width: 300, height: 300 });
-    const [isDragging, setIsDragging] = useState(false);
-    const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-    
+
     // === DOM 引用 ===
     const fileInputRef = useRef(null);
     const cameraInputRef = useRef(null);
     const previewImageRef = useRef(null);
-    const editorImageRef = useRef(null);
     const canvasRef = useRef(null);
-    const cropAreaRef = useRef(null);
     const videoRef = useRef(null);
     const streamRef = useRef(null);
 
@@ -285,53 +276,15 @@ function PhotoCapture() {
         }
     }, []);
 
-
-    // === 執行裁切 ===
-    const handleCropPhoto = useCallback(async () => {
-        if (!editorImageRef.current || !canvasRef.current) return;
-
-        setIsProcessing(true);
-        const img = editorImageRef.current;
-        const canvas = canvasRef.current;
-        const ctx = canvas.getContext('2d');
-
-        if (!ctx) {
-            setIsProcessing(false);
-            alert('畫布初始化失敗，請重新嘗試');
-            return;
-        }
-
-        // 設置畫布尺寸
-        canvas.width = cropArea.width;
-        canvas.height = cropArea.height;
-
-        // 繪製裁切後的圖片
-        ctx.drawImage(
-            img,
-            cropArea.x, cropArea.y, cropArea.width, cropArea.height,
-            0, 0, cropArea.width, cropArea.height
-        );
-
-        // 獲取裁切後的圖片數據
-        const croppedDataUrl = canvas.toDataURL('image/png');
-        await updatePreviewFromDataUrl(croppedDataUrl);
-    }, [cropArea, updatePreviewFromDataUrl]);
-
-    // === 取消編輯 ===
-    const handleCancelEdit = useCallback(() => {
-        setCurrentView('preview');
-    }, []);
-
     // === 重新開始 ===
     const handleNewPhoto = useCallback(() => {
         setCurrentView('main');
         setPreviewUrl(null);
         setImageData(null);
-        setCropArea({ x: 0, y: 0, width: 300, height: 300 });
         setShowAnalysisModal(false);
         setShowCameraOverlay(false);
         stopCameraStream();
-        
+
         // 清理文件輸入
         if (fileInputRef.current) fileInputRef.current.value = '';
         if (cameraInputRef.current) cameraInputRef.current.value = '';
@@ -346,23 +299,8 @@ function PhotoCapture() {
         setShowAnalysisModal(true);
     }, [imageData]);
 
-    // === 開啟攝影點位拖曳選擇 ===
-    const [showDragModeModal, setShowDragModeModal] = useState(false);
-    
-    const handleOpenDragMode = useCallback(() => {
-        setShowDragModeModal(true);
-    }, []);
-
-    const handleSelectDragMode = useCallback((target) => {
-        const targetPath = target === 'tail' 
-            ? '/manager/photo/capture-drag?type=tail' 
-            : '/manager/photo/capture-drag?type=spine';
-        navigate(targetPath);
-        setShowDragModeModal(false);
-    }, [navigate]);
-
-    const handleCloseDragModeModal = useCallback(() => {
-        setShowDragModeModal(false);
+    const handleCloseAnalysisChoice = useCallback(() => {
+        setShowAnalysisModal(false);
     }, []);
 
     const handleSelectAnalysis = useCallback((target) => {
@@ -379,53 +317,6 @@ function PhotoCapture() {
         navigate(targetPath);
         setShowAnalysisModal(false);
     }, [imageData, navigate]);
-
-    const handleCloseAnalysisChoice = useCallback(() => {
-        setShowAnalysisModal(false);
-    }, []);
-
-    // === 裁切區域拖拽處理 ===
-    const handleCropMouseDown = useCallback((e) => {
-        e.preventDefault();
-        setIsDragging(true);
-        
-        const rect = cropAreaRef.current?.getBoundingClientRect();
-        if (!rect) return;
-        
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        
-        setDragStart({
-            x: clientX - rect.left,
-            y: clientY - rect.top
-        });
-    }, []);
-
-    const handleCropMouseMove = useCallback((e) => {
-        if (!isDragging || !editorImageRef.current) return;
-        
-        e.preventDefault();
-        const img = editorImageRef.current;
-        const imgRect = img.getBoundingClientRect();
-        
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        
-        const newX = Math.max(0, Math.min(
-            img.offsetWidth - cropArea.width,
-            clientX - imgRect.left - dragStart.x
-        ));
-        const newY = Math.max(0, Math.min(
-            img.offsetHeight - cropArea.height,
-            clientY - imgRect.top - dragStart.y
-        ));
-        
-        setCropArea(prev => ({ ...prev, x: newX, y: newY }));
-    }, [isDragging, dragStart, cropArea.width, cropArea.height]);
-
-    const handleCropMouseUp = useCallback(() => {
-        setIsDragging(false);
-    }, []);
 
     const handleCaptureFromStream = useCallback(async () => {
         if (!videoRef.current || !canvasRef.current) {
@@ -462,33 +353,13 @@ function PhotoCapture() {
         stopCameraStream();
     }, [stopCameraStream]);
 
-    // === 添加拖拽事件監聽 ===
-    useEffect(() => {
-        if (isDragging) {
-            const handleMove = (e) => handleCropMouseMove(e);
-            const handleUp = () => handleCropMouseUp();
-            
-            document.addEventListener('mousemove', handleMove);
-            document.addEventListener('mouseup', handleUp);
-            document.addEventListener('touchmove', handleMove, { passive: false });
-            document.addEventListener('touchend', handleUp);
-            
-            return () => {
-                document.removeEventListener('mousemove', handleMove);
-                document.removeEventListener('mouseup', handleUp);
-                document.removeEventListener('touchmove', handleMove);
-                document.removeEventListener('touchend', handleUp);
-            };
-        }
-    }, [isDragging, handleCropMouseMove, handleCropMouseUp]);
-
     // === 渲染主界面 ===
     const renderMainView = () => (
         <div className="photo-capture-content">
             <div className="photo-capture-card">
                 <h2 className="photo-capture-title">照片拍攝與上傳</h2>
                 <p className="photo-capture-description">
-                    使用設備相機拍攝照片或從相冊上傳照片，支援簡單的編輯功能
+                    使用設備相機拍攝照片或從相冊上傳照片
                 </p>
                 
                 <button onClick={handleCameraCapture} >
@@ -501,15 +372,7 @@ function PhotoCapture() {
                     <FaUpload />
                     <span>上傳照片</span>
                 </button>
-                { /* // 隱藏該功能。
-                <br />
-                <br />
-                <button onClick={handleOpenDragMode} >
-                    <FaCamera />
-                    <span>攝影點位拖曳</span>
-                </button>
-                */}
-                
+
                 <div className="device-info-display">
                     {deviceInfo}
                 </div>
@@ -528,55 +391,6 @@ function PhotoCapture() {
                         src={previewUrl} 
                         alt="照片預覽" 
                         className="photo-preview-image"
-                    />
-                    <ScaleIndicator className="scale-indicator--capture" />
-                </div>
-            </div>
-        </div>
-    );
-
-    // === 渲染編輯界面 ===
-    const renderEditorView = () => (
-        <div className="photo-capture-content">
-            <div className="photo-capture-card">
-                <h2 className="photo-capture-title">編輯照片</h2>
-                <div className="photo-editor-container">
-                    <div className="photo-crop-container">
-                        <img 
-                            ref={editorImageRef}
-                            src={previewUrl} 
-                            alt="編輯照片" 
-                            className="photo-editor-image"
-                        />
-                        <div 
-                            ref={cropAreaRef}
-                            className="photo-crop-area"
-                            style={{
-                                left: `${cropArea.x}px`,
-                                top: `${cropArea.y}px`,
-                                width: `${cropArea.width}px`,
-                                height: `${cropArea.height}px`
-                            }}
-                            onMouseDown={handleCropMouseDown}
-                            onTouchStart={handleCropMouseDown}
-                        />
-                        <ScaleIndicator className="scale-indicator--capture" />
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-
-    // === 渲染結果界面 ===
-    const renderResultView = () => (
-        <div className="photo-capture-content">
-            <div className="photo-capture-card">
-                <h2 className="photo-capture-title">最終結果</h2>
-                <div className="photo-result-container">
-                    <img 
-                        src={previewUrl} 
-                        alt="最終結果" 
-                        className="photo-result-image"
                     />
                     <ScaleIndicator className="scale-indicator--capture" />
                 </div>
@@ -616,8 +430,6 @@ function PhotoCapture() {
             {/* 根據當前視圖渲染對應界面 */}
             {currentView === 'main' && renderMainView()}
             {currentView === 'preview' && renderPreviewView()}
-            {currentView === 'editor' && renderEditorView()}
-            {currentView === 'result' && renderResultView()}
 
             {/* 底部控制按鈕 */}
             {currentView === 'preview' && (
@@ -627,32 +439,6 @@ function PhotoCapture() {
                         <span>開始分析</span>
                     </button>
                     <button onClick={handleNewPhoto}>
-                        <FaRedo />
-                        <span>重新拍攝</span>
-                    </button>
-                </div>
-            )}
-
-            {currentView === 'editor' && (
-                <div className="photo-bottom-menu">
-                    <button onClick={handleCropPhoto} >
-                        <FaCrop />
-                        <span>裁切</span>
-                    </button>
-                    <button onClick={handleCancelEdit} >
-                        <FaTimes />
-                        <span>取消</span>
-                    </button>
-                </div>
-            )}
-
-            {currentView === 'result' && (
-                <div className="photo-bottom-menu">
-                    <button onClick={handleOpenAnalysisChoice} >
-                        <FaPlus />
-                        <span>開始分析</span>
-                    </button>
-                    <button onClick={handleNewPhoto} >
                         <FaRedo />
                         <span>重新拍攝</span>
                     </button>
@@ -705,25 +491,6 @@ function PhotoCapture() {
                 </div>
             )}
 
-            {showDragModeModal && (
-                <div className="photo-analysis-modal" role="dialog" aria-modal="true">
-                    <div className="photo-analysis-modal__content">
-                        <h3>選擇分析類型</h3>
-                        <p>請選擇要進行的分析項目：</p>
-                        <div className="photo-analysis-modal__actions">
-                            <button onClick={() => handleSelectDragMode('spine')}>
-                                頸部分析
-                            </button>
-                            <button onClick={() => handleSelectDragMode('tail')}>
-                                尾椎分析
-                            </button>
-                        </div>
-                        <button className="photo-analysis-modal__close" onClick={handleCloseDragModeModal}>
-                            取消
-                        </button>
-                    </div>
-                </div>
-            )}
         </div>
     );
 }

@@ -1,6 +1,6 @@
 /**
  * 點位約束工具函數
- * 用於處理頸椎分析中點位之間的聯動約束邏輯
+ * 用於處理頸椎/尾椎分析中點位之間的聯動約束邏輯
  */
 
 /**
@@ -10,9 +10,9 @@
  * - 點6在點2右邊並保持平行
  * - 上下移動時：點2和點6同步移動（保持Y座標相同）
  * - 左右移動時：點2和點6各自獨立移動
- * 
- * 腰椎約束（點2和點3）：
- * - 點3與點2保持垂直關係
+ *
+ * 尾椎約束（點2和點3）：
+ * - 點2與點3保持垂直關係（X座標相同）
  * - 左右移動時：點2和點3同步移動（保持X座標相同）
  * - 上下移動時：點2和點3各自獨立移動
  */
@@ -57,7 +57,30 @@ export const applyPointConstraints = (points, draggedPointIndex, newX, newY, pre
         }
     }
 
-    // 腰椎約束：點2（索引1）和點3（索引2）的關係
+    return updatedPoints;
+};
+
+/**
+ * 應用尾椎點位拖曳約束
+ * 尾椎約束：點2（索引1）和點3（索引2）保持垂直（X座標相同）
+ * @param {Array} points - 所有點位陣列
+ * @param {number} draggedPointIndex - 被拖曳的點位索引
+ * @param {number} newX - 新的X座標
+ * @param {number} newY - 新的Y座標
+ * @param {Object} previousPoint - 拖曳前的點位資訊（用於計算偏移量）
+ * @returns {Array} 更新後的所有點位陣列
+ */
+export const applyTailPointConstraints = (points, draggedPointIndex, newX, newY, previousPoint) => {
+    const updatedPoints = [...points];
+
+    // 更新被拖曳的點位
+    updatedPoints[draggedPointIndex] = {
+        ...updatedPoints[draggedPointIndex],
+        x: newX,
+        y: newY
+    };
+
+    // 尾椎約束：點2（索引1）和點3（索引2）的垂直關係
     if (draggedPointIndex === 1) {
         // 拖曳點2時，點3跟隨左右移動（X軸同步）
         if (updatedPoints[2]) {
@@ -74,9 +97,6 @@ export const applyPointConstraints = (points, draggedPointIndex, newX, newY, pre
                 x: newX  // 保持X座標相同（垂直）
             };
         }
-        // 當點3左右移動時，點6也要跟隨（因為點6要保持與點2平行，而點2的X改變了）
-        // 但點6的X不改變，只是為了保持與點2的Y座標相同
-        // （這裡不需要額外處理，因為點3移動時只影響點2的X，不影響Y）
     }
 
     return updatedPoints;
@@ -93,7 +113,7 @@ export const initializePoints = (containerWidth, containerHeight) => {
     const initialPointPositions = [
         { x: 0.3, y: 0.1 },    // 點1：頂部
         { x: 0.35, y: 0.2 },   // 點2：左側
-        { x: 0.35, y: 0.3 },   // 點3：與點2垂直（X座標相同）
+        { x: 0.35, y: 0.3 },   // 點3：腰椎點
         { x: 0.3, y: 0.41 },   // 點4：左下
         { x: 0.24, y: 0.52 },  // 點5：右下
         { x: 0.45, y: 0.2 }    // 點6：在點2右邊並平行（Y座標相同）
@@ -186,6 +206,20 @@ export const validatePointConstraints = (points) => {
             errors.push('點2和點6未保持平行（Y座標不同）');
         }
     }
+    
+    return {
+        isValid: errors.length === 0,
+        errors
+    };
+};
+
+/**
+ * 驗證尾椎點位約束是否正確應用
+ * @param {Array} points - 點位陣列
+ * @returns {Object} 驗證結果 {isValid, errors}
+ */
+export const validateTailPointConstraints = (points) => {
+    const errors = [];
     
     // 驗證點2和點3的X座標是否相同（垂直約束）
     if (points[1] && points[2]) {
