@@ -188,16 +188,67 @@ export const computeShimAdjustment = (dist37Cm, heightAdjustment) => {
 };
 
 /**
- * 根據點5-8距離與標準長度，計算額外加高值
- *
+ * 根據身高計算5-8點的標準長度
+ * 
+ * 基準：身高 166 cm 時，5-8點標準長度為 10 cm
+ * 公式：標準長度 = 10 * {1 + [(身高 - 166) / 166]}
+ * 
+ * 範例：
+ * - 身高 160 cm: 10 * {1 - [(166-160)/166]} = 10 * 0.964 = 9.64 cm
+ * - 身高 166 cm: 10 * {1 + 0} = 10 cm
+ * - 身高 180 cm: 10 * {1 + [(180-166)/166]} = 10 * 1.084 = 10.84 cm
+ * 
+ * @param {number|string|null} height - 身高（公分）
+ * @returns {number|null} 標準長度（公分），如果身高無效則返回 null
+ */
+export const calculateStandardLength58 = (height) => {
+    const heightNum = parseFloat(height);
+    if (!heightNum || heightNum <= 0) return null;
+    
+    const baseHeight = 166; // 基準身高
+    const baseLength = 10;  // 基準標準長度
+    
+    // 標準長度 = 10 * {1 + [(身高 - 166) / 166]}
+    const standardLength = baseLength * (1 + (heightNum - baseHeight) / baseHeight);
+    
+    return standardLength;
+};
+
+/**
+ * 根據點5-8距離、身高計算額外加高值
+ * 
+ * 計算邏輯：
+ * 1. 根據身高計算標準長度（使用 calculateStandardLength58）
+ * 2. 計算實際測量值與標準長度的差距
+ * 3. 如果差距超過 0.5 cm，每超過 0.5 cm 增加 0.5 cm 高度
+ * 
+ * 範例A（身高 160 cm）：
+ * - 標準長度：9.64 cm
+ * - 實際測量：10.25 cm
+ * - 差距：0.61 cm > 0.5 cm
+ * - 調整：floor(0.61 / 0.5) * 0.5 = 1 * 0.5 = 0.5 cm
+ * 
+ * 範例B（身高 180 cm）：
+ * - 標準長度：10.84 cm
+ * - 實際測量：12 cm
+ * - 差距：1.16 cm > 0.5 cm
+ * - 調整：floor(1.16 / 0.5) * 0.5 = 2 * 0.5 = 1.0 cm
+ * 
  * @param {number|null} dist58Cm - 點5-8距離（公分）
- * @param {number} standardLength - 5-8點標準長度（公分），預設 25 cm
+ * @param {number|string|null} height - 身高（公分）
  * @returns {number | null} 額外加高（公分），0 表示不需要加高
  */
-export const computeExtra58Height = (dist58Cm, standardLength = 25) => {
+export const computeExtra58Height = (dist58Cm, height) => {
     if (dist58Cm === null || dist58Cm === undefined) return null;
+    
+    // 根據身高計算標準長度
+    const standardLength = calculateStandardLength58(height);
+    if (standardLength === null) return null;
+    
+    // 計算差距
     const excess = dist58Cm - standardLength;
     if (excess <= 0) return 0;
+    
     // 每超過 0.5 cm，高度額外增加 0.5 cm
     return Math.floor(excess / 0.5) * 0.5;
 };
