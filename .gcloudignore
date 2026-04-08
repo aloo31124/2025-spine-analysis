@@ -1,0 +1,36 @@
+# 排除不需要上傳至 Cloud Build 的檔案
+# 大幅減少上傳量 (從 1000MB+ 降至數 MB)
+
+# Node modules (最大元兇)
+**/node_modules/
+
+# Build 產出物 (前端會在 Cloud Build 內重新 build)
+spine-client/build/
+spine-client/.firebase/
+
+# 後端不需要的檔案
+spine-server/logs/
+spine-server/.firebase/
+
+# Git
+.git/
+.github/
+
+# IDE / 編輯器
+.vscode/
+.idea/
+
+# 其他大型/不需要的目錄
+notes/
+notes-blogs/
+specs/
+spine-app/
+文件/
+.claude/
+.specify/
+
+# 雜項
+*.log
+*.tgz
+*.zip
+新商城.postman_collection.json

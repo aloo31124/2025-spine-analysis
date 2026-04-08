@@ -1,0 +1,38 @@
+# ====================================
+# 頸椎分析系統 - Docker Compose
+# 本地開發/測試用
+# ====================================
+services:
+  # 後端 API 服務
+  spine-server:
+    build:
+      context: ./spine-server
+      dockerfile: Dockerfile
+    container_name: spine-server
+    ports:
+      - "8083:8083"
+    environment:
+      - NODE_ENV=production
+      - PORT=8083
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8083/api/docs"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # 前端 Web 服務
+  spine-client:
+    build:
+      context: ./spine-client
+      dockerfile: Dockerfile
+      args:
+        - REACT_APP_BASE_URL=http://localhost:8083/
+    container_name: spine-client
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+    depends_on:
+      - spine-server
+    restart: unless-stopped
