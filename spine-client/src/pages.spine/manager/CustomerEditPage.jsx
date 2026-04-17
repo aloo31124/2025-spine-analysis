@@ -10,6 +10,7 @@ function CustomerEditPage() {
     const { id } = useParams();
     const { state } = useLocation();
     const customer = state?.customer;
+    const fromSpineAnalysis = state?.fromSpineAnalysis || false;
     // 編輯客戶資訊
     const [customerParam, setCustomerParam] = useState({});
     // 分析結果列表
@@ -98,6 +99,7 @@ function CustomerEditPage() {
                 onRefreshAnalysisResults={fetchCustomerAnalysisResults}
                 isAnalysisLoading={isAnalysisLoading}
                 typePage='EDIT'
+                fromSpineAnalysis={fromSpineAnalysis}
             />
         </div>
     );

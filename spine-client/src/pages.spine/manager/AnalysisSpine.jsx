@@ -7,9 +7,9 @@ import { applyPointConstraints, initializePoints } from '../../utils/pointConstr
 import useAnalysisBase, { calculateDistance, neckPatientImage } from '../../hooks/useAnalysisBase';
 
 // ─── 儲存酬載建構（module-level，無元件狀態依賴） ──────
-const buildSpineSavePayload = ({ points, lines, intersectionPoints, calculationResults, backgroundImage, currentScale }) => ({
+const buildSpineSavePayload = ({ points, lines, intersectionPoints, calculationResults, backgroundImage, currentScale, scaleFactorState }) => ({
     analysisType: 'spine',
-    analysisData: { scale: currentScale, timestamp: new Date().toISOString() },
+    analysisData: { scale: scaleFactorState, timestamp: new Date().toISOString() },
     points,
     lines,
     intersectionPoints,

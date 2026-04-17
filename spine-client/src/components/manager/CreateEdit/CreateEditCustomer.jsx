@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import style from './CreateEdit.module.css';
 import AnalysisResult from '../AnalysisResult/AnalysisResult';
@@ -14,7 +14,7 @@ import {
 } from '../../../utils/calculateDefaultHeight';
 import { extractSpineRecommendation, extractSpinePointDistances, computeShimAdjustment, computeExtra58Height, calculateStandardLength58 } from '../../../utils/spineRecommendation';
 
-function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCustomer, handleAddCustomer, onRefreshAnalysisResults, isAnalysisLoading = false}) {
+function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCustomer, handleAddCustomer, onRefreshAnalysisResults, isAnalysisLoading = false, fromSpineAnalysis = false}) {
     const navigate = useNavigate();
     const location = useLocation();
     
@@ -176,6 +176,28 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
             navigate(location.pathname, { replace: true });
         }
     }, [location.state, customer, navigate]);
+
+    // 追蹤是否已顯示過頸部分析帶入確認
+    const spineAnalysisPromptShown = useRef(false);
+
+    /* 從頸部分析頁面綁定客戶後，詢問是否帶入最新分析數據 */
+    useEffect(() => {
+        if (fromSpineAnalysis && customer?.id && !spineAnalysisPromptShown.current && analysisResults && analysisResults.length > 0) {
+            spineAnalysisPromptShown.current = true;
+            const shouldApply = window.confirm('是否將最新的頸部分析分析數據帶入?');
+            if (shouldApply && onRefreshAnalysisResults) {
+                onRefreshAnalysisResults();
+            }
+        }
+    }, [fromSpineAnalysis, customer?.id, analysisResults, onRefreshAnalysisResults]);
+
+    /* 更新頸部分析：手動刷新最新分析數據 */
+    const handleRefreshSpineAnalysis = () => {
+        const shouldApply = window.confirm('是否將最新的頸部分析分析數據帶入?');
+        if (shouldApply && onRefreshAnalysisResults) {
+            onRefreshAnalysisResults();
+        }
+    };
 
     /* 載入客戶購買的所有商品（枕頭 + 床墊）*/
     const fetchPurchasedProducts = async (customerId) => {
@@ -655,6 +677,23 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
                     <small style={{ color: '#999', fontStyle: 'italic', marginBottom: '10px', display: 'block' }}>
                         ※ 以下數據自動從最新的頸椎分析結果中提取
                     </small>
+                    {typePage === 'EDIT' && (
+                        <button
+                            onClick={handleRefreshSpineAnalysis}
+                            style={{
+                                backgroundColor: '#5cb85c',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '4px',
+                                padding: '6px 16px',
+                                cursor: 'pointer',
+                                fontSize: '14px',
+                                marginBottom: '10px',
+                            }}
+                        >
+                            更新頸部分析
+                        </button>
+                    )}
                 </div>
                 <div className={style.CreateEditProductRow}>
                     <label>點2-4距離 (cm):</label>

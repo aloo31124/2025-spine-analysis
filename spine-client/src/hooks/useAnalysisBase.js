@@ -274,7 +274,7 @@ export default function useAnalysisBase({
         try {
             await saveAnalysisResult(customer.id);
             setShowCustomerModal(false);
-            navigate('/manager/customer/edit/' + customer.id, { state: { customer } });
+            navigate('/manager/customer/edit/' + customer.id, { state: { customer, fromSpineAnalysis: analysisType === 'spine' } });
         } catch (error) {
             console.error('保存分析結果錯誤:', error);
             alert('保存分析結果失敗');

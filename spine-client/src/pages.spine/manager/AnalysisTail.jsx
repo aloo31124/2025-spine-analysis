@@ -53,7 +53,7 @@ const buildTailMetrics = (scaleFactor, currentPoints) => {
 const buildTailSavePayload = ({ points, lines, calculationResults, backgroundImage, currentScale, scaleFactorState }) => ({
     analysisType: 'tail',
     analysisData: {
-        scale: currentScale,
+        scale: scaleFactorState,
         timestamp: new Date().toISOString(),
         metrics: buildTailMetrics(scaleFactorState, points),
     },
