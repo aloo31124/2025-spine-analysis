@@ -5,10 +5,16 @@
 #
 # 使用方式:
 #   gcloud builds submit --config cloudbuild.yaml
+# GCP:
+#  測試 專案id : spineanalysis1006test1 
+#  正式 專案id : spineanalysis 
 # 測試網址(cloud run):
 #   https://spineanalysis20260408test1-882466139693.asia-east1.run.app/
 #
 substitutions:
+  # 注意：Project ID 與 Docker Image 名稱都必須為小寫。
+  # 若你的目標專案不是 spineanalysis，請改成實際的小寫 project id。
+  _GCP_PROJECT_ID: spineanalysis
   _REGION: asia-east1
   _SERVER_SERVICE: spine-server
   _CLIENT_SERVICE: spine-client
@@ -20,13 +26,13 @@ steps:
     args:
       - 'build'
       - '-t'
-      - 'gcr.io/$PROJECT_ID/${_SERVER_SERVICE}:latest'
+      - 'gcr.io/${_GCP_PROJECT_ID}/${_SERVER_SERVICE}:latest'
       - './spine-server'
     id: 'build-server'
 
   # Step 2: 推送後端 Image
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'gcr.io/$PROJECT_ID/${_SERVER_SERVICE}:latest']
+    args: ['push', 'gcr.io/${_GCP_PROJECT_ID}/${_SERVER_SERVICE}:latest']
     id: 'push-server'
     waitFor: ['build-server']
 
@@ -37,7 +43,8 @@ steps:
       - 'run'
       - 'deploy'
       - '${_SERVER_SERVICE}'
-      - '--image=gcr.io/$PROJECT_ID/${_SERVER_SERVICE}:latest'
+      - '--image=gcr.io/${_GCP_PROJECT_ID}/${_SERVER_SERVICE}:latest'
+      - '--project=${_GCP_PROJECT_ID}'
       - '--region=${_REGION}'
       - '--platform=managed'
       - '--port=8083'
@@ -56,7 +63,7 @@ steps:
     args:
       - '-c'
       - |
-        SERVER_URL=$(gcloud run services describe ${_SERVER_SERVICE} --region=${_REGION} --format='value(status.url)')
+        SERVER_URL=$(gcloud run services describe ${_SERVER_SERVICE} --project=${_GCP_PROJECT_ID} --region=${_REGION} --format='value(status.url)')
         echo "$${SERVER_URL}/" > /workspace/server_url.txt
         echo "後端 URL: $${SERVER_URL}"
     id: 'get-server-url'
@@ -73,14 +80,14 @@ steps:
         echo "前端連接後端 URL: $${SERVER_URL}"
         docker build \
           --build-arg REACT_APP_BASE_URL=$${SERVER_URL} \
-          -t gcr.io/$PROJECT_ID/${_CLIENT_SERVICE}:latest \
+          -t gcr.io/${_GCP_PROJECT_ID}/${_CLIENT_SERVICE}:latest \
           ./spine-client
     id: 'build-client'
     waitFor: ['get-server-url']
 
   # Step 6: 推送前端 Image
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'gcr.io/$PROJECT_ID/${_CLIENT_SERVICE}:latest']
+    args: ['push', 'gcr.io/${_GCP_PROJECT_ID}/${_CLIENT_SERVICE}:latest']
     id: 'push-client'
     waitFor: ['build-client']
 
@@ -91,7 +98,8 @@ steps:
       - 'run'
       - 'deploy'
       - '${_CLIENT_SERVICE}'
-      - '--image=gcr.io/$PROJECT_ID/${_CLIENT_SERVICE}:latest'
+      - '--image=gcr.io/${_GCP_PROJECT_ID}/${_CLIENT_SERVICE}:latest'
+      - '--project=${_GCP_PROJECT_ID}'
       - '--region=${_REGION}'
       - '--platform=managed'
       - '--port=8080'
@@ -104,8 +112,8 @@ steps:
     waitFor: ['push-client']
 
 images:
-  - 'gcr.io/$PROJECT_ID/${_SERVER_SERVICE}:latest'
-  - 'gcr.io/$PROJECT_ID/${_CLIENT_SERVICE}:latest'
+  - 'gcr.io/${_GCP_PROJECT_ID}/${_SERVER_SERVICE}:latest'
+  - 'gcr.io/${_GCP_PROJECT_ID}/${_CLIENT_SERVICE}:latest'
 
 options:
   logging: CLOUD_LOGGING_ONLY
