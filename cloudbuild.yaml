@@ -5,6 +5,8 @@
 #
 # 使用方式:
 #   gcloud builds submit --config cloudbuild.yaml
+# 測試網址(cloud run):
+#   https://spineanalysis20260408test1-882466139693.asia-east1.run.app/
 #
 substitutions:
   _REGION: asia-east1
