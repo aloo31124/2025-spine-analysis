@@ -6,11 +6,10 @@ import PillowRecommendationModal from '../ProductRecommendation/PillowRecommenda
 import MattressRecommendationModal from '../ProductRecommendation/MattressRecommendationModal';
 import { getCustomerToProductPillowByCustomerId } from '../../../api/manager/customerToProductPillow';
 import { getCustomerToProductMattressByCustomerId } from '../../../api/manager/customerToProductMattress';
-import { 
-    calculateDefaultHeight, 
-    formatDefaultHeight,
+import {
     calculateAdjustedDefaultHeight,
-    calculateStandardWeight
+    getDefaultHeightBasis,
+    getHeightAdjustmentBasis,
 } from '../../../utils/calculateDefaultHeight';
 import { extractSpineRecommendation, extractSpinePointDistances, computeShimAdjustment, computeExtra58Height, calculateStandardLength58 } from '../../../utils/spineRecommendation';
 
@@ -610,6 +609,17 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
                         step="0.1"
                     />
                 </div>
+            </div>
+
+            <div className={style.CreateEditProductContainer}>
+                <h2>最終基準高度</h2>
+                <div className={style.CreateEditProductRow}>
+                    <small style={{ color: '#999', fontStyle: 'italic', display: 'block' }}>
+                        ※ 依據「個人資訊」之性別、身高、體重、年齡，依「初始高度對照表」與「體重偏離調整表」計算
+                    </small>
+                </div>
+
+                {/* 標準體重 */}
                 <div className={style.CreateEditProductRow}>
                     <label>標準體重 (kg):</label>
                     <input
@@ -617,61 +627,145 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
                         value={standardWeight !== null ? `${standardWeight.toFixed(1)} kg` : '請輸入身高及性別'}
                         readOnly
                         style={{ backgroundColor: '#f0f0f0', cursor: 'not-allowed' }}
-                        placeholder="自動計算"
                     />
                     <small style={{ marginLeft: '10px', color: '#666' }}>
-                        {gender === '男' && '(身高 - 80) × 70%'}
-                        {gender === '女' && '(身高 - 70) × 60%'}
-                        {!gender && '(需選擇性別)'}
+                        男性：(身高 - 80) × 70%；女性：(身高 - 70) × 60%
                     </small>
                 </div>
+                {height && gender && standardWeight !== null && (gender === '男' || gender === '女') && (
+                    <div className={style.CreateEditProductRow}>
+                        <label></label>
+                        <div style={{ fontSize: '0.9em', color: '#555' }}>
+                            <strong>計算：</strong>
+                            {gender === '男'
+                                ? `(${height} - 80) × 70% = ${Number(height) - 80} × 0.7 = `
+                                : `(${height} - 70) × 60% = ${Number(height) - 70} × 0.6 = `}
+                            <span style={{ color: '#2e7d32', fontWeight: 'bold' }}>
+                                {standardWeight.toFixed(1)} kg
+                            </span>
+                        </div>
+                    </div>
+                )}
+
+                {/* 體重偏差 */}
                 <div className={style.CreateEditProductRow}>
                     <label>體重偏差 (kg):</label>
                     <input
                         type="text"
                         value={
-                            weightDeviation !== null 
-                                ? `${weightDeviation > 0 ? '+' : ''}${weightDeviation.toFixed(1)} kg` 
+                            weightDeviation !== null
+                                ? `${weightDeviation > 0 ? '+' : ''}${weightDeviation.toFixed(1)} kg`
                                 : '請輸入體重'
                         }
                         readOnly
-                        style={{ 
-                            backgroundColor: '#f0f0f0', 
+                        style={{
+                            backgroundColor: '#f0f0f0',
                             cursor: 'not-allowed',
-                            color: weightDeviation > 4 ? '#d9534f' : weightDeviation < -4 ? '#5bc0de' : '#666'
+                            color: weightDeviation > 4 ? '#d9534f' : weightDeviation < -4 ? '#5bc0de' : '#666',
                         }}
-                        placeholder="自動計算"
                     />
                     <small style={{ marginLeft: '10px', color: '#666' }}>
-                        (實際體重 - 標準體重)
+                        體重偏差 = 實際體重 - 標準體重
                     </small>
                 </div>
+                {weightDeviation !== null && (
+                    <div className={style.CreateEditProductRow}>
+                        <label></label>
+                        <div style={{ fontSize: '0.9em', color: '#555' }}>
+                            <strong>計算：</strong>
+                            {weight} - {standardWeight.toFixed(1)} =
+                            <span style={{ color: '#2e7d32', fontWeight: 'bold' }}>
+                                {' '}{weightDeviation > 0 ? '+' : ''}{weightDeviation.toFixed(1)} kg
+                            </span>
+                        </div>
+                    </div>
+                )}
+
+                {/* 體重偏差調整 */}
                 <div className={style.CreateEditProductRow}>
-                    <label>初始高度:</label>
+                    <label>體重偏差調整 (cm):</label>
                     <input
                         type="text"
-                        value={formatDefaultHeight(defaultHeight)}
+                        value={
+                            weightDeviation !== null
+                                ? `${heightAdjustment > 0 ? '+' : ''}${heightAdjustment.toFixed(1)} cm`
+                                : '請輸入體重'
+                        }
+                        readOnly
+                        style={{
+                            backgroundColor: '#f0f0f0',
+                            cursor: 'not-allowed',
+                            color: heightAdjustment > 0 ? '#d9534f' : heightAdjustment < 0 ? '#5bc0de' : '#666',
+                        }}
+                    />
+                    <small style={{ marginLeft: '10px', color: '#666' }}>
+                        參考「體重偏離調整表」
+                    </small>
+                </div>
+                {weightDeviation !== null && (
+                    <div className={style.CreateEditProductRow}>
+                        <label></label>
+                        <div style={{ fontSize: '0.9em', color: '#555' }}>
+                            <strong>判斷：</strong>{getHeightAdjustmentBasis(weightDeviation)}
+                        </div>
+                    </div>
+                )}
+
+                {/* 初始高度 */}
+                <div className={style.CreateEditProductRow}>
+                    <label>初始高度 (cm):</label>
+                    <input
+                        type="text"
+                        value={baseHeight !== null ? `${baseHeight} cm` : '請輸入年齡及身高'}
                         readOnly
                         style={{ backgroundColor: '#f0f0f0', cursor: 'not-allowed' }}
-                        placeholder="自動計算"
                     />
+                    <small style={{ marginLeft: '10px', color: '#666' }}>
+                        參考「初始高度對照表」（依年齡 / 身高判斷）
+                    </small>
+                </div>
+                {(age !== '' || height !== '') && (
+                    <div className={style.CreateEditProductRow}>
+                        <label></label>
+                        <div style={{ fontSize: '0.9em', color: '#555' }}>
+                            <strong>判斷依據：</strong>{getDefaultHeightBasis(age, height)}
+                        </div>
+                    </div>
+                )}
+
+                {/* 最終基準高度 */}
+                <div className={style.CreateEditProductRow}>
+                    <label>最終基準高度 (cm):</label>
+                    <input
+                        type="text"
+                        value={defaultHeight !== null ? `${defaultHeight} cm` : '請輸入年齡、身高、性別、體重'}
+                        readOnly
+                        style={{
+                            backgroundColor: defaultHeight !== null ? '#e8f5e9' : '#f0f0f0',
+                            cursor: 'not-allowed',
+                            color: defaultHeight !== null ? '#2e7d32' : '#999',
+                            fontWeight: defaultHeight !== null ? 'bold' : 'normal',
+                        }}
+                    />
+                    <small style={{ marginLeft: '10px', color: '#666' }}>
+                        最終基準高度 = 初始高度 + 體重偏差調整
+                    </small>
                 </div>
                 {baseHeight !== null && (
                     <div className={style.CreateEditProductRow}>
                         <label></label>
-                        <small style={{ color: '#666' }}>
-                            基準高度: {baseHeight} cm
-                            {heightAdjustment !== 0 && (
-                                <>
-                                    {' '} + 體重調整: {heightAdjustment > 0 ? '+' : ''}{heightAdjustment} cm
-                                    {' '} = 最終高度: {defaultHeight} cm
-                                </>
-                            )}
-                            {heightAdjustment === 0 && ' (無需調整)'}
-                        </small>
+                        <div style={{ fontSize: '0.9em', color: '#555' }}>
+                            <strong>計算：</strong>
+                            {baseHeight} + ({heightAdjustment > 0 ? '+' : ''}{heightAdjustment}) =
+                            <span style={{ color: '#2e7d32', fontWeight: 'bold' }}>
+                                {' '}{defaultHeight} cm
+                            </span>
+                        </div>
                     </div>
                 )}
-                
+            </div>
+
+            <div className={style.CreateEditProductContainer}>
                 <h2>頸椎分析推薦</h2>
                 <div className={style.CreateEditProductRow}>
                     <small style={{ color: '#999', fontStyle: 'italic', marginBottom: '10px', display: 'block' }}>

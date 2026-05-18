@@ -1,33 +1,41 @@
 /**
- * 計算初始高度（頸枕起始高度）
- * 根據年齡與身高決定初始的基準高度
- * 
- * @param {number|string} age - 年齡（歲）
- * @param {number|string} height - 身高（公分）
- * @returns {number|null} 初始高度（公分），若資料不足則返回 null
+ * 太醫床枕基準高度計算工具
+ *
+ * 名詞對照（依產品規範）：
+ *  - 標準體重 (standardWeight)         ：依性別、身高計算的理想體重
+ *  - 體重偏差 (weightDeviation)        ：實際體重 - 標準體重
+ *  - 體重偏差調整 (heightAdjustment)    ：依「體重偏離調整表」換算的高度修正值 (cm)
+ *  - 初始高度 (baseHeight)              ：依「初始高度對照表」(年齡 / 身高) 查得的高度 (cm)
+ *  - 最終基準高度 (finalHeight)         ：初始高度 + 體重偏差調整
+ */
+
+/* ----------------------------- 初始高度 ----------------------------- */
+
+/**
+ * 計算初始高度（依年齡與身高對照表）
+ *
+ * 年齡優先（0-8 歲分段），9 歲以上或未填年齡則依身高分段；
+ * 身高每超出 197 cm，每多 5 cm 加 0.5 cm。
+ *
+ * @param {number|string} age    年齡（歲）
+ * @param {number|string} height 身高（公分）
+ * @returns {number|null} 初始高度（公分），資料不足回傳 null
  */
 export const calculateDefaultHeight = (age, height) => {
-    const heightNum = Number(height);
-
-    // 判斷年齡是否有效填寫
     const ageStr = age === null || age === undefined ? '' : String(age).trim();
     const ageProvided = ageStr !== '' && !isNaN(Number(ageStr)) && Number(ageStr) >= 0;
     const ageNum = ageProvided ? Number(ageStr) : null;
 
-    // 有填年齡：套用兒童查表（0~8 歲）
     if (ageProvided) {
-        if (ageNum >= 0 && ageNum <= 2) return 3;
-        if (ageNum >= 3 && ageNum <= 4) return 4;
-        if (ageNum >= 5 && ageNum <= 6) return 5;
-        if (ageNum >= 7 && ageNum <= 8) return 6;
-        // 9 歲以上：繼續往下進行身高查表
+        if (ageNum <= 2) return 3;
+        if (ageNum <= 4) return 4;
+        if (ageNum <= 6) return 5;
+        if (ageNum <= 8) return 6;
+        // 9 歲以上：續查身高表
     }
-    // 未填年齡：視為 9 歲以上，直接進行身高查表（最低 6 cm）
 
-    // 身高查表（9 歲以上 或 未填年齡）
-    if (isNaN(heightNum) || heightNum <= 0) {
-        return null;
-    }
+    const heightNum = Number(height);
+    if (isNaN(heightNum) || heightNum <= 0) return null;
 
     if (heightNum <= 152) return 6;
     if (heightNum <= 157) return 6.5;
@@ -40,178 +48,154 @@ export const calculateDefaultHeight = (age, height) => {
     if (heightNum <= 192) return 10;
     if (heightNum <= 197) return 10.5;
 
-    // 成人 - 身高 198cm 以上: 每增加 5cm，高度增加 0.5cm
-    // 基準: 193cm = 10.5cm，之後每 5cm 增加 0.5cm
-    const extraCm = heightNum - 193;
-    return 10.5 + Math.floor(extraCm / 5) * 0.5;
+    // 197 cm 以上：每 5 cm 多 0.5 cm，從 193 cm = 10.5 cm 起算
+    return 10.5 + Math.floor((heightNum - 193) / 5) * 0.5;
 };
 
+/**
+ * 取得「初始高度」的判斷依據文字（依何條規則命中）
+ *
+ * @param {number|string} age
+ * @param {number|string} height
+ * @returns {string}
+ */
+export const getDefaultHeightBasis = (age, height) => {
+    const ageStr = age === null || age === undefined ? '' : String(age).trim();
+    const ageProvided = ageStr !== '' && !isNaN(Number(ageStr)) && Number(ageStr) >= 0;
+    const ageNum = ageProvided ? Number(ageStr) : null;
+
+    if (ageProvided) {
+        if (ageNum <= 2) return '依年齡：嬰兒 0-2 歲 → 3 cm（使用低側）';
+        if (ageNum <= 4) return '依年齡：嬰兒 3-4 歲 → 4 cm（使用高側）';
+        if (ageNum <= 6) return '依年齡：兒童 5-6 歲 → 5 cm（使用低側）';
+        if (ageNum <= 8) return '依年齡：兒童 7-8 歲 → 6 cm（使用高側）';
+    }
+
+    const heightNum = Number(height);
+    if (isNaN(heightNum) || heightNum <= 0) return '請輸入年齡及身高';
+
+    if (heightNum <= 152) return '依身高：152 cm 以下 → 6 cm';
+    if (heightNum <= 157) return '依身高：153 - 157 cm → 6.5 cm';
+    if (heightNum <= 162) return '依身高：158 - 162 cm → 7 cm';
+    if (heightNum <= 167) return '依身高：163 - 167 cm → 7.5 cm';
+    if (heightNum <= 172) return '依身高：168 - 172 cm → 8 cm';
+    if (heightNum <= 177) return '依身高：173 - 177 cm → 8.5 cm';
+    if (heightNum <= 182) return '依身高：178 - 182 cm → 9 cm';
+    if (heightNum <= 187) return '依身高：183 - 187 cm → 9.5 cm';
+    if (heightNum <= 192) return '依身高：188 - 192 cm → 10 cm';
+    if (heightNum <= 197) return '依身高：193 - 197 cm → 10.5 cm';
+    return `依身高：${heightNum} cm（197 cm 以上每 5 cm 多 0.5 cm 推算）`;
+};
+
+/* ----------------------------- 標準體重 ----------------------------- */
 
 /**
  * 計算標準體重
- * 根據性別與身高計算標準體重
- * 
- * @param {number|string} height - 身高（公分）
- * @param {string} gender - 性別（'男'/'女'）
- * @returns {number|null} 標準體重（公斤），若資料不足則返回 null
+ *  - 男性：(身高 - 80) × 70%
+ *  - 女性：(身高 - 70) × 60%
+ *
+ * @param {number|string} height 身高（公分）
+ * @param {string} gender 性別 '男' / '女'
+ * @returns {number|null}
  */
 export const calculateStandardWeight = (height, gender) => {
     const heightNum = Number(height);
-    
-    // 身高必須為有效數字
-    if (isNaN(heightNum) || heightNum <= 0) {
-        return null;
-    }
-    
-    // 性別必須為有效值
-    if (!gender || (gender !== '男' && gender !== '女')) {
-        return null;
-    }
-    
-    // 男性：(身高cm - 80) × 70%
-    if (gender === '男') {
-        return (heightNum - 80) * 0.7;
-    }
-    
-    // 女性：(身高cm - 70) × 60%
-    if (gender === '女') {
-        return (heightNum - 70) * 0.6;
-    }
-    
+    if (isNaN(heightNum) || heightNum <= 0) return null;
+
+    if (gender === '男') return (heightNum - 80) * 0.7;
+    if (gender === '女') return (heightNum - 70) * 0.6;
     return null;
 };
 
+/* ----------------------------- 體重偏差 ----------------------------- */
+
 /**
- * 計算體重偏差
- * 計算實際體重與標準體重的差異
- * 
- * @param {number|string} weight - 實際體重（公斤）
- * @param {number} standardWeight - 標準體重（公斤）
- * @returns {number|null} 體重偏差（公斤），正值表示超重，負值表示過輕
+ * 計算體重偏差 = 實際體重 - 標準體重
+ *
+ * @param {number|string} weight
+ * @param {number|null} standardWeight
+ * @returns {number|null}
  */
 export const calculateWeightDeviation = (weight, standardWeight) => {
     const weightNum = Number(weight);
-    
-    // 體重與標準體重必須為有效數字
-    if (isNaN(weightNum) || weightNum <= 0) {
-        return null;
-    }
-    
-    if (standardWeight === null || standardWeight === undefined) {
-        return null;
-    }
-    
-    // 計算偏差：實際體重 - 標準體重
+    if (isNaN(weightNum) || weightNum <= 0) return null;
+    if (standardWeight === null || standardWeight === undefined) return null;
     return weightNum - standardWeight;
 };
 
+/* ------------------------- 體重偏差調整 (cm) ------------------------- */
+
 /**
- * 根據體重偏差計算高度調整值
- * 依據體重偏差對照表計算需要調整的高度
- * 
- * @param {number} weightDeviation - 體重偏差（公斤）
- * @returns {number} 高度調整值（公分）
+ * 依「體重偏離調整表」計算體重偏差調整 (cm)
+ *
+ *   正負 4 kg 以內    →  0
+ *   超出 5-9 kg       → +0.5
+ *   超出 10-14 kg     → +1.0
+ *   超出 15-18 kg     → +1.5
+ *   超出 19-22 kg     → +2.0
+ *   超出 23 kg 以上   → +2.5
+ *   低於 5 kg 以下    → -0.5
+ *
+ * @param {number|null} weightDeviation
+ * @returns {number} 高度調整 (cm)
  */
 export const calculateHeightAdjustment = (weightDeviation) => {
-    if (weightDeviation === null || weightDeviation === undefined) {
-        return 0;
-    }
-    
-    const absDeviation = Math.abs(weightDeviation);
-    
-    // 正負 4 kg 以內：不變
-    if (absDeviation <= 4) {
-        return 0;
-    }
-    
-    // 低於標準體重 5 kg 以上：-0.5
-    if (weightDeviation < -4 && absDeviation >= 5) {
-        return -0.5;
-    }
-    
-    // 超出標準體重 5-9 kg：+0.5
-    if (weightDeviation > 4 && absDeviation >= 5 && absDeviation <= 9) {
-        return 0.5;
-    }
-    
-    // 超出標準體重 10-14 kg：+1.0
-    if (weightDeviation >= 10 && absDeviation <= 14) {
-        return 1.0;
-    }
-    
-    // 超出標準體重 15-18 kg：+1.5
-    if (weightDeviation >= 15 && absDeviation <= 18) {
-        return 1.5;
-    }
-    
-    // 超出標準體重 19-22 kg：+2.0
-    if (weightDeviation >= 19 && absDeviation <= 22) {
-        return 2.0;
-    }
-    
-    // 超出標準體重 23 kg 以上：+2.5
-    if (weightDeviation >= 23) {
-        return 2.5;
-    }
-    
-    return 0;
+    if (weightDeviation === null || weightDeviation === undefined) return 0;
+
+    if (weightDeviation <= -5) return -0.5;
+    if (weightDeviation < 5)   return 0;       // -4 ~ +4 視為不變
+    if (weightDeviation <= 9)  return 0.5;
+    if (weightDeviation <= 14) return 1.0;
+    if (weightDeviation <= 18) return 1.5;
+    if (weightDeviation <= 22) return 2.0;
+    return 2.5;
 };
 
 /**
- * 計算調整後的初始高度
- * 先根據年齡身高計算基準高度，再根據體重偏差進行調整
- * 
- * @param {number|string} age - 年齡（歲）
- * @param {number|string} height - 身高（公分）
- * @param {string} gender - 性別（'男'/'女'）
- * @param {number|string} weight - 體重（公斤）
- * @returns {object} 包含基準高度、調整值、最終高度等資訊
+ * 取得「體重偏差調整」的判斷依據文字
+ *
+ * @param {number|null} weightDeviation
+ * @returns {string}
+ */
+export const getHeightAdjustmentBasis = (weightDeviation) => {
+    if (weightDeviation === null || weightDeviation === undefined) return '請輸入體重';
+    if (weightDeviation <= -5) return '低於標準 5 kg 以下 → -0.5 cm';
+    if (weightDeviation < 5)   return '正負 4 kg 以內 → 不變';
+    if (weightDeviation <= 9)  return '超出 5 - 9 kg → +0.5 cm';
+    if (weightDeviation <= 14) return '超出 10 - 14 kg → +1.0 cm';
+    if (weightDeviation <= 18) return '超出 15 - 18 kg → +1.5 cm';
+    if (weightDeviation <= 22) return '超出 19 - 22 kg → +2.0 cm';
+    return '超出 23 kg 以上 → +2.5 cm';
+};
+
+/* --------------------------- 最終基準高度 --------------------------- */
+
+/**
+ * 計算最終基準高度 = 初始高度 + 體重偏差調整
+ *
+ * @param {number|string} age
+ * @param {number|string} height
+ * @param {string} gender
+ * @param {number|string} weight
+ * @returns {{
+ *   baseHeight: number|null,        // 初始高度
+ *   standardWeight: number|null,    // 標準體重
+ *   weightDeviation: number|null,   // 體重偏差
+ *   heightAdjustment: number,       // 體重偏差調整 (cm)
+ *   finalHeight: number|null        // 最終基準高度
+ * }}
  */
 export const calculateAdjustedDefaultHeight = (age, height, gender, weight) => {
-    // 1. 先計算基準高度（根據年齡身高對照表）
     const baseHeight = calculateDefaultHeight(age, height);
-    
-    // 如果沒有基準高度，返回 null
-    if (baseHeight === null) {
-        return {
-            baseHeight: null,
-            standardWeight: null,
-            weightDeviation: null,
-            heightAdjustment: 0,
-            finalHeight: null
-        };
-    }
-    
-    // 2. 計算標準體重
     const standardWeight = calculateStandardWeight(height, gender);
-    
-    // 3. 計算體重偏差
     const weightDeviation = calculateWeightDeviation(weight, standardWeight);
-    
-    // 4. 計算高度調整值
     const heightAdjustment = calculateHeightAdjustment(weightDeviation);
-    
-    // 5. 計算最終高度
-    const finalHeight = baseHeight + heightAdjustment;
-    
-    return {
-        baseHeight,              // 基準高度
-        standardWeight,          // 標準體重
-        weightDeviation,         // 體重偏差
-        heightAdjustment,        // 高度調整值
-        finalHeight              // 最終高度
-    };
-};
 
-/**
- * 格式化初始高度顯示文字
- * 
- * @param {number|null} defaultHeight - 初始高度
- * @returns {string} 格式化後的顯示文字
- */
-export const formatDefaultHeight = (defaultHeight) => {
-    if (defaultHeight === null || defaultHeight === undefined) {
-        return '請輸入年齡及身高';
-    }
-    return `${defaultHeight} cm`;
+    return {
+        baseHeight,
+        standardWeight,
+        weightDeviation,
+        heightAdjustment,
+        finalHeight: baseHeight === null ? null : baseHeight + heightAdjustment,
+    };
 };
