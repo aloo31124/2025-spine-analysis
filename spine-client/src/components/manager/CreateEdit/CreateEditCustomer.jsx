@@ -765,29 +765,29 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
                 )}
             </div>
 
+            {typePage === 'EDIT' && (
+                <button
+                    onClick={handleRefreshSpineAnalysis}
+                    style={{
+                        backgroundColor: '#5cb85c',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '4px',
+                        padding: '6px 16px',
+                        cursor: 'pointer',
+                        fontSize: '14px',
+                    }}
+                >
+                    更新頸部分析
+                </button>
+            )}
+
             <div className={style.CreateEditProductContainer}>
-                <h2>頸椎分析推薦</h2>
+                <h2>弧度與醫學枕型號</h2>
                 <div className={style.CreateEditProductRow}>
                     <small style={{ color: '#999', fontStyle: 'italic', marginBottom: '10px', display: 'block' }}>
-                        ※ 以下數據自動從最新的頸椎分析結果中提取
+                        ※ 依照[頸椎分析]之點2-4距離（枕骨至第七頸椎的距離）推薦適合的枕頭型號，數據自動從最新頸椎分析提取。
                     </small>
-                    {typePage === 'EDIT' && (
-                        <button
-                            onClick={handleRefreshSpineAnalysis}
-                            style={{
-                                backgroundColor: '#5cb85c',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '4px',
-                                padding: '6px 16px',
-                                cursor: 'pointer',
-                                fontSize: '14px',
-                                marginBottom: '10px',
-                            }}
-                        >
-                            更新頸部分析
-                        </button>
-                    )}
                 </div>
                 <div className={style.CreateEditProductRow}>
                     <label>點2-4距離 (cm):</label>
