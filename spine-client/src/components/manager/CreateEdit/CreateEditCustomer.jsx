@@ -10,8 +10,13 @@ import {
     calculateAdjustedDefaultHeight,
     getDefaultHeightBasis,
     getHeightAdjustmentBasis,
-} from '../../../utils/calculateDefaultHeight';
-import { extractSpineRecommendation, extractSpinePointDistances, computeShimAdjustment, computeExtra58Height, calculateStandardLength58 } from '../../../utils/spineRecommendation';
+    extractSpineRecommendation,
+    extractSpinePointDistances,
+    computeShimAdjustment,
+    computeExtra58Height,
+    calculateStandardLength58,
+    composeModelName,
+} from '../../../utils/spineRecommendation';
 
 function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCustomer, handleAddCustomer, onRefreshAnalysisResults, isAnalysisLoading = false, fromSpineAnalysis = false}) {
     const navigate = useNavigate();
@@ -1000,35 +1005,12 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
 
             {/* ── 型號建議 ─────────────────────────── */}
             {(() => {
-                // 將數字高度轉換為中文（6.5 → 六點五公分）
-                const cnDigits = { '0': '零', '1': '一', '2': '二', '3': '三', '4': '四', '5': '五', '6': '六', '7': '七', '8': '八', '9': '九' };
-                const heightToChinese = (h) => {
-                    if (h === null || h === undefined) return null;
-                    return String(h).split('').map(c => c === '.' ? '點' : (cnDigits[c] || c)).join('') + '公分';
-                };
-
-                // 從 shimAdj.modelSuffix 取得墊片狀態標籤
                 const shimAdj = computeShimAdjustment(spinePoint37Distance, heightAdjustment);
-                const extractShimLabel = (adj) => {
-                    if (!adj) return null;
-                    if (!adj.modelSuffix) return '無墊片';
-                    if (adj.modelSuffix === '.5') return '半張墊片';
-                    if (adj.modelSuffix === '.2') return '二個半張墊片';
-                    return null;
-                };
-
-                // 從推薦型號取得弧度類型（'AA 型枕' → 'AA型'）
-                const extractArcLabel = (rec) => {
-                    if (!rec) return null;
-                    return rec.replace(/\s+/g, '').replace('枕', '');
-                };
-
-                const heightLabel = heightToChinese(defaultHeight);
-                const shimLabel   = extractShimLabel(shimAdj);
-                const arcLabel    = extractArcLabel(spinePillowRecommendation);
-
-                const allReady = heightLabel && shimLabel && arcLabel;
-                const modelName = allReady ? `${heightLabel}_${shimLabel}_${arcLabel}` : null;
+                const { heightLabel, shimLabel, arcLabel, modelName } = composeModelName({
+                    finalHeight: defaultHeight,
+                    shimAdj,
+                    pillowRecommendation: spinePillowRecommendation,
+                });
 
                 return (
                     <div className={style.CreateEditProductContainer}>
