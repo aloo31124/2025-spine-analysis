@@ -54,8 +54,8 @@
 /* 點位樣式 */
 .point {
     position: absolute;
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
     border: 2px solid #3DA5FF;
     background-color: #3DA5FF;
     border-radius: 50%;
@@ -203,19 +203,19 @@
 /* 交點樣式 */
 .intersection-point {
     position: absolute;
-    width: 12px;
-    height: 12px;
+    width: 18px;
+    height: 18px;
     border: 2px solid #f39c12;
     background-color: #f39c12;
     border-radius: 50%;
     transform: translate(-50%, -50%);
     z-index: 3;
-    box-shadow: 0 0 3px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
-    font-size: 10px;
+    font-size: 12px;
     font-weight: bold;
     text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
 }
@@ -308,6 +308,19 @@
     
     .neck-container-wrapper {
         max-width: 95%;
+    }
+
+    /* 窄螢幕時縮小 1~8 點位 */
+    .point {
+        width: 14px;
+        height: 14px;
+        font-size: 10px;
+    }
+
+    .intersection-point {
+        width: 14px;
+        height: 14px;
+        font-size: 10px;
     }
 }
 
@@ -446,11 +459,11 @@
     }
     
     .point {
-        width: 16px;
-        height: 16px;
+        width: 14px;
+        height: 14px;
         font-size: 10px;
     }
-    
+
     .draggable-point {
         width: 25px;
         height: 25px;
@@ -464,9 +477,9 @@
     }
     
     .intersection-point {
-        width: 10px;
-        height: 10px;
-        font-size: 8px;
+        width: 14px;
+        height: 14px;
+        font-size: 10px;
     }
 
     .customer-modal {

@@ -88,17 +88,17 @@ export const getDefaultHeightBasis = (age, height) => {
     const heightNum = Number(height);
     if (isNaN(heightNum) || heightNum <= 0) return '請輸入年齡及身高';
 
-    if (heightNum <= 152) return '依身高：152 cm 以下 → 6 cm';
-    if (heightNum <= 157) return '依身高：153 - 157 cm → 6.5 cm';
-    if (heightNum <= 162) return '依身高：158 - 162 cm → 7 cm';
-    if (heightNum <= 167) return '依身高：163 - 167 cm → 7.5 cm';
-    if (heightNum <= 172) return '依身高：168 - 172 cm → 8 cm';
-    if (heightNum <= 177) return '依身高：173 - 177 cm → 8.5 cm';
-    if (heightNum <= 182) return '依身高：178 - 182 cm → 9 cm';
-    if (heightNum <= 187) return '依身高：183 - 187 cm → 9.5 cm';
-    if (heightNum <= 192) return '依身高：188 - 192 cm → 10 cm';
-    if (heightNum <= 197) return '依身高：193 - 197 cm → 10.5 cm';
-    return `依身高：${heightNum} cm（197 cm 以上每 5 cm 多 0.5 cm 推算）`;
+    if (heightNum <= 152) return '依成人身高：152 cm 以下 範圍 → 6 cm';
+    if (heightNum <= 157) return '依成人身高：153 - 157 cm 範圍 → 6.5 cm';
+    if (heightNum <= 162) return '依成人身高：158 - 162 cm 範圍 → 7 cm';
+    if (heightNum <= 167) return '依成人身高：163 - 167 cm 範圍 → 7.5 cm';
+    if (heightNum <= 172) return '依成人身高：168 - 172 cm 範圍 → 8 cm';
+    if (heightNum <= 177) return '依成人身高：173 - 177 cm 範圍 → 8.5 cm';
+    if (heightNum <= 182) return '依成人身高：178 - 182 cm 範圍 → 9 cm';
+    if (heightNum <= 187) return '依成人身高：183 - 187 cm 範圍 → 9.5 cm';
+    if (heightNum <= 192) return '依成人身高：188 - 192 cm 範圍 → 10 cm';
+    if (heightNum <= 197) return '依成人身高：193 - 197 cm 範圍 → 10.5 cm';
+    return `依成人身高：${heightNum} cm（197 cm 以上每 5 cm 多 0.5 cm 推算）`;
 };
 
 /* ----------------------------- 標準體重 ----------------------------- */

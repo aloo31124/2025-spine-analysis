@@ -686,9 +686,9 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
                     </div>
                 )}
 
-                {/* 體重偏差調整 */}
+                {/* 體重偏差高度調整 */}
                 <div className={style.CreateEditProductRow}>
-                    <label>體重偏差調整 (cm):</label>
+                    <label>體重偏差高度調整 (cm):</label>
                     <input
                         type="text"
                         value={
@@ -733,7 +733,7 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
                     <div className={style.CreateEditProductRow}>
                         <label></label>
                         <div style={{ fontSize: '0.9em', color: '#555' }}>
-                            <strong>判斷依據：</strong>{getDefaultHeightBasis(age, height)}
+                            <strong>判斷依據 「初始高度對照表」 ：</strong>{getDefaultHeightBasis(age, height)}
                         </div>
                     </div>
                 )}
@@ -753,7 +753,7 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
                         }}
                     />
                     <small style={{ marginLeft: '10px', color: '#666' }}>
-                        最終基準高度 = 初始高度 + 體重偏差調整
+                        最終基準高度 = 初始高度 + 體重偏差高度調整
                     </small>
                 </div>
                 {baseHeight !== null && (
@@ -788,7 +788,7 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
             )}
 
             <div className={style.CreateEditProductContainer}>
-                <h2>弧度與醫學枕型號</h2>
+                <h2>枕骨七頸椎對應枕型</h2>
                 <div className={style.CreateEditProductRow}>
                     <small style={{ color: '#999', fontStyle: 'italic', marginBottom: '10px', display: 'block' }}>
                         ※ 依照[頸椎分析]之點2-4距離（枕骨至第七頸椎的距離）推薦適合的枕頭型號，數據自動從最新頸椎分析提取。
@@ -834,12 +834,7 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
             </div>
 
             <div className={style.CreateEditProductContainer}>
-                <h2>頸椎曲線特殊調整規則 (墊片與加高)</h2>
-                <div className={style.CreateEditProductRow}>
-                    <small style={{ color: '#999', fontStyle: 'italic', marginBottom: '10px', display: 'block' }}>
-                        ※ 根據頸椎分析點位距離進行最終微調，數據自動從最新頸椎分析提取
-                    </small>
-                </div>
+                <h2>頸凹點至後腦勺增加墊片</h2>
 
                 {/* 點3-7 距離（頸椎凹點至後腦勺） */}
                 <div className={style.CreateEditProductRow}>
@@ -853,6 +848,48 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
                     />
                     <small style={{ marginLeft: '10px', color: '#666' }}>(頸椎凹點至後腦勺)</small>
                 </div>
+
+                {/* 墊片調整建議（依點3-7距離） */}
+                {(() => {
+                    const shimAdj = computeShimAdjustment(spinePoint37Distance, heightAdjustment);
+                    const modelLabel = baseHeight !== null && shimAdj?.modelSuffix
+                        ? `型號: ${baseHeight}${shimAdj.modelSuffix}`
+                        : null;
+                    return (
+                        <div className={style.CreateEditProductRow}>
+                            <label>墊片調整建議:</label>
+                            <input
+                                type="text"
+                                value={
+                                    shimAdj
+                                        ? shimAdj.shimText + (modelLabel ? `　→　${modelLabel}` : '')
+                                        : '無頸椎分析數據'
+                                }
+                                readOnly
+                                style={{
+                                    backgroundColor: '#f0f0f0',
+                                    cursor: 'not-allowed',
+                                    color: shimAdj?.modelSuffix ? '#d9534f' : '#5cb85c',
+                                    fontWeight: shimAdj?.modelSuffix ? 'bold' : 'normal',
+                                    minWidth: '300px',
+                                }}
+                                placeholder="需要頸椎分析結果"
+                            />
+                            {spinePoint37Distance !== null && (
+                                <small style={{ marginLeft: '10px', color: '#666' }}>
+                                    {spinePoint37Distance < 1.6 && '(< 1.6 cm → 無需墊片)'}
+                                    {spinePoint37Distance >= 1.6 && spinePoint37Distance <= 2.1 && '(1.6 - 2.1 cm → 半張墊片，型號 X.5)'}
+                                    {spinePoint37Distance >= 2.2 && '(≥ 2.2 cm → 二個半張墊片，型號 X.2)'}
+                                </small>
+                            )}
+                        </div>
+                    );
+                })()}
+
+            </div>
+
+            <div className={style.CreateEditProductContainer}>
+                <h2>頸凹點至背凸點增加墊片</h2>
 
                 {/* 點5-8 距離（頸椎凹點至背部凸點） */}
                 <div className={style.CreateEditProductRow}>
@@ -928,43 +965,6 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
                         </div>
                     </div>
                 )}
-
-                {/* 墊片調整建議（依點3-7距離） */}
-                {(() => {
-                    const shimAdj = computeShimAdjustment(spinePoint37Distance, heightAdjustment);
-                    const modelLabel = baseHeight !== null && shimAdj?.modelSuffix
-                        ? `型號: ${baseHeight}${shimAdj.modelSuffix}`
-                        : null;
-                    return (
-                        <div className={style.CreateEditProductRow}>
-                            <label>墊片調整建議:</label>
-                            <input
-                                type="text"
-                                value={
-                                    shimAdj
-                                        ? shimAdj.shimText + (modelLabel ? `　→　${modelLabel}` : '')
-                                        : '無頸椎分析數據'
-                                }
-                                readOnly
-                                style={{
-                                    backgroundColor: '#f0f0f0',
-                                    cursor: 'not-allowed',
-                                    color: shimAdj?.modelSuffix ? '#d9534f' : '#5cb85c',
-                                    fontWeight: shimAdj?.modelSuffix ? 'bold' : 'normal',
-                                    minWidth: '300px',
-                                }}
-                                placeholder="需要頸椎分析結果"
-                            />
-                            {spinePoint37Distance !== null && (
-                                <small style={{ marginLeft: '10px', color: '#666' }}>
-                                    {spinePoint37Distance < 1.6 && '(< 1.6 cm → 無需墊片)'}
-                                    {spinePoint37Distance >= 1.6 && spinePoint37Distance <= 2.1 && '(1.6 - 2.1 cm → 半張墊片，型號 X.5)'}
-                                    {spinePoint37Distance >= 2.2 && '(≥ 2.2 cm → 二個半張墊片，型號 X.2)'}
-                                </small>
-                            )}
-                        </div>
-                    );
-                })()}
 
                 {/* 5-8點加高調整建議 */}
                 {(() => {
