@@ -214,6 +214,78 @@ export const calculateAdjustedDefaultHeight = (age, height, gender, weight) => {
     };
 };
 
+/* ---------------------- 計算公式呈現（最終基準高度） ---------------------- */
+/*
+ * 以下 describe* 函式皆回傳 { value, formula, process }，
+ * 供畫面「完整呈現計算公式」使用：
+ *   value   ：計算結果
+ *   formula ：通用公式（文字）
+ *   process ：代入實際數值的計算過程（資料不足時為 null）
+ */
+
+/** 標準體重：男性 (身高-80)×70%；女性 (身高-70)×60% */
+export const describeStandardWeight = (height, gender) => {
+    const formula = '男性：(身高 - 80) × 70%；女性：(身高 - 70) × 60%';
+    const value = calculateStandardWeight(height, gender);
+    if (value === null) return { value, formula, process: null };
+
+    const h = Number(height);
+    const process = gender === '男'
+        ? `(${h} - 80) × 70% = ${h - 80} × 0.7 = ${value.toFixed(1)} kg`
+        : `(${h} - 70) × 60% = ${h - 70} × 0.6 = ${value.toFixed(1)} kg`;
+    return { value, formula, process };
+};
+
+/** 體重偏差 = 實際體重 - 標準體重 */
+export const describeWeightDeviation = (weight, standardWeight) => {
+    const formula = '體重偏差 = 實際體重 - 標準體重';
+    const value = calculateWeightDeviation(weight, standardWeight);
+    if (value === null) return { value, formula, process: null };
+
+    const sign = value > 0 ? '+' : '';
+    const process = `${weight} - ${standardWeight.toFixed(1)} = ${sign}${value.toFixed(1)} kg`;
+    return { value, formula, process };
+};
+
+/** 體重偏差高度調整：參考「體重偏離調整表」 */
+export const describeHeightAdjustment = (weightDeviation) => ({
+    value: calculateHeightAdjustment(weightDeviation),
+    formula: '參考「體重偏離調整表」',
+    process: weightDeviation === null ? null : getHeightAdjustmentBasis(weightDeviation),
+});
+
+/** 初始高度：參考「初始高度對照表」（依年齡 / 身高判斷） */
+export const describeInitialHeight = (age, height) => ({
+    value: calculateDefaultHeight(age, height),
+    formula: '參考「初始高度對照表」（依年齡 / 身高判斷）',
+    process: getDefaultHeightBasis(age, height),
+});
+
+/** 最終基準高度 = 初始高度 + 體重偏差高度調整 */
+export const describeFinalHeight = (baseHeight, heightAdjustment) => {
+    const formula = '最終基準高度 = 初始高度 + 體重偏差高度調整';
+    if (baseHeight === null || baseHeight === undefined) {
+        return { value: null, formula, process: null };
+    }
+    const value = baseHeight + heightAdjustment;
+    const sign = heightAdjustment > 0 ? '+' : '';
+    const process = `${baseHeight} + (${sign}${heightAdjustment}) = ${value} cm`;
+    return { value, formula, process };
+};
+
+/**
+ * 8 歲以下分高低處墊片（純文字提示，依「初始高度對照表」高低側）
+ * @returns {string|null} 無對應時回傳 null
+ */
+export const getUnderEightShimNote = (age) => {
+    const a = Number(age);
+    if (age === '' || age === null || age === undefined || isNaN(a) || a < 0 || a > 8) return null;
+    if (a <= 2) return '0-2 歲：墊片使用低側';
+    if (a <= 4) return '3-4 歲：墊片使用高側';
+    if (a <= 6) return '5-6 歲：墊片使用低側';
+    return '7-8 歲：墊片使用高側';
+};
+
 /* ============================================================
  *  區塊二｜弧度醫學枕型號（點2-4 距離）
  * ============================================================ */
@@ -251,6 +323,21 @@ export const recommendPillowType = (distanceCm) => {
 
     return '';
 };
+
+/** 對應枕型的判斷依據文字（依「頸椎長度與型號表」） */
+export const getPillowTypeBasis = (distanceCm) => {
+    if (distanceCm === null || distanceCm === undefined) return '需要頸椎分析結果';
+    if (distanceCm <= 8.4) return '≤ 8.4 cm → B 型枕';
+    if (distanceCm <= 10.0) return '8.5 - 10 cm → A 型枕';
+    return '≥ 10.1 cm → AA 型枕';
+};
+
+/** 對應枕型：依點2-4距離，參考「頸椎長度與型號表」 */
+export const describePillowType = (distanceCm) => ({
+    value: recommendPillowType(distanceCm),
+    formula: '參考「頸椎長度與型號表」（依點2-4距離判斷）',
+    process: getPillowTypeBasis(distanceCm),
+});
 
 /**
  * 從分析結果中提取點2到點4的距離和推薦型號
@@ -371,169 +458,173 @@ export const extractSpinePointDistances = (analysisResults) => {
 };
 
 /* ============================================================
- *  區塊三｜墊片加高（點3-7 距離）
+ *  區塊三｜頸凹點至後腦勺增加墊片（點3-7 距離）
  * ============================================================ */
 
+/** 判斷「最終基準高度」是否為 .5 結尾（如 6.5、7.5） */
+export const isHalfHeight = (finalHeight) =>
+    finalHeight !== null && finalHeight !== undefined &&
+    Math.abs((finalHeight % 1) - 0.5) < 1e-9;
+
 /**
- * 根據點3-7距離與體重調整值，計算墊片調整建議
+ * 依「頸凹點至後腦勺增加墊片」表計算墊片配置
  *
- * @param {number|null} dist37Cm - 點3-7距離（公分）
- * @param {number} heightAdjustment - 體重高度調整值（公分，0.5 表示因體重已加整張墊片）
- * @returns {{ shimText: string, modelSuffix: string, hasWeightSheet: boolean } | null}
+ * 規則（依 [3-7點距離] 與 [最終基準高度是否為 .5]）：
+ *   3-7 ≤ 1.5 cm  ：最終基準高度非 .5 → 0 墊片（命名 .0）
+ *                    最終基準高度為 .5 → 0.5 張墊片（命名 .5）
+ *   3-7 1.6-2.1 cm：0.5 張墊片（命名 .5）
+ *   3-7 ≥ 2.2 cm  ：2.5 張墊片（命名 .2）
+ *
+ * @param {number|null} dist37Cm   - 點3-7距離（公分）
+ * @param {number|null} finalHeight - 最終基準高度（公分）
+ * @returns {{ shimText: string, modelSuffix: string, sheets: number } | null}
  */
-export const computeShimAdjustment = (dist37Cm, heightAdjustment) => {
+export const computeShimAdjustment = (dist37Cm, finalHeight) => {
     if (dist37Cm === null || dist37Cm === undefined) return null;
 
-    const hasWeightSheet = heightAdjustment === 0.5; // 因體重已加 0.5cm（整張）
-
-    if (dist37Cm >= 1.6 && dist37Cm <= 2.1) {
-        const shimText = hasWeightSheet
-            ? '改為「半張墊片」（取代原體重整張墊片）'
-            : '增加「半張墊片」';
-        return { shimText, modelSuffix: '.5', hasWeightSheet };
+    if (dist37Cm <= 1.5) {
+        return isHalfHeight(finalHeight)
+            ? { shimText: '0.5 張墊片', modelSuffix: '.5', sheets: 0.5 }
+            : { shimText: '0 墊片', modelSuffix: '.0', sheets: 0 };
     }
-
-    if (dist37Cm >= 2.2) {
-        const shimText = hasWeightSheet
-            ? '改為「二個半張墊片」（取代原體重整張墊片）'
-            : '增加「二個半張墊片」';
-        return { shimText, modelSuffix: '.2', hasWeightSheet };
+    if (dist37Cm <= 2.1) {
+        return { shimText: '0.5 張墊片', modelSuffix: '.5', sheets: 0.5 };
     }
+    return { shimText: '2.5 張墊片', modelSuffix: '.2', sheets: 2.5 };
+};
 
-    return { shimText: '無需墊片調整', modelSuffix: '', hasWeightSheet };
+/** 墊片配置的判斷依據文字 */
+export const getShimBasis = (dist37Cm, finalHeight) => {
+    if (dist37Cm === null || dist37Cm === undefined) return '需要頸椎分析結果';
+    if (dist37Cm <= 1.5) {
+        return isHalfHeight(finalHeight)
+            ? '≤ 1.5 cm（最終基準高度為 .5）→ 0.5 張墊片（命名 .5）'
+            : '≤ 1.5 cm（最終基準高度非 .5）→ 0 墊片（命名 .0）';
+    }
+    if (dist37Cm <= 2.1) return '1.6 - 2.1 cm → 0.5 張墊片（命名 .5）';
+    return '≥ 2.2 cm → 2.5 張墊片（命名 .2）';
+};
+
+/** 墊片配置：依點3-7距離與最終基準高度，參考墊片對照表 */
+export const describeShimAdjustment = (dist37Cm, finalHeight) => {
+    const shimAdj = computeShimAdjustment(dist37Cm, finalHeight);
+    return {
+        value: shimAdj ? shimAdj.shimText : null,
+        modelSuffix: shimAdj ? shimAdj.modelSuffix : null,
+        formula: '參考「頸凹點至後腦勺增加墊片」表（依點3-7距離與最終基準高度是否為 .5）',
+        process: getShimBasis(dist37Cm, finalHeight),
+    };
 };
 
 /* ============================================================
- *  區塊四｜標準長度與 5-8 點加高（點5-8 距離）
+ *  區塊四｜頸凹點至背凸點級距（點5-8 距離）
  * ============================================================ */
 
+/** 5-8 點標準長度：固定 10 cm */
+export const STANDARD_LENGTH_58 = 10;
+
 /**
- * 根據身高計算5-8點的標準長度
- *
- * 基準：身高 166 cm 時，5-8點標準長度為 10 cm
- * 公式：標準長度 = 10 * {1 + [(身高 - 166) / 166]}
- *
- * 範例：
- * - 身高 160 cm: 10 * {1 - [(166-160)/166]} = 10 * 0.964 = 9.64 cm
- * - 身高 166 cm: 10 * {1 + 0} = 10 cm
- * - 身高 180 cm: 10 * {1 + [(180-166)/166]} = 10 * 1.084 = 10.84 cm
+ * 標準長比差 = 標準長度 × { 1 - ( |身高 - 166| / 166 ) }
  *
  * @param {number|string|null} height - 身高（公分）
- * @returns {number|null} 標準長度（公分），如果身高無效則返回 null
+ * @returns {number|null} 標準長比差（公分），身高無效則回傳 null
  */
-export const calculateStandardLength58 = (height) => {
-    const heightNum = parseFloat(height);
-    if (!heightNum || heightNum <= 0) return null;
-
-    const baseHeight = 166; // 基準身高
-    const baseLength = 10;  // 基準標準長度
-
-    // 標準長度 = 10 * {1 + [(身高 - 166) / 166]}
-    const standardLength = baseLength * (1 + (heightNum - baseHeight) / baseHeight);
-
-    return standardLength;
+export const calculateStandardLengthRatio = (height) => {
+    const h = parseFloat(height);
+    if (!h || h <= 0) return null;
+    return STANDARD_LENGTH_58 * (1 - Math.abs(h - 166) / 166);
 };
 
 /**
- * 根據點5-8距離、身高計算額外加高值
+ * .5 級距 = { [ (患者[5-8點距離] - 標準長比差) / 0.5 ] 無條件捨去 } × 0.5
  *
- * 計算邏輯：
- * 1. 根據身高計算標準長度（使用 calculateStandardLength58）
- * 2. 計算實際測量值與標準長度的差距
- * 3. 如果差距超過 0.5 cm，每超過 0.5 cm 增加 0.5 cm 高度
- *
- * 範例A（身高 160 cm）：
- * - 標準長度：9.64 cm
- * - 實際測量：10.25 cm
- * - 差距：0.61 cm > 0.5 cm
- * - 調整：floor(0.61 / 0.5) * 0.5 = 1 * 0.5 = 0.5 cm
- *
- * 範例B（身高 180 cm）：
- * - 標準長度：10.84 cm
- * - 實際測量：12 cm
- * - 差距：1.16 cm > 0.5 cm
- * - 調整：floor(1.16 / 0.5) * 0.5 = 2 * 0.5 = 1.0 cm
+ * 結果為 0.5, 1, 1.5, 2 …（純文字顯示，不影響墊片與命名）。
  *
  * @param {number|null} dist58Cm - 點5-8距離（公分）
  * @param {number|string|null} height - 身高（公分）
- * @returns {number | null} 額外加高（公分），0 表示不需要加高
+ * @returns {number|null} .5 級距（公分），資料不足則回傳 null
  */
-export const computeExtra58Height = (dist58Cm, height) => {
+export const calculateLevel58 = (dist58Cm, height) => {
     if (dist58Cm === null || dist58Cm === undefined) return null;
+    const ratio = calculateStandardLengthRatio(height);
+    if (ratio === null) return null;
+    const level = Math.floor((dist58Cm - ratio) / 0.5) * 0.5;
+    return level < 0 ? 0 : level;
+};
 
-    // 根據身高計算標準長度
-    const standardLength = calculateStandardLength58(height);
-    if (standardLength === null) return null;
+/** 標準長比差：標準長度 × {1 - (|身高 - 166| / 166)} */
+export const describeStandardLengthRatio = (height) => {
+    const value = calculateStandardLengthRatio(height);
+    const formula = '標準長比差 = 標準長度 × { 1 - ( |身高 - 166| / 166 ) }';
+    if (value === null) return { value, formula, process: null };
+    const h = parseFloat(height);
+    const diff = Math.abs(h - 166);
+    const process =
+        `${STANDARD_LENGTH_58} × { 1 - ( |${h} - 166| / 166 ) } = ` +
+        `${STANDARD_LENGTH_58} × ( 1 - ${(diff / 166).toFixed(4)} ) = ${value.toFixed(2)} cm`;
+    return { value, formula, process };
+};
 
-    // 計算差距
-    const excess = dist58Cm - standardLength;
-    if (excess <= 0) return 0;
-
-    // 每超過 0.5 cm，高度額外增加 0.5 cm
-    return Math.floor(excess / 0.5) * 0.5;
+/** .5 級距：⌊(5-8距離 - 標準長比差) / 0.5⌋ × 0.5 */
+export const describeLevel58 = (dist58Cm, height) => {
+    const value = calculateLevel58(dist58Cm, height);
+    const formula = '.5 級距 = { [ (5-8點距離 - 標準長比差) / 0.5 ] 無條件捨去 } × 0.5';
+    if (value === null) return { value, formula, process: null };
+    const ratio = calculateStandardLengthRatio(height);
+    const steps = Math.floor((dist58Cm - ratio) / 0.5);
+    const process =
+        `{ [ (${dist58Cm.toFixed(2)} - ${ratio.toFixed(2)}) / 0.5 ] 無條件捨去 } × 0.5 = ` +
+        `${Math.max(0, steps)} × 0.5 = ${value} cm`;
+    return { value, formula, process };
 };
 
 /* ============================================================
- *  區塊五｜型號命名組合
+ *  區塊五｜型號命名建議
  *
- *  將「最終基準高度」、「墊片狀態」、「弧度類型」組合為型號名稱，
- *  例如：「八公分_半張墊片_AA型」。
+ *  依文件命名格式：高度.墊片[+F]弧度型號
+ *  例：8.5FAA、7.2B、9.0A、8.5FA
  * ============================================================ */
 
-const CN_DIGITS = {
-    '0': '零', '1': '一', '2': '二', '3': '三', '4': '四',
-    '5': '五', '6': '六', '7': '七', '8': '八', '9': '九',
+/** 高度參數：取「最終基準高度」的第一個數字（整數位） */
+export const getHeightDigit = (finalHeight) => {
+    if (finalHeight === null || finalHeight === undefined) return null;
+    return Math.floor(finalHeight);
 };
 
-/**
- * 將數字高度轉換為中文（例：6.5 → 六點五公分）
- * @param {number|null} h
- * @returns {string|null}
- */
-export const heightToChinese = (h) => {
-    if (h === null || h === undefined) return null;
-    return String(h).split('').map(c => c === '.' ? '點' : (CN_DIGITS[c] || c)).join('') + '公分';
+/** 墊片參數：由墊片建議的命名後綴取數字（.5 → '5'、.2 → '2'、.0 → '0'） */
+export const getShimDigit = (shimAdj) => {
+    if (!shimAdj || !shimAdj.modelSuffix) return null;
+    return shimAdj.modelSuffix.replace('.', '');
 };
 
-/**
- * 由墊片建議推導「墊片狀態」標籤
- * @param {{ modelSuffix: string }|null} shimAdj
- * @returns {string|null}
- */
-export const extractShimLabel = (shimAdj) => {
-    if (!shimAdj) return null;
-    if (!shimAdj.modelSuffix) return '無墊片';
-    if (shimAdj.modelSuffix === '.5') return '半張墊片';
-    if (shimAdj.modelSuffix === '.2') return '二個半張墊片';
-    return null;
-};
+/** F 參數：墊片為 .5 時加入 'F' */
+export const getFParam = (shimAdj) => (getShimDigit(shimAdj) === '5' ? 'F' : '');
 
-/**
- * 由推薦枕頭型號推導「弧度類型」標籤（例：'AA 型枕' → 'AA型'）
- * @param {string} recommendation
- * @returns {string|null}
- */
-export const extractArcLabel = (recommendation) => {
+/** 弧度型號：由推薦枕頭型號取 A / B / AA（例：'AA 型枕' → 'AA'） */
+export const getArcCode = (recommendation) => {
     if (!recommendation) return null;
-    return recommendation.replace(/\s+/g, '').replace('枕', '');
+    return recommendation.replace(/\s+/g, '').replace('型枕', '');
 };
 
 /**
- * 組合型號名稱：「高度_墊片狀態_弧度類型」
+ * 組合型號名稱：高度.墊片[+F]弧度型號（例：8.5FAA）
  *
  * @param {Object} params
  * @param {number|null} params.finalHeight       - 最終基準高度（公分）
- * @param {{ modelSuffix: string }|null} params.shimAdj - 墊片調整建議
+ * @param {{ modelSuffix: string }|null} params.shimAdj - 墊片配置
  * @param {string} params.pillowRecommendation   - 弧度醫學枕型號（例：'AA 型枕'）
- * @returns {{ heightLabel:string|null, shimLabel:string|null, arcLabel:string|null, modelName:string|null }}
+ * @returns {{ heightDigit:number|null, shimDigit:string|null, fParam:string, arcCode:string|null, modelName:string|null }}
  */
 export const composeModelName = ({ finalHeight, shimAdj, pillowRecommendation }) => {
-    const heightLabel = heightToChinese(finalHeight);
-    const shimLabel   = extractShimLabel(shimAdj);
-    const arcLabel    = extractArcLabel(pillowRecommendation);
+    const heightDigit = getHeightDigit(finalHeight);
+    const shimDigit   = getShimDigit(shimAdj);
+    const fParam      = getFParam(shimAdj);
+    const arcCode     = getArcCode(pillowRecommendation);
 
-    const allReady = heightLabel && shimLabel && arcLabel;
-    const modelName = allReady ? `${heightLabel}_${shimLabel}_${arcLabel}` : null;
+    const allReady = heightDigit !== null && shimDigit !== null && arcCode;
+    const modelName = allReady
+        ? `${heightDigit}.${shimDigit}${fParam}${arcCode}`
+        : null;
 
-    return { heightLabel, shimLabel, arcLabel, modelName };
+    return { heightDigit, shimDigit, fParam, arcCode, modelName };
 };
