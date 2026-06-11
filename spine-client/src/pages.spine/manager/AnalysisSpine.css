@@ -5,6 +5,10 @@
     width: 100%;
     background: #f5f5f5;
     /* overflow: hidden; */
+
+    /* 點位大小：所有點位（1~8、交點）統一大小，並隨 RWD 平滑縮放 */
+    --spine-point-size: clamp(12px, 3.6vw, 18px);
+    --spine-point-font: clamp(9px, 2.2vw, 12px);
 }
 
 .analysis-content {
@@ -54,8 +58,8 @@
 /* 點位樣式 */
 .point {
     position: absolute;
-    width: 18px;
-    height: 18px;
+    width: var(--spine-point-size);
+    height: var(--spine-point-size);
     border: 2px solid #3DA5FF;
     background-color: #3DA5FF;
     border-radius: 50%;
@@ -67,7 +71,7 @@
     align-items: center;
     justify-content: center;
     color: white;
-    font-size: 12px;
+    font-size: var(--spine-point-font);
     font-weight: bold;
     text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
     user-select: none;
@@ -200,11 +204,21 @@
     transform-origin: left center;
 }
 
+/* 約束虛線（點2-點3 垂直、點2-點6 平行） */
+.constraint-line {
+    position: absolute;
+    height: 0;
+    border-top: 2px dashed #e74c3c;
+    z-index: 1;
+    transform-origin: left center;
+    pointer-events: none;
+}
+
 /* 交點樣式 */
 .intersection-point {
     position: absolute;
-    width: 18px;
-    height: 18px;
+    width: var(--spine-point-size);
+    height: var(--spine-point-size);
     border: 2px solid #f39c12;
     background-color: #f39c12;
     border-radius: 50%;
@@ -215,7 +229,7 @@
     align-items: center;
     justify-content: center;
     color: white;
-    font-size: 12px;
+    font-size: var(--spine-point-font);
     font-weight: bold;
     text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
 }
@@ -309,19 +323,7 @@
     .neck-container-wrapper {
         max-width: 95%;
     }
-
-    /* 窄螢幕時縮小 1~8 點位 */
-    .point {
-        width: 14px;
-        height: 14px;
-        font-size: 10px;
-    }
-
-    .intersection-point {
-        width: 14px;
-        height: 14px;
-        font-size: 10px;
-    }
+    /* 點位大小改由 --spine-point-size 的 clamp() 隨 RWD 平滑縮放，此處不再覆寫 */
 }
 
 /* 對話框樣式 */
@@ -457,12 +459,6 @@
         font-size: 12px;
         min-width: 40px;
     }
-    
-    .point {
-        width: 14px;
-        height: 14px;
-        font-size: 10px;
-    }
 
     .draggable-point {
         width: 25px;
@@ -470,16 +466,10 @@
         font-size: 14px;
         border-width: 2px;
     }
-    
+
     .draggable-point.active {
         width: 28px;
         height: 28px;
-    }
-    
-    .intersection-point {
-        width: 14px;
-        height: 14px;
-        font-size: 10px;
     }
 
     .customer-modal {

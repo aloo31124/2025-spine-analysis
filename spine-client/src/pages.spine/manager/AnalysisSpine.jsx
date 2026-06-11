@@ -166,6 +166,20 @@ function AnalysisSpine() {
         if (isCalculated) calculateAllDistancesAndAngles(newScaleFactor);
     };
 
+    // ─── 約束虛線渲染（點2-點3 垂直、點2-點6 平行） ───────
+    const renderConstraintLine = (id, pointA, pointB) => {
+        if (!pointA || !pointB) return null;
+        const length = Math.sqrt(
+            Math.pow(pointB.x - pointA.x, 2) + Math.pow(pointB.y - pointA.y, 2),
+        );
+        const angle = Math.atan2(pointB.y - pointA.y, pointB.x - pointA.x) * 180 / Math.PI;
+        return (
+            <div key={id} className="constraint-line"
+                style={{ left: `${pointA.x}px`, top: `${pointA.y}px`, width: `${length}px`, transform: `rotate(${angle}deg)` }}
+            />
+        );
+    };
+
     // ─── 線條渲染 ─────────────────────────────────────────
     const renderLine = (line) => {
         if (line.type === 'diagonal') {
@@ -214,6 +228,9 @@ function AnalysisSpine() {
                         )}
                     </div>
                     <div className="neck-container" ref={neckContainerRef} style={getContainerStyle()}>
+                        {renderConstraintLine('constraint23', points[1], points[2])}
+                        {renderConstraintLine('constraint26', points[1], points[5])}
+
                         {points.map((point, index) => (
                             <div
                                 key={point.id}
