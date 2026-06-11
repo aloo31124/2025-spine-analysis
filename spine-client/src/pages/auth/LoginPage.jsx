@@ -115,9 +115,9 @@ function LoginPage() {
             }}>
                 更新版本: 
                 <br />
-                Date: 2026年5月5日 下午 08:04:00
+                Date: 2026年6月11日 下午 08:04:00
                 <br />
-                git commit: 94347c3
+                git commit: 7dca44b
             </div>
         </div>
     );
