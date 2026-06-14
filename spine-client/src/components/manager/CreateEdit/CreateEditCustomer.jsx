@@ -331,8 +331,8 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
     /* post 新增客戶 */
     const clickAddCustomer = async () => {
         if(typePage !== typePageList.CREATE) return;
-        if (!name || !email || !phone) {
-            alert('請填寫必要欄位：姓名、電子郵件、電話');
+        if (!name || !phone) {
+            alert('請填寫必要欄位：姓名、電話');
             return;
         }
         
@@ -349,8 +349,8 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
     /* 編輯客戶, 更新編輯客戶 */
     const clickUpdateCustomer = async () => {
         if(typePage !== typePageList.EDIT) return;
-        if (!name || !email || !phone) {
-            alert('請填寫必要欄位：姓名、電子郵件、電話');
+        if (!name || !phone) {
+            alert('請填寫必要欄位：姓名、電話');
             return;
         }
         
@@ -573,13 +573,12 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
 
                 <h2>基本資訊</h2>
                 <div className={style.CreateEditProductRow}>
-                    <label>電子郵件: *</label>
+                    <label>電子郵件:</label>
                     <input
                         type="email"
                         placeholder="請輸入電子郵件"
                         value={email}
                         onChange={e => setEmail(e.target.value)}
-                        required
                     />
                 </div>
 
