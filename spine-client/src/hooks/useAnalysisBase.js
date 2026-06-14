@@ -225,7 +225,7 @@ export default function useAnalysisBase({
 
     const handleBindCustomer = async () => {
         try {
-            const response = await getCustomerList({}, { pageIndex: 1, pageSize: 1000 });
+            const response = await getCustomerList({}, { pageIndex: 1, pageSize: 1000, sort: 'createdAt' });
             if (response.status === 200) {
                 setCustomerList(response.data.result.customerList || []);
                 setShowSaveOptions(false);
