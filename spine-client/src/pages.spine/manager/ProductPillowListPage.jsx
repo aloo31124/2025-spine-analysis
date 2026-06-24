@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { withLoading } from '../../utils/loading';
-import { useNavigate } from 'react-router-dom';
-import { getProductPillowList, deleteProductPillow, searchProductPillow } from '../../api/manager/productPillow';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { deleteProductPillow, searchProductPillow } from '../../api/manager/productPillow';
 import PaginationBar from '../../components/tools/PaginationBar/PaginationBar';
 import loadingGif from '../../assets/loading.gif';
 import styles from './ProductListPage.module.css';
@@ -13,6 +13,8 @@ import { PILLOW_MODEL_OPTIONS } from '../../utils/pillowModelOptions';
  */
 function ProductPillowListPage() {
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const initialKeyword = searchParams.get('keyword') || ''; // 來自上方搜尋bar的關鍵字
     const [productPillowList, setProductPillowList] = useState([]);
     const [pagingParam, setPagingParam] = useState({ 
         pageIndex: 1, 
@@ -21,8 +23,8 @@ function ProductPillowListPage() {
         pageTotal: -1, 
         dataTotal: -1 
     });
-    const [searchParam, setSearchParam] = useState({ 
-        keyword: '', 
+    const [searchParam, setSearchParam] = useState({
+        keyword: initialKeyword,
         type: '',
         stateList: [],  // 狀態多選
         priceMin: '', priceMax: '',
@@ -38,28 +40,12 @@ function ProductPillowListPage() {
     // 狀態選項
     const stateOptions = ['草稿', '上架', '下架'];
 
-    // 初始時, 取得枕頭商品列表
+    // 初始載入 / 上方搜尋bar 帶入的關鍵字變動時, 依關鍵字搜尋枕頭商品
     useEffect(() => {
-        fetchProductPillowList();
-    }, []);
-
-    const fetchProductPillowList = async () => {
-        await withLoading(
-            getProductPillowList(searchParam, pagingParam),
-            {
-                min: 0,
-                timeout: 5000,
-                onLoading: () => setIsLoading(true),
-                onLoaded: () => setIsLoading(false),
-                onTimeout: () => alert('網路不穩, 請重新搜尋')
-            }
-        ).then(res => {
-            setProductPillowList(res.data.result.productPillowList || []);
-            setPagingParam(res.data.result.pagingParam || pagingParam);
-        }).catch(e => {
-            if (e.message !== 'timeout') console.log('取得枕頭商品列表發生錯誤', e);
-        });
-    }
+        const kw = searchParams.get('keyword') || '';
+        handleSearchResult({ ...searchParam, keyword: kw });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [searchParams]);
 
     // 切換每頁顯示筆數
     const handlePageSizeChange = async (event) => {

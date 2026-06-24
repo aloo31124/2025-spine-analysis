@@ -27,13 +27,47 @@
     flex-shrink: 0;
 }
 
+.headerSearchWrapper {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    max-width: 480px;
+    min-width: 180px;
+    gap: 6px;
+}
+
+.headerSearchType {
+    border: none;
+    border-radius: 20px;
+    padding: 8px 12px;
+    font-size: 15px;
+    background: rgba(255, 255, 255, 0.9);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.headerSearchBtn {
+    border: none;
+    border-radius: 20px;
+    padding: 8px 18px;
+    font-size: 15px;
+    background: #fff;
+    color: #333;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.headerSearchBtn:hover {
+    background: #f0f0f0;
+}
+
 .headerInputSearch {
     border: none;
     border-radius: 20px;
     padding: 8px 20px;
     flex: 1;
     max-width: 400px;
-    min-width: 150px;
+    min-width: 100px;
     font-size: 16px;
     background: rgba(255, 255, 255, 0.9);
 }
@@ -274,10 +308,25 @@
         margin-left: 45px;
     }
 
+    .headerSearchWrapper {
+        min-width: 140px;
+        gap: 4px;
+    }
+
+    .headerSearchType {
+        font-size: 13px;
+        padding: 6px 8px;
+    }
+
+    .headerSearchBtn {
+        font-size: 13px;
+        padding: 6px 12px;
+    }
+
     .headerInputSearch {
         flex: 1;
         max-width: none;
-        min-width: 100px;
+        min-width: 60px;
         font-size: 14px;
         padding: 6px 15px;
     }
@@ -347,10 +396,20 @@
         margin-left: 40px;
     }
 
+    .headerSearchType {
+        font-size: 12px;
+        padding: 5px 6px;
+    }
+
+    .headerSearchBtn {
+        font-size: 12px;
+        padding: 5px 10px;
+    }
+
     .headerInputSearch {
         font-size: 12px;
         padding: 5px 10px;
-        min-width: 80px;
+        min-width: 50px;
     }
 
     .storeManagerIcon {

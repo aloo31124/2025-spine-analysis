@@ -12,9 +12,18 @@ import {
     clearUserData 
 } from '../../utils/localStorage';
 
+// 搜尋類別對應的導向列表頁
+const SEARCH_TYPE_OPTIONS = [
+    { value: 'customer', label: '客戶', path: '/manager/customer/list' },
+    { value: 'pillow', label: '醫學枕', path: '/manager/product-pillow/list' },
+    { value: 'mattress', label: '床墊', path: '/manager/product-mattress/list' },
+];
+
 function Header({ onToggleMenu }) {
     const navigate = useNavigate();
     const [hoveredMenu, setHoveredMenu] = useState(null); // 控制顯示選單
+    const [searchType, setSearchType] = useState('customer'); // 搜尋類別: 客戶/醫學枕/床墊
+    const [searchKeyword, setSearchKeyword] = useState(''); // 搜尋關鍵字
     const [isMobile, setIsMobile] = useState(window.innerWidth < 800); // 檢測是否為移動設備
     const [storeManagerList, setStoreManagerList] = useState([]); // 店長列表
     const [selectedStoreManager, setSelectedStoreManager] = useState(''); // 選中的店長
@@ -90,6 +99,20 @@ function Header({ onToggleMenu }) {
         fetchStoreManagers();
     }, []);
 
+    // 依選擇的類別導向對應列表頁, 並帶入搜尋關鍵字
+    const handleSearch = () => {
+        const option = SEARCH_TYPE_OPTIONS.find(o => o.value === searchType);
+        if (!option) return;
+        const keyword = searchKeyword.trim();
+        const query = keyword ? `?keyword=${encodeURIComponent(keyword)}` : '';
+        navigate(`${option.path}${query}`);
+    };
+
+    // Enter 鍵觸發搜尋
+    const handleSearchKeyPress = (e) => {
+        if (e.key === 'Enter') handleSearch();
+    };
+
     const clickToManager = async () => {
         navigate('/manager/product/list');
     }
@@ -160,11 +183,26 @@ function Header({ onToggleMenu }) {
                 src={logo} 
             />
 
-            <input className={style.headerInputSearch}
-                type="text" 
-                placeholder='客戶,頸枕搜尋'
-                onClick={e => alert('功能開發中')}
-            />
+            <div className={style.headerSearchWrapper}>
+                <select className={style.headerSearchType}
+                    value={searchType}
+                    onChange={e => setSearchType(e.target.value)}
+                >
+                    {SEARCH_TYPE_OPTIONS.map(o => (
+                        <option key={o.value} value={o.value}>{o.label}</option>
+                    ))}
+                </select>
+                <input className={style.headerInputSearch}
+                    type="text"
+                    placeholder='輸入關鍵字搜尋'
+                    value={searchKeyword}
+                    onChange={e => setSearchKeyword(e.target.value)}
+                    onKeyPress={handleSearchKeyPress}
+                />
+                <button className={style.headerSearchBtn} onClick={handleSearch}>
+                    搜尋
+                </button>
+            </div>
 
             <div className={style.headerRightSection} >
                 {/* 店長選單 (僅總經理和系統管理員可見) */}

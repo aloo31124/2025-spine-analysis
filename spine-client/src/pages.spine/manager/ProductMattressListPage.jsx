@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { withLoading } from '../../utils/loading';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getProductMattressList, deleteProductMattress, searchProductMattress } from '../../api/manager/productMattress';
 import PaginationBar from '../../components/tools/PaginationBar/PaginationBar';
 import loadingGif from '../../assets/loading.gif';
@@ -12,6 +12,8 @@ import styles from './ProductListPage.module.css';
  */
 function ProductMattressListPage() {
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const initialKeyword = searchParams.get('keyword') || ''; // 來自上方搜尋bar的關鍵字
     const [productMattressList, setProductMattressList] = useState([]);
     const [pagingParam, setPagingParam] = useState({ 
         pageIndex: 1, 
@@ -20,8 +22,8 @@ function ProductMattressListPage() {
         pageTotal: -1, 
         dataTotal: -1 
     });
-    const [searchParam, setSearchParam] = useState({ 
-        keyword: '', 
+    const [searchParam, setSearchParam] = useState({
+        keyword: initialKeyword,
         model: '',
         stateList: [],  // 狀態多選
         priceMin: '', priceMax: ''
@@ -41,10 +43,12 @@ function ProductMattressListPage() {
         '1+1號床墊(1號床墊加厚1公分)'
     ];
 
-    // 初始時, 取得床墊商品列表
+    // 初始載入 / 上方搜尋bar 帶入的關鍵字變動時, 依關鍵字搜尋床墊商品
     useEffect(() => {
-        fetchProductMattressList();
-    }, []);
+        const kw = searchParams.get('keyword') || '';
+        handleSearchResult({ ...searchParam, keyword: kw });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [searchParams]);
 
     const fetchProductMattressList = async () => {
         await withLoading(

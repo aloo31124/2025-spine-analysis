@@ -2,8 +2,8 @@ import React, {useEffect, useState} from 'react';
 import { withLoading } from '../../utils/loading';
 import SearchBarCustomer from '../../components/manager/SearchBar/SearchBarCustomer';
 import TopBtnBarCustomer from '../../components/manager/TopBtnBar/TopBtnBarCustomer';
-import {useNavigate} from 'react-router-dom';
-import {getCustomerList, deleteCustomer, searchCustomer} from '../../api/manager/customer';
+import {useNavigate, useSearchParams} from 'react-router-dom';
+import {deleteCustomer, searchCustomer} from '../../api/manager/customer';
 import PaginationBar from '../../components/tools/PaginationBar/PaginationBar'
 import userIcon from '../../assets.spine/icon/user.png';
 import loadingGif from '../../assets/loading.gif';
@@ -11,6 +11,8 @@ import styles from './CustomerSpineListPage.module.css';
 
 function CustomerSpineListPage() {
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const initialKeyword = searchParams.get('keyword') || ''; // 來自上方搜尋bar的關鍵字
     const [customerList, setCustomerList] = useState([]);
     const [pagingParam, setPagingParam] = useState({ 
         pageIndex: 1, 
@@ -19,31 +21,15 @@ function CustomerSpineListPage() {
         pageTotal:-1, 
         dataTotal:-1 
     });
-    const [searchParam, setSearchParam] = useState({keyword:'', state:'', createDate:'', phone:'', email:''});
+    const [searchParam, setSearchParam] = useState({keyword:initialKeyword, state:'', createDate:'', phone:'', email:''});
     const [isLoading, setIsLoading] = useState(false);
 
-    // 初始時, 取得客戶列表
+    // 初始載入 / 上方搜尋bar 帶入的關鍵字變動時, 依關鍵字搜尋客戶
     useEffect(() => {
-        fetchCustomerList();
-    }, []);
-
-    const fetchCustomerList = async () => {
-        await withLoading(
-            getCustomerList(searchParam, pagingParam),
-            {
-                min: 0,
-                timeout: 5000,
-                onLoading: () => setIsLoading(true),
-                onLoaded: () => setIsLoading(false),
-                onTimeout: () => alert('網路不穩, 請重新搜尋')
-            }
-        ).then(res => {
-            setCustomerList(res.data.result.customerList);
-            setPagingParam(res.data.result.pagingParam);
-        }).catch(e => {
-            if (e.message !== 'timeout') console.log('取得客戶列表發生錯誤', e);
-        });
-    }
+        const kw = searchParams.get('keyword') || '';
+        handleSearchResult({ ...searchParam, keyword: kw });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [searchParams]);
 
     // 切換每頁顯示筆數
     const handlePageSizeChange = async (event) => {
