@@ -10,7 +10,7 @@ import styles from './PillowRecommendationModal.module.css';
  * - 0～2歲、或 3～4歲 推薦 型號:【嬰兒枕】型號Ｂ
  * - 5～6歲、或 7～8歲 推薦 型號:【兒童枕】型號Ｃ
  */
-function PillowRecommendationModal({ isOpen, onClose, customerData }) {
+function PillowRecommendationModal({ isOpen, onClose, customerData, modelName }) {
     const navigate = useNavigate();
     const [recommendation, setRecommendation] = useState(null);
 
@@ -103,6 +103,15 @@ function PillowRecommendationModal({ isOpen, onClose, customerData }) {
                 </div>
                 
                 <div className={styles.modalBody}>
+                    <div className={styles.modelNameResult}>
+                        <h4>型號命名建議</h4>
+                        {modelName ? (
+                            <span className={styles.modelNameValue}>{modelName}</span>
+                        ) : (
+                            <span className={styles.modelNameEmpty}>尚未計算</span>
+                        )}
+                    </div>
+
                     <div className={styles.ruleDescription}>
                         <h4>推薦規則說明</h4>
                         <p>根據客戶 <strong>年齡</strong> 進行枕頭型號推薦：</p>

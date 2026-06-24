@@ -428,6 +428,13 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
         });
     }
 
+    // 型號命名建議計算結果（供推薦枕頭彈窗顯示用）
+    const { modelName } = composeModelName({
+        finalHeight: defaultHeight,
+        shimAdj: computeShimAdjustment(spinePoint37Distance, defaultHeight),
+        pillowRecommendation: spinePillowRecommendation,
+    });
+
     return (
         <div className={style.CreateEditProduct}>
             <div className={style.CreateEditProductTopBar}>
@@ -473,6 +480,7 @@ function CreateEditCustomer({typePage, customer, analysisResults, handleUpdateCu
                 <PillowRecommendationModal
                     isOpen={showPillowRecommendationModal}
                     onClose={() => setShowPillowRecommendationModal(false)}
+                    modelName={modelName}
                     customerData={{
                         id: customer?.id,
                         name,
