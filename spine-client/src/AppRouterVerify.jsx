@@ -3,10 +3,28 @@ import { useNavigate } from 'react-router-dom';
 import Loading from './components/Loading';
 import { verifyJwt, verifyRole, verifyPayment } from './api/auth';
 
+/**
+ * 模組層級旗標：避免多個（巢狀）AppRouterVerify 同時驗證失敗時，
+ * 重複跳出多次「請重新登入」。登出後 parent(layout) 與 child(page)
+ * 兩個驗證器會同時驗證失敗，故需共用旗標去重，只提示一次。
+ */
+let isReloginPrompted = false;
+
 /* 驗證路由 */
 function AppRouterVerify({ element: Component, node="" }) {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+
+  // 顯示「請重新登入」並導回登入頁；以模組旗標去重，確保多個驗證器只提示一次
+  const promptRelogin = () => {
+    if (!isReloginPrompted) {
+      isReloginPrompted = true;
+      alert('請重新登入');
+      // 下一輪事件循環重置旗標，讓日後 token 過期時仍能再次提示
+      setTimeout(() => { isReloginPrompted = false; }, 1000);
+    }
+    navigate('/auth/login');
+  };
 
   // 檢查 jwt 和角色
   useEffect(() => {
@@ -56,16 +74,14 @@ function AppRouterVerify({ element: Component, node="" }) {
       const payload = req?.data?.payload;
       
       if (!payload) {
-        alert("請重新登入");
-        navigate('/auth/login');
+        promptRelogin();
         return null;
       }
-      
-      return { userId: payload.userId, email: payload.email }; 
+
+      return { userId: payload.userId, email: payload.email };
     } catch (error) {
-      alert(`請重新登入`);
       console.error('JWT 驗證錯誤:', error);
-      navigate('/auth/login');
+      promptRelogin();
       return null;
     }
   };
