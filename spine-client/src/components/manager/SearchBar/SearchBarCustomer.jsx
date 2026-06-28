@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import style from './SearchBar.module.css';
 
-function SearchBarCustomer({ getSearchParam, pagingParam }) {
-    const [keyword, setKeyword] = useState('');
+function SearchBarCustomer({ getSearchParam, pagingParam, initialKeyword = '' }) {
+    const [keyword, setKeyword] = useState(initialKeyword);
     const [state, setState] = useState('');
     const [phone, setPhone] = useState('');
     const [email, setEmail] = useState('');
+
+    // 同步上方搜尋bar帶入的關鍵字至名稱搜尋欄位
+    useEffect(() => {
+        setKeyword(initialKeyword);
+    }, [initialKeyword]);
 
     // 搜尋客戶
     const handleSearch = () => {

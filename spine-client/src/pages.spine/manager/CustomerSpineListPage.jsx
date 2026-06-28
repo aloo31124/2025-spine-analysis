@@ -272,9 +272,10 @@ function CustomerSpineListPage() {
             <TopBtnBarCustomer 
                 customerList={customerList}
             />
-            <SearchBarCustomer 
+            <SearchBarCustomer
                 getSearchParam={handleSearchResult}
                 pagingParam={pagingParam}
+                initialKeyword={initialKeyword}
             />
             
             {/* 桌面版表格 */}
