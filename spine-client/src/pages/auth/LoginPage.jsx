@@ -115,9 +115,16 @@ function LoginPage() {
             }}>
                 更新版本: 
                 <br />
-                Date: 2026年6月14日 08:04:00
+                June 28, 2026 at 8:29:31 AM GMT+8
                 <br />
-                git commit: 32cd2ea
+                git commit: 3a7e7f6 
+                <br />
+                fix: #4 [登入驗證] 修正登出後「請重新登入」重複跳出多次 3a7e7f6
+                <br />
+                update: #4 [客戶管理] 推薦枕頭彈窗上方顯示型號命名建議計算結果
+                <br />
+                update: #4 [全域] [上方搜尋bar] 可選客戶/醫學枕/床墊 並帶關鍵字導向對應列表頁顯示結果. 41d124f
+                <br />
             </div>
         </div>
     );
