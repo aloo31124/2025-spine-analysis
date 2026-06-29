@@ -32,7 +32,7 @@ gcloud services enable cloudbuild.googleapis.com run.googleapis.com containerreg
 
 # 建置後端 Docker Image
 echo "[2/7] 建置後端 Docker Image..."
-gcloud builds submit ./spine-server \
+gcloud builds submit ./backend \
     --tag "gcr.io/$PROJECT_ID/$SERVER_SERVICE:latest" \
     --quiet
 
@@ -72,7 +72,7 @@ images:
   - 'gcr.io/$PROJECT_ID/$CLIENT_SERVICE:latest'
 EOF
 
-gcloud builds submit ./spine-client --config /tmp/_cloudbuild_temp.yaml --quiet
+gcloud builds submit ./frontend --config /tmp/_cloudbuild_temp.yaml --quiet
 rm -f /tmp/_cloudbuild_temp.yaml
 
 # 部署前端至 Cloud Run
