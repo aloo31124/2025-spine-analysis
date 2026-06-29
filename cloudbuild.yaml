@@ -27,7 +27,7 @@ steps:
       - 'build'
       - '-t'
       - 'gcr.io/${_GCP_PROJECT_ID}/${_SERVER_SERVICE}:latest'
-      - './spine-server'
+      - './backend'
     id: 'build-server'
 
   # Step 2: 推送後端 Image
@@ -81,7 +81,7 @@ steps:
         docker build \
           --build-arg REACT_APP_BASE_URL=$${SERVER_URL} \
           -t gcr.io/${_GCP_PROJECT_ID}/${_CLIENT_SERVICE}:latest \
-          ./spine-client
+          ./frontend
     id: 'build-client'
     waitFor: ['get-server-url']
 

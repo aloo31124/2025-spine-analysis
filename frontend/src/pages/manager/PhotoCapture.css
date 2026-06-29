@@ -1,0 +1,683 @@
+/* PhotoCapture.css - 拍照上傳功能樣式 */
+
+.photo-capture {
+    position: relative;
+    width: 100%;
+    background: #f5f5f5;
+}
+
+.photo-capture-content {
+    margin-bottom: 80px; /* 為底部按鈕留出空間 */
+    padding: 20px;
+    background: #fff;
+    overflow-y: auto;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding-top: 40px;
+}
+
+.photo-capture-card {
+    background-color: white;
+    border-radius: 20px;
+    padding: 30px;
+    width: 100%;
+    max-width: 600px;
+    text-align: center;
+    border: 2px solid #3498db;
+    position: relative;
+    overflow: hidden;
+}
+
+.photo-capture-title {
+    color: #2c3e50;
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.photo-capture-description {
+    color: #7f8c8d;
+    font-size: 16px;
+    line-height: 1.6;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+
+.photo-btn:active {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.photo-btn:disabled {
+    background: #bdc3c7;
+    color: #7f8c8d;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.photo-btn svg {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+}
+
+.device-info-display {
+    background: rgba(52, 152, 219, 0.1);
+    color: #2980b9;
+    padding: 15px 20px;
+    border-radius: 25px;
+    font-size: 14px;
+    margin-top: 20px;
+    border: 1px solid rgba(52, 152, 219, 0.2);
+}
+
+/* 預覽相關樣式 */
+.photo-preview-container,
+.photo-result-container {
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+    aspect-ratio: 1 / 1.5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 20px auto;
+    overflow: hidden;
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    border: 3px solid #3498db;
+    background-color: #f0f0f0;
+}
+
+.photo-preview-image,
+.photo-result-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* 編輯器相關樣式 */
+.photo-editor-container {
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+    aspect-ratio: 1 / 1.5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 20px auto;
+    overflow: hidden;
+}
+
+.photo-crop-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    border: 3px solid #3498db;
+}
+
+.photo-editor-image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.photo-crop-area {
+    position: absolute;
+    border: 3px dashed #f39c12;
+    background: rgba(243, 156, 18, 0.1);
+    cursor: move;
+    transition: background-color 0.2s;
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.4);
+}
+
+.photo-crop-area:hover {
+    background: rgba(243, 156, 18, 0.2);
+    border-color: #e67e22;
+}
+
+/* 底部控制按鈕 */
+.photo-bottom-menu {
+    background: #3498db;
+    color: #fff;
+    border-radius: 15px 15px 0 0;
+    padding: 20px;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.photo-action-btn {
+    padding: 12px 25px;
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 100px;
+    justify-content: center;
+}
+
+.photo-action-btn:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.photo-action-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.photo-action-btn:disabled {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.5);
+    border-color: rgba(255, 255, 255, 0.2);
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.photo-action-btn svg {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
+/* 處理中覆蓋層 */
+.photo-processing-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    backdrop-filter: blur(4px);
+}
+
+.photo-processing-message {
+    background: white;
+    padding: 30px 50px;
+    border-radius: 20px;
+    font-size: 18px;
+    font-weight: 600;
+    color: #2c3e50;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+    border: 2px solid #3498db;
+    animation: processingPulse 1.5s ease-in-out infinite;
+}
+
+/* 分析選擇對話框 */
+.photo-analysis-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2500;
+    padding: 20px;
+}
+
+.photo-analysis-modal__content {
+    background: #fff;
+    border-radius: 16px;
+    padding: 30px;
+    width: 100%;
+    max-width: 420px;
+    text-align: center;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+    border: 2px solid #3498db;
+}
+
+.photo-analysis-modal__content h3 {
+    margin-bottom: 10px;
+    color: #2c3e50;
+}
+
+.photo-analysis-modal__content p {
+    margin: 0 0 20px 0;
+    color: #555;
+    font-size: 14px;
+}
+
+.photo-analysis-modal__actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.photo-analysis-modal__actions button {
+    flex: 1 1 150px;
+    padding: 12px 20px;
+    border-radius: 10px;
+    border: none;
+    background: #3498db;
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+}
+
+.photo-analysis-modal__actions button:hover {
+    background: #2c80bf;
+    transform: translateY(-2px);
+}
+
+.photo-analysis-modal__close {
+    display: inline-block;
+    padding: 10px 25px;
+    border-radius: 999px;
+    border: none;
+    background: #95a5a6;
+    color: #fff;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.2s;
+}
+
+.photo-analysis-modal__close:hover {
+    background: #7f8c8d;
+}
+
+.photo-camera-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2600;
+    padding: 20px;
+}
+
+.photo-camera-overlay__frame {
+    position: relative;
+    width: min(400px, 90vw);
+    aspect-ratio: 1 / 1.5;
+    background: #000;
+    border-radius: 24px;
+    overflow: hidden;
+    border: 2px solid #3498db;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.photo-camera-overlay__video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    background: #000;
+}
+
+.photo-camera-overlay__controls {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+}
+
+.photo-camera-overlay__controls button {
+    flex: 1;
+    max-width: 160px;
+    padding: 12px 18px;
+    border-radius: 999px;
+    border: none;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s, opacity 0.2s;
+    color: #fff;
+}
+
+.photo-camera-overlay__controls button:first-child {
+    background: #27ae60;
+}
+
+.photo-camera-overlay__controls button:last-child {
+    background: #e74c3c;
+}
+
+.photo-camera-overlay__controls button:hover {
+    transform: translateY(-2px);
+    opacity: 0.95;
+}
+
+@keyframes processingPulse {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+    }
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    }
+}
+
+/* 響應式設計 */
+@media (max-width: 800px) {
+    .photo-capture-content {
+        padding: 15px;
+        padding-top: 20px;
+    }
+    
+    .photo-capture-card {
+        padding: 25px 20px;
+        border-radius: 15px;
+    }
+    
+    .photo-capture-title {
+        font-size: 20px;
+    }
+    
+    .photo-capture-description {
+        font-size: 14px;
+    }
+    
+    .photo-btn {
+        padding: 16px 25px;
+        font-size: 16px;
+        min-height: 55px;
+    }
+    
+    .photo-btn svg {
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+    }
+    
+    .photo-bottom-menu {
+        padding: 15px;
+        gap: 12px;
+    }
+    
+    .photo-action-btn {
+        padding: 10px 20px;
+        font-size: 13px;
+        min-width: 90px;
+    }
+    
+    .photo-action-btn svg {
+        font-size: 14px;
+        width: 14px;
+        height: 14px;
+    }
+    
+    .photo-preview-container,
+    .photo-result-container,
+    .photo-editor-container {
+        max-width: 100%;
+    }
+    
+    .photo-crop-container {
+        border-width: 2px;
+    }
+    
+    .photo-crop-area {
+        border-width: 2px;
+    }
+}
+
+@media (max-width: 480px) {
+    .photo-capture-content {
+        padding: 10px;
+        padding-top: 15px;
+    }
+    
+    .photo-capture-card {
+        padding: 20px 15px;
+        border-radius: 12px;
+    }
+    
+    .photo-capture-title {
+        font-size: 18px;
+        margin-bottom: 15px;
+    }
+    
+    .photo-capture-description {
+        font-size: 13px;
+        margin-bottom: 20px;
+    }
+    
+    .photo-btn {
+        padding: 14px 20px;
+        font-size: 14px;
+        min-height: 50px;
+        gap: 10px;
+    }
+    
+    .photo-btn svg {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+    }
+    
+    .device-info-display {
+        font-size: 12px;
+        padding: 12px 15px;
+    }
+    
+    .photo-bottom-menu {
+        padding: 12px;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    
+    .photo-action-btn {
+        padding: 8px 15px;
+        font-size: 12px;
+        min-width: 80px;
+        flex: 1;
+    }
+    
+    .photo-processing-message {
+        padding: 25px 35px;
+        font-size: 16px;
+    }
+    
+    .photo-preview-container,
+    .photo-result-container,
+    .photo-editor-container {
+        max-width: 100%;
+        border-radius: 12px;
+    }
+    
+    .photo-crop-container {
+        border-radius: 12px;
+    }
+}
+
+/* 高對比度模式支持 */
+@media (prefers-contrast: high) {
+    .photo-capture-card {
+        border-width: 3px;
+        border-color: #000;
+    }
+    
+    .photo-btn {
+        border-width: 2px;
+        border-color: rgba(0, 0, 0, 0.3);
+    }
+    
+    .photo-crop-area {
+        border-width: 4px;
+    }
+}
+
+/* 減少動畫效果 */
+@media (prefers-reduced-motion: reduce) {
+    .photo-btn,
+    .photo-action-btn,
+    .photo-crop-area {
+        transition: none;
+    }
+    
+    .photo-btn:hover,
+    .photo-action-btn:hover {
+        transform: none;
+    }
+    
+    .photo-processing-message {
+        animation: none;
+    }
+}
+
+.scale-indicator--camera {
+    top: 5px;
+    left: 2px;
+    z-index: 3;
+}
+
+/* PhotoCaptureDrag - 底部控制區域 */
+.photo-camera-overlay__bottom-controls {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 20px;
+    z-index: 11;
+}
+
+/* PhotoCaptureDrag - 點位控制樣式 */
+.photo-camera-overlay__point-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    background: rgba(0, 0, 0, 0.6);
+    padding: 10px 20px;
+    border-radius: 25px;
+    backdrop-filter: blur(5px);
+}
+
+.photo-camera-overlay__point-controls .point-nav-btn {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 80px;
+    font-weight: 500;
+}
+
+.photo-camera-overlay__point-controls .point-nav-btn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.05);
+}
+
+.photo-camera-overlay__point-controls .point-nav-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.photo-camera-overlay__point-controls .current-point-info {
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    min-width: 80px;
+    text-align: center;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* 相機覆蓋層調整 */
+.photo-camera-overlay__frame {
+    position: relative;
+}
+
+.photo-camera-overlay__controls .capture-btn {
+    background: #27ae60;
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 25px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+}
+
+.photo-camera-overlay__controls .capture-btn:hover {
+    background: #229954;
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(39, 174, 96, 0.4);
+}
+
+.photo-camera-overlay__controls .cancel-btn {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 25px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+}
+
+.photo-camera-overlay__controls .cancel-btn:hover {
+    background: #c0392b;
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
+}
+
+/* 響應式調整 */
+@media (max-width: 768px) {
+    .photo-camera-overlay__point-controls {
+        top: 60px;
+        padding: 8px 15px;
+        gap: 10px;
+    }
+    
+    .photo-camera-overlay__point-controls .point-nav-btn {
+        padding: 6px 12px;
+        font-size: 12px;
+        min-width: 60px;
+    }
+    
+    .photo-camera-overlay__point-controls .current-point-info {
+        font-size: 14px;
+        min-width: 60px;
+    }
+}

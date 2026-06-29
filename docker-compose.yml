@@ -6,7 +6,7 @@ services:
   # 後端 API 服務
   spine-server:
     build:
-      context: ./spine-server
+      context: ./backend
       dockerfile: Dockerfile
     container_name: spine-server
     ports:
@@ -24,7 +24,7 @@ services:
   # 前端 Web 服務
   spine-client:
     build:
-      context: ./spine-client
+      context: ./frontend
       dockerfile: Dockerfile
       args:
         - REACT_APP_BASE_URL=http://localhost:8083/

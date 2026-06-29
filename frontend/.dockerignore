@@ -1,0 +1,14 @@
+node_modules
+npm-debug.log*
+.firebase
+.firebaserc*
+firebase*.json
+build
+logs
+*.log
+.git
+.gitignore
+.vscode
+*.md
+.env.development
+.env.production*
