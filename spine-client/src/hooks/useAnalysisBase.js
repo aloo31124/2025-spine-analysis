@@ -14,7 +14,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import neckPatientImage from '../assets.spine/images/病患側面.png';
+import neckPatientImage from '../assets/images/病患側面.png';
 import { addCustomerAnalysisResult } from '../api/manager/customerAnalysisResult';
 import { getCustomerList } from '../api/manager/customer';
 import { initializePointsFromRelative } from '../utils/pointConstraints';

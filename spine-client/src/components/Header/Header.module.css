@@ -1,28 +1,75 @@
 
 .headerContainer {
-    width: 98%;
-    min-width: 200px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    width: 100%;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
     padding: 10px;
-    border-bottom: #cfcfcf solid 2px;
+    background: #3DA5FF;
+    color: #fff;
+    border-radius: 0 0 10px 10px;
+    z-index: 1000;
+    box-sizing: border-box;
+    gap: 10px;
 }
 
 .headerLogo {
-    max-width: 80px;
-    padding: 10px;
+    max-width: 60px;
+    padding: 5px;
     cursor: pointer;
+    margin-left: 50px;
+    flex-shrink: 0;
+}
+
+.headerSearchWrapper {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    max-width: 480px;
+    min-width: 180px;
+    gap: 6px;
+}
+
+.headerSearchType {
+    border: none;
+    border-radius: 20px;
+    padding: 8px 12px;
+    font-size: 15px;
+    background: rgba(255, 255, 255, 0.9);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.headerSearchBtn {
+    border: none;
+    border-radius: 20px;
+    padding: 8px 18px;
+    font-size: 15px;
+    background: #fff;
+    color: #333;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.headerSearchBtn:hover {
+    background: #f0f0f0;
 }
 
 .headerInputSearch {
-    border: #cfcfcf solid 2px;
-    border-radius: 40px;
-    padding: 10px 40px;
-    width: 40%;
+    border: none;
+    border-radius: 20px;
+    padding: 8px 20px;
+    flex: 1;
+    max-width: 400px;
     min-width: 100px;
-    font-size: 25px;
+    font-size: 16px;
+    background: rgba(255, 255, 255, 0.9);
 }
 
 .headerRightSection {
@@ -31,6 +78,119 @@
     align-items: center;
     font-size: 18px;
     padding: 10px;
+    gap: 15px;
+    flex-shrink: 0;
+}
+
+/* 店長選單包裝器 */
+.storeManagerButtonWrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.storeManagerSelectWrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.storeManagerLabel {
+    color: #fff;
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.storeManagerSelect {
+    padding: 6px 12px;
+    font-size: 14px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.95);
+    color: #333;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 150px;
+}
+
+.storeManagerSelect:hover {
+    border-color: rgba(255, 255, 255, 0.5);
+    background: #fff;
+}
+
+.storeManagerSelect:focus {
+    outline: none;
+    border-color: #fff;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+}
+
+/* 店長 icon */
+.storeManagerIcon {
+    font-size: 18px;
+    color: #fff;
+    transition: transform 0.3s ease;
+}
+
+.storeManagerIcon:hover {
+    transform: scale(1.1);
+}
+
+/* 手機版店長選單 */
+.storeManagerMenu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    min-width: 180px;
+    max-width: 250px;
+    background: #fff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+    padding: 8px 0;
+    z-index: 1100;
+    margin-top: 8px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.storeManagerMenuTitle {
+    padding: 8px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #666;
+    border-bottom: 1px solid #f0f0f0;
+    margin-bottom: 4px;
+}
+
+.storeManagerMenuItem {
+    background: none;
+    border: none;
+    text-align: left;
+    width: 100%;
+    padding: 10px 16px;
+    font-size: 14px;
+    cursor: pointer;
+    color: #333;
+    transition: background-color 0.2s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.storeManagerMenuItem:hover {
+    background-color: #f8f9fa;
+}
+
+.storeManagerMenuItem.active {
+    background-color: #e3f2fd;
+    color: #1976d2;
+    font-weight: 500;
+}
+
+.checkmark {
+    color: #1976d2;
+    font-weight: bold;
+    margin-left: 8px;
 }
 
 .headerButtonWrapper {
@@ -39,11 +199,41 @@
 }
 
 .headerButton {
-    background: white;
+    background: transparent;
     border: none;
-    white-space:nowrap;
-    font-size: 18px;
+    white-space: nowrap;
+    font-size: 16px;
     cursor: pointer;
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+.headerButton:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* 移動版按鈕樣式 */
+.headerButtonMobile {
+    min-width: 40px;
+    width: 40px;
+    height: 40px;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.settingsIcon {
+    font-size: 18px;
+    color: #fff;
+    transition: transform 0.3s ease;
+}
+
+.settingsIcon:hover {
+    transform: rotate(90deg);
 }
 
 .headerMenu {
@@ -55,7 +245,7 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
     padding: 10px 20px;
-    z-index: 100;
+    z-index: 1100;
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -68,17 +258,204 @@
     text-align: left;
     width: 100%;
     padding: 10px;
-    font-size: 18px;
+    font-size: 16px;
     cursor: pointer;
     color: #333;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
 }
 
 .headerMenu button:hover {
     background-color: #f0f0f0;
 }
 
+/* 漢堡選單按鈕樣式 */
+.hamburger {
+    display: flex;
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    width: 35px;
+    height: 28px;
+    flex-direction: column;
+    justify-content: space-between;
+    cursor: pointer;
+    z-index: 1100;
+}
+
+.hamburger span {
+    display: block;
+    height: 4px;
+    background: #fff;
+    border-radius: 2px;
+    transition: all 0.3s ease;
+}
+
 .headerIcon {
     padding: 10px;
     cursor: pointer;
+}
+
+/* RWD 響應式設計 */
+@media (max-width: 800px) {
+    .headerContainer {
+        gap: 8px;
+        padding: 8px;
+    }
+
+    .headerLogo {
+        max-width: 50px;
+        margin-left: 45px;
+    }
+
+    .headerSearchWrapper {
+        min-width: 140px;
+        gap: 4px;
+    }
+
+    .headerSearchType {
+        font-size: 13px;
+        padding: 6px 8px;
+    }
+
+    .headerSearchBtn {
+        font-size: 13px;
+        padding: 6px 12px;
+    }
+
+    .headerInputSearch {
+        flex: 1;
+        max-width: none;
+        min-width: 60px;
+        font-size: 14px;
+        padding: 6px 15px;
+    }
+
+    /* 手機版不需要 storeManagerSelectWrapper，因為改用 icon */
+    .storeManagerSelectWrapper {
+        display: none;
+    }
+
+    .storeManagerIcon {
+        font-size: 16px;
+    }
+
+    .storeManagerMenu {
+        min-width: 160px;
+        right: -10px;
+    }
+
+    .storeManagerMenuItem {
+        font-size: 13px;
+        padding: 9px 14px;
+    }
+    
+    .headerRightSection {
+        font-size: 14px;
+        padding: 5px;
+        gap: 10px;
+    }
+    
+    .headerButton {
+        font-size: 14px;
+        padding: 6px 8px;
+    }
+    
+    /* 移動版系統設定按鈕特殊樣式 */
+    .headerButtonMobile {
+        min-width: 36px;
+        width: 36px;
+        height: 36px;
+        padding: 6px;
+    }
+    
+    .settingsIcon {
+        font-size: 16px;
+    }
+    
+    .headerMenu {
+        min-width: 120px;
+        padding: 8px 15px;
+        right: -10px; /* 調整下拉選單位置，確保不會超出螢幕 */
+    }
+    
+    .headerMenu button {
+        font-size: 14px;
+        padding: 8px;
+    }
+}
+
+@media (max-width: 500px) {
+    .headerContainer {
+        gap: 5px;
+        padding: 6px;
+    }
+    
+    .headerLogo {
+        max-width: 45px;
+        margin-left: 40px;
+    }
+
+    .headerSearchType {
+        font-size: 12px;
+        padding: 5px 6px;
+    }
+
+    .headerSearchBtn {
+        font-size: 12px;
+        padding: 5px 10px;
+    }
+
+    .headerInputSearch {
+        font-size: 12px;
+        padding: 5px 10px;
+        min-width: 50px;
+    }
+
+    .storeManagerIcon {
+        font-size: 14px;
+    }
+
+    .storeManagerMenu {
+        min-width: 140px;
+        right: -15px;
+    }
+
+    .storeManagerMenuItem {
+        font-size: 12px;
+        padding: 8px 12px;
+    }
+
+    .headerRightSection {
+        gap: 5px;
+        padding: 3px;
+    }
+    
+    .headerButton {
+        font-size: 12px;
+    }
+    
+    /* 小螢幕的系統設定按鈕 */
+    .headerButtonMobile {
+        min-width: 32px;
+        width: 32px;
+        height: 32px;
+        padding: 4px;
+    }
+    
+    .settingsIcon {
+        font-size: 14px;
+    }
+    
+    .headerMenu {
+        right: -15px; /* 進一步調整選單位置 */
+        min-width: 100px;
+        padding: 6px 12px;
+    }
+    
+    .headerMenu button {
+        font-size: 12px;
+        padding: 6px;
+    }
 }
 

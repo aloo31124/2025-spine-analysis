@@ -23,13 +23,13 @@ import { verifyJwt, verifyRole, verifyPayment } from './api/auth';
 import AppRouterVerify from './AppRouterVerify';
 
 // === 布局組件 ===
-import AccountLayout from './layout.spine/AccountLayout';          // 帳戶布局
-import ManagerLayout from './layout.spine/ManagerLayout';          // 管理者布局
+import AccountLayout from './layout/AccountLayout';          // 帳戶布局
+import ManagerLayout from './layout/ManagerLayout';          // 管理者布局
 import ShoppingLayout from './layout/ShoppingLayout';        // 購物布局 (已註解)
 
 // === 共用組件 ===
 import Loading from './components/Loading';                   // 載入動畫
-import Header from './components.spine/Header/Header';              // 頁面標頭
+import Header from './components/Header/Header';              // 頁面標頭
 
 // === 系統管理頁面 ===
 import SystemPage from './pages/manager/SystemPage';         // 系統備份頁面
@@ -51,63 +51,63 @@ import FogetPasswordPage from './pages/auth/FogetPasswordPage'; // 忘記密碼
 import PaymentSelectPage from './pages/Payment/PaymentSelectPage'; // 付款方式選擇
 
 // === 帳戶管理頁面 ===
-import InfoPage from './pages.spine/account/InfoPage';             // 個人資訊
-import SelectPaymentPage from './pages.spine/account/SelectPaymentPage'; // 選擇付費方案
-import ShoppingOrder from './pages.spine/account/ShoppingOrder';   // 購物訂單
+import InfoPage from './pages/account/InfoPage';             // 個人資訊
+import SelectPaymentPage from './pages/account/SelectPaymentPage'; // 選擇付費方案
+import ShoppingOrder from './pages/account/ShoppingOrder';   // 購物訂單
 
 // === 商品管理頁面 ===
-import ProductListPage from './pages.spine/manager/ProductListPage';     // 商品列表
-import ProductPillowRecommendationList from './pages.spine/manager/ProductPillowRecommendationList'; // 枕頭商品推薦列表
-import ProductMattressRecommendationList from './pages.spine/manager/ProductMattressRecommendationList'; // 床墊商品推薦列表
-import ProductAddPage from './pages.spine/manager/ProductAddPage';       // 新增商品
-import ProductEditPage from './pages.spine/manager/ProductEditPage';     // 編輯商品
+import ProductListPage from './pages/manager/ProductListPage';     // 商品列表
+import ProductPillowRecommendationList from './pages/manager/ProductPillowRecommendationList'; // 枕頭商品推薦列表
+import ProductMattressRecommendationList from './pages/manager/ProductMattressRecommendationList'; // 床墊商品推薦列表
+import ProductAddPage from './pages/manager/ProductAddPage';       // 新增商品
+import ProductEditPage from './pages/manager/ProductEditPage';     // 編輯商品
 
 // === 枕頭商品管理頁面 ===
-import ProductPillowListPage from './pages.spine/manager/ProductPillowListPage';   // 枕頭商品列表
-import ProductPillowAddPage from './pages.spine/manager/ProductPillowAddPage';     // 新增枕頭商品
-import ProductPillowEditPage from './pages.spine/manager/ProductPillowEditPage';   // 編輯枕頭商品
+import ProductPillowListPage from './pages/manager/ProductPillowListPage';   // 枕頭商品列表
+import ProductPillowAddPage from './pages/manager/ProductPillowAddPage';     // 新增枕頭商品
+import ProductPillowEditPage from './pages/manager/ProductPillowEditPage';   // 編輯枕頭商品
 
 // === 床墊商品管理頁面 ===
-import ProductMattressListPage from './pages.spine/manager/ProductMattressListPage';   // 床墊商品列表
-import ProductMattressAddPage from './pages.spine/manager/ProductMattressAddPage';     // 新增床墊商品
-import ProductMattressEditPage from './pages.spine/manager/ProductMattressEditPage';   // 編輯床墊商品
+import ProductMattressListPage from './pages/manager/ProductMattressListPage';   // 床墊商品列表
+import ProductMattressAddPage from './pages/manager/ProductMattressAddPage';     // 新增床墊商品
+import ProductMattressEditPage from './pages/manager/ProductMattressEditPage';   // 編輯床墊商品
 
 // === 商品庫存頁面 ===
-import ProductInventoryPage from './pages.spine/manager/ProductInventoryPage';   // 商品庫存
+import ProductInventoryPage from './pages/manager/ProductInventoryPage';   // 商品庫存
 
 // === 脊椎分析頁面 ===
-import AnalysisSpine from './pages.spine/manager/AnalysisSpine';   // 脊椎分析
-import AnalysisTail from './pages.spine/manager/AnalysisTail';     // 尾椎分析
-import AnalysisSpineTest from './pages.spine/manager/AnalysisSpineTest';   // 脊椎分析測試版
-import PhotoCapture from './pages.spine/manager/PhotoCapture';     // 拍照上傳
-import PhotoCaptureDrag from './pages.spine/manager/PhotoCaptureDrag';  // 攝影點位拖曳
+import AnalysisSpine from './pages/manager/AnalysisSpine';   // 脊椎分析
+import AnalysisTail from './pages/manager/AnalysisTail';     // 尾椎分析
+import AnalysisSpineTest from './pages/manager/AnalysisSpineTest';   // 脊椎分析測試版
+import PhotoCapture from './pages/manager/PhotoCapture';     // 拍照上傳
+import PhotoCaptureDrag from './pages/manager/PhotoCaptureDrag';  // 攝影點位拖曳
 
 // === 分類管理頁面 ===
-import CategoryListPage from './pages.spine/manager/CategoryListPage';   // 分類列表
-import CategoryAddPage from './pages.spine/manager/CategoryAddPage';     // 新增分類
-import CategoryEditPage from './pages.spine/manager/CategoryEditPage';   // 編輯分類
+import CategoryListPage from './pages/manager/CategoryListPage';   // 分類列表
+import CategoryAddPage from './pages/manager/CategoryAddPage';     // 新增分類
+import CategoryEditPage from './pages/manager/CategoryEditPage';   // 編輯分類
 
 // 方案管理頁
 import PaymentListPage from './pages/manager/PaymentListPage';
 import PaymentFormPage from './pages/manager/PaymentFormPage';
 
 // 客戶管理頁
-import CustomerSpineListPage from './pages.spine/manager/CustomerSpineListPage';
-import CustomerAddPage from './pages.spine/manager/CustomerAddPage';
-import CustomerEditPage from './pages.spine/manager/CustomerEditPage';
-import ReportSpineRevenueLineChart from './pages.spine/manager/ReportSpineRevenueLineChart';
-import ReportSpineSalesLineChart from './pages.spine/manager/ReportSpineSalesLineChart';
+import CustomerSpineListPage from './pages/manager/CustomerSpineListPage';
+import CustomerAddPage from './pages/manager/CustomerAddPage';
+import CustomerEditPage from './pages/manager/CustomerEditPage';
+import ReportSpineRevenueLineChart from './pages/manager/ReportSpineRevenueLineChart';
+import ReportSpineSalesLineChart from './pages/manager/ReportSpineSalesLineChart';
 
 // 分權設定頁
-import RoleManagementPage from './pages.spine/manager/RoleManagementPage';
-import OperatorManagementPage from './pages.spine/manager/OperatorManagementPage';
-import ManagerSettingPage from './pages.spine/manager/ManagerSettingPage';
-import DistrictManagerSettingPage from './pages.spine/manager/DistrictManagerSettingPage';
+import RoleManagementPage from './pages/manager/RoleManagementPage';
+import OperatorManagementPage from './pages/manager/OperatorManagementPage';
+import ManagerSettingPage from './pages/manager/ManagerSettingPage';
+import DistrictManagerSettingPage from './pages/manager/DistrictManagerSettingPage';
 
 // 店面管理頁
-import StoreListPage from './pages.spine/manager/StoreListPage';
-import StoreAddPage from './pages.spine/manager/StoreAddPage';
-import StoreEditPage from './pages.spine/manager/StoreEditPage';
+import StoreListPage from './pages/manager/StoreListPage';
+import StoreAddPage from './pages/manager/StoreAddPage';
+import StoreEditPage from './pages/manager/StoreEditPage';
 
 /**
  * 路由配置器 - 管理整個應用的頁面導航
