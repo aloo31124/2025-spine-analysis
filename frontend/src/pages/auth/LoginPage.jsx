@@ -2,12 +2,14 @@ import React, {useRef, useEffect, useState} from 'react';
 import { login } from '../../api/auth';
 import { useNavigate } from 'react-router-dom';
 import { FaEye, FaEyeSlash } from 'react-icons/fa'; // 引入眼睛圖標
+import Loading from '../../components/Loading';
 
 function LoginPage() {
     const navigate = useNavigate();
     const inputEMailRef = useRef('');
     const inputPasswordRef = useRef('');
     const [showPassword, setShowPassword] = useState(false); // 控制密碼顯示狀態
+    const [isLoading, setIsLoading] = useState(false); // 登入中 loading 狀態
 
     useEffect(() => {
         getTempEMail();
@@ -39,21 +41,26 @@ function LoginPage() {
             alert("帳號密碼不可空白");
             return;
         }
-        const res = await login(email, password); 
-        const {isSuccess} = res.data;
-        if(!isSuccess) {
-            alert('登入失敗');
-            return;
-        }
-        alert('登入成功');
+        setIsLoading(true);
+        try {
+            const res = await login(email, password);
+            const {isSuccess} = res.data;
+            if(!isSuccess) {
+                alert('登入失敗');
+                return;
+            }
+            alert('登入成功');
 
-        // 儲存 暫存信箱 到 localStorage (包含當前時間戳記)
-        if (email) {
-            localStorage.setItem('savedEmail', email);
-            localStorage.setItem('savedEmailTime', new Date().getTime().toString());
-        }
+            // 儲存 暫存信箱 到 localStorage (包含當前時間戳記)
+            if (email) {
+                localStorage.setItem('savedEmail', email);
+                localStorage.setItem('savedEmailTime', new Date().getTime().toString());
+            }
 
-        navigate('/manager/analysis/spine')
+            navigate('/manager/analysis/spine')
+        } finally {
+            setIsLoading(false);
+        }
     }
 
     /* 註冊 */
@@ -73,6 +80,7 @@ function LoginPage() {
 
     return (
         <div className='Form'>
+            {isLoading && <Loading text='登入中...' />}
             <h1>登入頁</h1>
             <input type="text" 
                 placeholder='信箱'
@@ -95,7 +103,7 @@ function LoginPage() {
                 </button>
             </div>
             <div className='btnBar'>
-                <button onClick={clickLogin}>登入</button>
+                <button onClick={clickLogin} disabled={isLoading}>登入</button>
                 <button onClick={clickForgetPassword}>忘記密碼</button>
             </div>
             <button onClick={clickRegist}>註冊</button>
