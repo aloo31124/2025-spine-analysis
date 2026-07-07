@@ -166,7 +166,7 @@ function AnalysisSpine() {
         if (isCalculated) calculateAllDistancesAndAngles(newScaleFactor);
     };
 
-    // ─── 約束虛線渲染（點2-點3 垂直、點2-點6 平行） ───────
+    // ─── 約束虛線渲染（點2-點6 平行） ───────────────────
     const renderConstraintLine = (id, pointA, pointB) => {
         if (!pointA || !pointB) return null;
         const length = Math.sqrt(
@@ -228,7 +228,6 @@ function AnalysisSpine() {
                         )}
                     </div>
                     <div className="neck-container" ref={neckContainerRef} style={getContainerStyle()}>
-                        {renderConstraintLine('constraint23', points[1], points[2])}
                         {renderConstraintLine('constraint26', points[1], points[5])}
 
                         {points.map((point, index) => (
