@@ -1,12 +1,12 @@
 {
   "permissions": {
     "allow": [
-      "PowerShell",
-      "Bash",
-      "Edit",
-      "Write",
-      "Read",
-      "Edit(/.claude/*)"
+      "PowerShell(*)",
+      "Bash(*)",
+      "Edit(*)",
+      "Write(*)",
+      "Read(*)",
+      "Edit(*)"
     ],
     "defaultMode": "bypassPermissions"
   }
