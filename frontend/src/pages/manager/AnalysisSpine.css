@@ -204,7 +204,7 @@
     transform-origin: left center;
 }
 
-/* 約束虛線（點2-點3 垂直、點2-點6 平行） */
+/* 約束虛線（點2-點6 平行） */
 .constraint-line {
     position: absolute;
     height: 0;

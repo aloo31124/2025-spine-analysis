@@ -5,16 +5,13 @@
 
 /**
  * 點位約束關係定義
- * 
+ *
  * 頸椎約束（點2和點6）：
  * - 點6在點2右邊並保持平行
  * - 上下移動時：點2和點6同步移動（保持Y座標相同）
  * - 左右移動時：點2和點6各自獨立移動
  *
- * 頸椎約束（點2和點3）：
- * - 點2與點3保持垂直關係（X座標相同）
- * - 左右移動時：點2和點3同步移動（保持X座標相同）
- * - 上下移動時：點2和點3各自獨立移動
+ * 頸椎（點2和點3）：無約束，兩點完全獨立移動
  *
  * 尾椎約束（點2和點3）：
  * - 點2與點3保持垂直關係（X座標相同）
@@ -52,13 +49,6 @@ export const applyPointConstraints = (points, draggedPointIndex, newX, newY, pre
                 y: newY  // 保持Y座標相同（平行）
             };
         }
-        // 拖曳點2時，點3跟隨左右移動（X軸同步，保持垂直）
-        if (updatedPoints[2]) {
-            updatedPoints[2] = {
-                ...updatedPoints[2],
-                x: newX  // 保持X座標相同（垂直）
-            };
-        }
     } else if (draggedPointIndex === 5) {
         // 拖曳點6時，點2跟隨上下移動（Y軸同步）
         if (updatedPoints[1]) {
@@ -67,15 +57,8 @@ export const applyPointConstraints = (points, draggedPointIndex, newX, newY, pre
                 y: newY  // 保持Y座標相同（平行）
             };
         }
-    } else if (draggedPointIndex === 2) {
-        // 拖曳點3時，點2跟隨左右移動（X軸同步，保持垂直）
-        if (updatedPoints[1]) {
-            updatedPoints[1] = {
-                ...updatedPoints[1],
-                x: newX  // 保持X座標相同（垂直）
-            };
-        }
     }
+    // 點3（索引2）不與點2綁定，可完全獨立移動
 
     return updatedPoints;
 };
@@ -219,18 +202,11 @@ export const getPointName = (index) => {
  */
 export const validatePointConstraints = (points) => {
     const errors = [];
-    
+
     // 驗證點2和點6的Y座標是否相同（平行約束）
     if (points[1] && points[5]) {
         if (Math.abs(points[1].y - points[5].y) > 0.1) {
             errors.push('點2和點6未保持平行（Y座標不同）');
-        }
-    }
-
-    // 驗證點2和點3的X座標是否相同（垂直約束）
-    if (points[1] && points[2]) {
-        if (Math.abs(points[1].x - points[2].x) > 0.1) {
-            errors.push('點2和點3未保持垂直（X座標不同）');
         }
     }
 
