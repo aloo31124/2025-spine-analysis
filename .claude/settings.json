@@ -1,7 +1,13 @@
 {
   "permissions": {
     "allow": [
-      "Edit(/.claude/skills/log-prompt/**)"
-    ]
+      "PowerShell",
+      "Bash",
+      "Edit",
+      "Write",
+      "Read",
+      "Edit(/.claude/*)"
+    ],
+    "defaultMode": "bypassPermissions"
   }
 }
