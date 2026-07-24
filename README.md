@@ -4,7 +4,27 @@
 
 ## Getting started
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+GitHub is the primary repository for this project. GitLab is a secondary mirror;
+do not use it as `origin`.
+
+### Repair GitHub push configuration
+
+If `git push origin main` reports that `main` does not match any local refs,
+run the configuration script from the repository root. It fetches GitHub,
+creates a missing local `main` from `origin/main`, configures its upstream, and
+sets GitHub as the default push remote.
+
+```powershell
+.\scripts\git\Configure-DualRemote.ps1
+```
+
+Pushing to GitHub requires an authenticated GitHub account. Sign in with your
+normal Git credential manager, GitHub CLI, or SSH remote before running the
+push script; a successful unauthenticated fetch does **not** grant push access.
+
+```powershell
+.\scripts\git\Push-DualRemote.ps1
+```
 
 Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
 
@@ -15,7 +35,7 @@ Already a pro? Just edit this README.md and make it your own. Want to make it ea
 
 ```
 cd existing_repo
-git remote add origin https://gitlab.com/aloo31124/2025-spine-analysis.git
+git remote add origin https://github.com/aloo31124/2025-spine-analysis.git
 git branch -M main
 git push -uf origin main
 ```

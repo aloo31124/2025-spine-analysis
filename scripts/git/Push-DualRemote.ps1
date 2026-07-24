@@ -1,12 +1,14 @@
 <#
 .SYNOPSIS
-Pushes every local branch and tag to GitHub, then mirrors them to GitLab.
+Pushes local main first to GitHub, then mirrors every local branch and tag to GitLab.
 
 .DESCRIPTION
-GitHub (`origin`) is pushed first and treated as the source of truth. GitLab
-(`gitlab`) is updated only after the GitHub push succeeds. The script does not
-force-push or delete remote refs. After pushing, it verifies that every local
-branch and tag exists at the same commit on both remotes.
+GitHub (`origin`) is pushed first and treated as the source of truth. The
+script explicitly pushes `main`, rather than depending on the checked-out
+branch, so the primary branch is always updated. GitLab (`gitlab`) is updated
+only after the GitHub push succeeds. The script does not force-push or delete
+remote refs. After pushing, it verifies that every local branch and tag exists
+at the same commit on both remotes.
 
 .EXAMPLE
 .\scripts\git\Push-DualRemote.ps1
@@ -120,7 +122,14 @@ Invoke-Git -Arguments @('rev-parse', '--is-inside-work-tree')
 Assert-RemoteUrl -Name 'origin' -ExpectedUrl $GitHubUrl
 Assert-RemoteUrl -Name 'gitlab' -ExpectedUrl $GitLabUrl
 
-Write-Host 'Pushing all branches and tags to GitHub (origin)...'
+& git show-ref --verify --quiet refs/heads/main
+if ($LASTEXITCODE -ne 0) {
+    throw 'Local main does not exist. Run Configure-DualRemote.ps1 before pushing.'
+}
+
+Write-Host 'Pushing main to GitHub (origin)...'
+Invoke-Git -Arguments @('push', 'origin', 'main:main')
+Write-Host 'Pushing remaining branches and tags to GitHub (origin)...'
 Invoke-Git -Arguments @('push', 'origin', '--all')
 Invoke-Git -Arguments @('push', 'origin', '--tags')
 Assert-RemoteMatchesLocal -Remote 'origin'
