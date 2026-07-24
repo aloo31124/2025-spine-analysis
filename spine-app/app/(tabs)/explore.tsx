@@ -1,109 +1,29 @@
-import { StyleSheet, Image, Platform } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { Collapsible } from '@/components/Collapsible';
-import { ExternalLink } from '@/components/ExternalLink';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-import { IconSymbol } from '@/components/ui/IconSymbol';
+const steps = [
+  ['01', '建立專屬專案', '建立公開儲存庫，命名為「你的使用者名稱.github.io」。'],
+  ['02', '選擇靜態生成器', '新手可選 GitHub 原生支援的 Jekyll；想要更多主題可試試 Hexo 或 Hugo。'],
+  ['03', '推送並發布', '把內容推送到 GitHub，透過 GitHub Actions 自動建置與佈署。'],
+];
 
-export default function TabTwoScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color="#808080"
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Explore</ThemedText>
-      </ThemedView>
-      <ThemedText>This app includes example code to help you get started.</ThemedText>
-      <Collapsible title="File-based routing">
-        <ThemedText>
-          This app has two screens:{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/explore.tsx</ThemedText>
-        </ThemedText>
-        <ThemedText>
-          The layout file in <ThemedText type="defaultSemiBold">app/(tabs)/_layout.tsx</ThemedText>{' '}
-          sets up the tab navigator.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/router/introduction">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Android, iOS, and web support">
-        <ThemedText>
-          You can open this project on Android, iOS, and the web. To open the web version, press{' '}
-          <ThemedText type="defaultSemiBold">w</ThemedText> in the terminal running this project.
-        </ThemedText>
-      </Collapsible>
-      <Collapsible title="Images">
-        <ThemedText>
-          For static images, you can use the <ThemedText type="defaultSemiBold">@2x</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">@3x</ThemedText> suffixes to provide files for
-          different screen densities
-        </ThemedText>
-        <Image source={require('@/assets/images/react-logo.png')} style={{ alignSelf: 'center' }} />
-        <ExternalLink href="https://reactnative.dev/docs/images">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Custom fonts">
-        <ThemedText>
-          Open <ThemedText type="defaultSemiBold">app/_layout.tsx</ThemedText> to see how to load{' '}
-          <ThemedText style={{ fontFamily: 'SpaceMono' }}>
-            custom fonts such as this one.
-          </ThemedText>
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/versions/latest/sdk/font">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Light and dark mode components">
-        <ThemedText>
-          This template has light and dark mode support. The{' '}
-          <ThemedText type="defaultSemiBold">useColorScheme()</ThemedText> hook lets you inspect
-          what the user's current color scheme is, and so you can adjust UI colors accordingly.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Animations">
-        <ThemedText>
-          This template includes an example of an animated component. The{' '}
-          <ThemedText type="defaultSemiBold">components/HelloWave.tsx</ThemedText> component uses
-          the powerful <ThemedText type="defaultSemiBold">react-native-reanimated</ThemedText>{' '}
-          library to create a waving hand animation.
-        </ThemedText>
-        {Platform.select({
-          ios: (
-            <ThemedText>
-              The <ThemedText type="defaultSemiBold">components/ParallaxScrollView.tsx</ThemedText>{' '}
-              component provides a parallax effect for the header image.
-            </ThemedText>
-          ),
-        })}
-      </Collapsible>
-    </ParallaxScrollView>
-  );
+export default function GuideScreen() {
+  return <ScrollView style={styles.page} contentContainerStyle={styles.content}>
+    <Text style={styles.kicker}>FIELD GUIDE</Text>
+    <Text style={styles.title}>用 GitHub{`\n`}搭建個人部落格</Text>
+    <Text style={styles.intro}>免費、無廣告，並且可以隨心客製化。用一個儲存庫，開始建立屬於自己的網路基地。</Text>
+    <View style={styles.steps}>{steps.map(([number, title, description]) => <View style={styles.step} key={number}>
+      <Text style={styles.number}>{number}</Text><View style={styles.stepContent}><Text style={styles.stepTitle}>{title}</Text><Text style={styles.stepDescription}>{description}</Text></View>
+    </View>)}</View>
+    <View style={styles.tip}><Text style={styles.tipTitle}>給第一次開始的你</Text><Text style={styles.tipText}>GitHub 的 Pages 互動式學習專案，能在一小時內帶你完成第一篇文章與首頁設定。</Text></View>
+    <Pressable style={styles.button} onPress={() => Alert.alert('已準備好！', '前往 GitHub 建立新的公開儲存庫。')}><Text style={styles.buttonText}>前往建立我的網站 →</Text></Pressable>
+  </ScrollView>;
 }
 
 const styles = StyleSheet.create({
-  headerImage: {
-    color: '#808080',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
-  },
-  titleContainer: {
-    flexDirection: 'row',
-    gap: 8,
-  },
+  page: { flex: 1, backgroundColor: '#F7F5EF' }, content: { padding: 25, paddingTop: 65, paddingBottom: 110, maxWidth: 720, width: '100%', alignSelf: 'center' },
+  kicker: { color: '#A15135', fontWeight: '800', letterSpacing: 2, fontSize: 11 }, title: { fontSize: 39, lineHeight: 48, letterSpacing: -1.8, color: '#20241F', fontWeight: '800', marginTop: 15 },
+  intro: { color: '#586157', fontSize: 16, lineHeight: 27, marginTop: 20, marginBottom: 35 }, steps: { borderTopWidth: 1, borderColor: '#20241F' }, step: { flexDirection: 'row', gap: 18, paddingVertical: 23, borderBottomWidth: 1, borderColor: '#D3D2CA' },
+  number: { color: '#A15135', fontSize: 12, fontWeight: '800' }, stepContent: { flex: 1 }, stepTitle: { color: '#20241F', fontSize: 18, fontWeight: '800', marginBottom: 8 }, stepDescription: { color: '#5D665C', fontSize: 14, lineHeight: 22 },
+  tip: { marginTop: 32, backgroundColor: '#DDE5D6', padding: 21 }, tipTitle: { color: '#263A2E', fontWeight: '800', fontSize: 17 }, tipText: { color: '#526252', lineHeight: 22, marginTop: 7, fontSize: 14 },
+  button: { marginTop: 24, backgroundColor: '#2F493A', alignItems: 'center', paddingVertical: 16 }, buttonText: { color: '#FFFDF6', fontWeight: '800', fontSize: 14 },
 });
