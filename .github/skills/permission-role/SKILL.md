@@ -250,7 +250,7 @@ if (!isXxx) return res.status(403).json({ error: '權限不足' });
 
 ### 6.3 前端 localStorage 管理
 
-統一由 `spine-client/src/utils/localStorage.js` 管理：
+統一由 `frontend/src/utils/localStorage.js` 管理：
 
 | Key | 常數名 | 說明 |
 |-----|--------|------|
@@ -290,8 +290,8 @@ if (!isXxx) return res.status(403).json({ error: '權限不足' });
 | `/api/auth/store-manager/delete/:id` | DELETE | 刪除店長角色 |
 
 **相關檔案**：
-- 前端：`spine-client/src/pages.spine/manager/RoleManagementPage.jsx`
-- 後端 Service：`spine-server/src/services/userToRole.service.js`
+- 前端：`frontend/src/pages.spine/manager/RoleManagementPage.jsx`
+- 後端 Service：`backend/src/services/userToRole.service.js`
 
 ### 7.2 操作員 (Operator) 管理
 
@@ -323,12 +323,12 @@ if (!isXxx) return res.status(403).json({ error: '權限不足' });
 | `/api/account/store-manager-to-operator/store-manager-info` | GET | 取得操作員所屬店長資訊 |
 
 **相關檔案**：
-- 前端頁面：`spine-client/src/pages.spine/manager/OperatorManagementPage.jsx`
-- 前端 API：`spine-client/src/api/manager/storeManagerToOperator.js`
-- 後端 Controller：`spine-server/src/controllers/manager/storeManagerToOperator.api.controller.js`
-- 後端 Service：`spine-server/src/services/storeManagerToOperator.service.js`
-- 後端 Model：`spine-server/src/models/storeManagerToOperator.model.js`
-- 商品 Service（商品綁定邏輯）：`spine-server/src/services/productPillow.service.js`、`spine-server/src/services/productMattress.service.js`
+- 前端頁面：`frontend/src/pages.spine/manager/OperatorManagementPage.jsx`
+- 前端 API：`frontend/src/api/manager/storeManagerToOperator.js`
+- 後端 Controller：`backend/src/controllers/manager/storeManagerToOperator.api.controller.js`
+- 後端 Service：`backend/src/services/storeManagerToOperator.service.js`
+- 後端 Model：`backend/src/models/storeManagerToOperator.model.js`
+- 商品 Service（商品綁定邏輯）：`backend/src/services/productPillow.service.js`、`backend/src/services/productMattress.service.js`
 
 ### 7.3 總經理 (GeneralManager) 管理
 
@@ -356,10 +356,10 @@ if (!isXxx) return res.status(403).json({ error: '權限不足' });
 | `/api/manager/auth-permission/store-manager-list` | GET | 取得可檢視的店長列表 |
 
 **相關檔案**：
-- 前端頁面：`spine-client/src/pages.spine/manager/ManagerSettingPage.jsx`
-- 前端 API：`spine-client/src/api/manager/generalManager.js`、`spine-client/src/api/manager/authPermission.js`
-- 後端 Controller：`spine-server/src/controllers/manager/generalManager.api.controller.js`、`spine-server/src/controllers/manager/authPermission.api.controller.js`
-- 後端 Service：`spine-server/src/services/generalManager.service.js`、`spine-server/src/services/authPermission.service.js`
+- 前端頁面：`frontend/src/pages.spine/manager/ManagerSettingPage.jsx`
+- 前端 API：`frontend/src/api/manager/generalManager.js`、`frontend/src/api/manager/authPermission.js`
+- 後端 Controller：`backend/src/controllers/manager/generalManager.api.controller.js`、`backend/src/controllers/manager/authPermission.api.controller.js`
+- 後端 Service：`backend/src/services/generalManager.service.js`、`backend/src/services/authPermission.service.js`
 
 ### 7.4 區經理 (DistrictManager) 管理
 
@@ -396,11 +396,11 @@ if (!isXxx) return res.status(403).json({ error: '權限不足' });
 | `/api/manager/district/unbind-district-manager/:bindingId` | DELETE | 解除區域區經理綁定 |
 
 **相關檔案**：
-- 前端頁面：`spine-client/src/pages.spine/manager/DistrictManagerSettingPage.jsx`
-- 前端 API：`spine-client/src/api/manager/districtManager.js`、`spine-client/src/api/manager/district.js`
-- 後端 Controller：`spine-server/src/controllers/manager/districtManager.api.controller.js`、`spine-server/src/controllers/manager/district.api.controller.js`
-- 後端 Service：`spine-server/src/services/districtManager.service.js`、`spine-server/src/services/district.service.js`
-- 後端 Model：`spine-server/src/models/district.model.js`、`spine-server/src/models/districtManagerToDistrict.model.js`、`spine-server/src/models/districtToStoreManager.model.js`
+- 前端頁面：`frontend/src/pages.spine/manager/DistrictManagerSettingPage.jsx`
+- 前端 API：`frontend/src/api/manager/districtManager.js`、`frontend/src/api/manager/district.js`
+- 後端 Controller：`backend/src/controllers/manager/districtManager.api.controller.js`、`backend/src/controllers/manager/district.api.controller.js`
+- 後端 Service：`backend/src/services/districtManager.service.js`、`backend/src/services/district.service.js`
+- 後端 Model：`backend/src/models/district.model.js`、`backend/src/models/districtManagerToDistrict.model.js`、`backend/src/models/districtToStoreManager.model.js`
 
 ---
 
@@ -444,8 +444,8 @@ if (!isXxx) return res.status(403).json({ error: '權限不足' });
 - **區經理**：僅可選擇其區域內店長
 
 相關頁面：
-- `spine-client/src/pages.spine/manager/ReportSpineRevenueLineChart.jsx`
-- `spine-client/src/pages.spine/manager/ReportSpineSalesLineChart.jsx`
+- `frontend/src/pages.spine/manager/ReportSpineRevenueLineChart.jsx`
+- `frontend/src/pages.spine/manager/ReportSpineSalesLineChart.jsx`
 
 ### 庫存頁面
 
@@ -453,10 +453,10 @@ if (!isXxx) return res.status(403).json({ error: '權限不足' });
 - 若店長無綁定店面，需顯示提示訊息
 
 相關頁面：
-- `spine-client/src/pages.spine/manager/ProductInventoryPage.jsx`
+- `frontend/src/pages.spine/manager/ProductInventoryPage.jsx`
 
 相關後端：
-- `spine-server/src/controllers/manager/stock.api.controller.js`
+- `backend/src/controllers/manager/stock.api.controller.js`
 
 ---
 
@@ -484,11 +484,11 @@ if (!isXxx) return res.status(403).json({ error: '權限不足' });
 | `/api/manager/store/store-manager/:storeManagerId` | GET | 依店長取得店面 |
 
 **相關檔案**：
-- 前端：`spine-client/src/pages.spine/manager/StoreListPage.jsx`、`StoreAddPage.jsx`、`StoreEditPage.jsx`
-- 前端 API：`spine-client/src/api/manager/store.js`
-- 後端 Controller：`spine-server/src/controllers/manager/store.api.controller.js`
-- 後端 Service：`spine-server/src/services/store.service.js`
-- 後端 Model：`spine-server/src/models/store.model.js`
+- 前端：`frontend/src/pages.spine/manager/StoreListPage.jsx`、`StoreAddPage.jsx`、`StoreEditPage.jsx`
+- 前端 API：`frontend/src/api/manager/store.js`
+- 後端 Controller：`backend/src/controllers/manager/store.api.controller.js`
+- 後端 Service：`backend/src/services/store.service.js`
+- 後端 Model：`backend/src/models/store.model.js`
 
 ---
 
@@ -498,55 +498,55 @@ if (!isXxx) return res.status(403).json({ error: '權限不足' });
 
 | 檔案路徑 | 說明 |
 |----------|------|
-| `spine-client/src/AppRouterVerify.jsx` | 路由權限驗證（JWT + 角色） |
-| `spine-client/src/components.spine/manager/MenuLeft/MenuLeft.jsx` | 左選單（白名單控制） |
-| `spine-client/src/components.spine/Header/Header.jsx` | 上方選單（店長下拉選單） |
-| `spine-client/src/utils/localStorage.js` | localStorage 統一管理 |
-| `spine-client/src/api/auth.js` | 認證 API（login / logout / verify） |
-| `spine-client/src/api/manager/authPermission.js` | 角色權限 API |
-| `spine-client/src/api/manager/generalManager.js` | 總經理管理 API |
-| `spine-client/src/api/manager/districtManager.js` | 區經理管理 API |
-| `spine-client/src/api/manager/district.js` | 區域管理 API |
-| `spine-client/src/api/manager/storeManagerToOperator.js` | 操作員管理 API |
-| `spine-client/src/api/manager/store.js` | 店面管理 API |
+| `frontend/src/AppRouterVerify.jsx` | 路由權限驗證（JWT + 角色） |
+| `frontend/src/components.spine/manager/MenuLeft/MenuLeft.jsx` | 左選單（白名單控制） |
+| `frontend/src/components.spine/Header/Header.jsx` | 上方選單（店長下拉選單） |
+| `frontend/src/utils/localStorage.js` | localStorage 統一管理 |
+| `frontend/src/api/auth.js` | 認證 API（login / logout / verify） |
+| `frontend/src/api/manager/authPermission.js` | 角色權限 API |
+| `frontend/src/api/manager/generalManager.js` | 總經理管理 API |
+| `frontend/src/api/manager/districtManager.js` | 區經理管理 API |
+| `frontend/src/api/manager/district.js` | 區域管理 API |
+| `frontend/src/api/manager/storeManagerToOperator.js` | 操作員管理 API |
+| `frontend/src/api/manager/store.js` | 店面管理 API |
 
 ### 前端頁面
 
 | 檔案路徑 | 說明 |
 |----------|------|
-| `spine-client/src/pages.spine/manager/RoleManagementPage.jsx` | 店長設定頁 |
-| `spine-client/src/pages.spine/manager/OperatorManagementPage.jsx` | 操作員設定頁 |
-| `spine-client/src/pages.spine/manager/ManagerSettingPage.jsx` | 經理設定頁 |
-| `spine-client/src/pages.spine/manager/DistrictManagerSettingPage.jsx` | 區經理設定頁 |
-| `spine-client/src/pages.spine/manager/StoreListPage.jsx` | 店面列表頁 |
-| `spine-client/src/pages.spine/manager/StoreAddPage.jsx` | 新增店面頁 |
-| `spine-client/src/pages.spine/manager/StoreEditPage.jsx` | 編輯店面頁 |
+| `frontend/src/pages.spine/manager/RoleManagementPage.jsx` | 店長設定頁 |
+| `frontend/src/pages.spine/manager/OperatorManagementPage.jsx` | 操作員設定頁 |
+| `frontend/src/pages.spine/manager/ManagerSettingPage.jsx` | 經理設定頁 |
+| `frontend/src/pages.spine/manager/DistrictManagerSettingPage.jsx` | 區經理設定頁 |
+| `frontend/src/pages.spine/manager/StoreListPage.jsx` | 店面列表頁 |
+| `frontend/src/pages.spine/manager/StoreAddPage.jsx` | 新增店面頁 |
+| `frontend/src/pages.spine/manager/StoreEditPage.jsx` | 編輯店面頁 |
 
 ### 後端核心檔案
 
 | 檔案路徑 | 說明 |
 |----------|------|
-| `spine-server/src/index.js` | 路由註冊 |
-| `spine-server/src/services/userToRole.service.js` | 使用者角色服務 |
-| `spine-server/src/services/authPermission.service.js` | 權限檢查服務 |
-| `spine-server/src/services/generalManager.service.js` | 總經理服務 |
-| `spine-server/src/services/districtManager.service.js` | 區經理服務 |
-| `spine-server/src/services/district.service.js` | 區域管理服務 |
-| `spine-server/src/services/storeManagerToOperator.service.js` | 操作員綁定服務 |
-| `spine-server/src/services/store.service.js` | 店面服務 |
-| `spine-server/src/models/userToRole.model.js` | 使用者角色 Model |
-| `spine-server/src/models/storeManagerToOperator.model.js` | 操作員綁定 Model |
-| `spine-server/src/models/store.model.js` | 店面 Model |
-| `spine-server/src/models/district.model.js` | 區域 Model |
-| `spine-server/src/models/districtManagerToDistrict.model.js` | 區經理↔區域 Model |
-| `spine-server/src/models/districtToStoreManager.model.js` | 區域↔店長 Model |
-| `spine-server/src/controllers/manager/authPermission.api.controller.js` | 權限 API Controller |
-| `spine-server/src/controllers/manager/generalManager.api.controller.js` | 總經理 API Controller |
-| `spine-server/src/controllers/manager/districtManager.api.controller.js` | 區經理 API Controller |
-| `spine-server/src/controllers/manager/district.api.controller.js` | 區域 API Controller |
-| `spine-server/src/controllers/manager/storeManagerToOperator.api.controller.js` | 操作員 API Controller |
-| `spine-server/src/controllers/manager/store.api.controller.js` | 店面 API Controller |
-| `spine-server/src/controllers/manager/stock.api.controller.js` | 庫存 API Controller |
+| `backend/src/index.js` | 路由註冊 |
+| `backend/src/services/userToRole.service.js` | 使用者角色服務 |
+| `backend/src/services/authPermission.service.js` | 權限檢查服務 |
+| `backend/src/services/generalManager.service.js` | 總經理服務 |
+| `backend/src/services/districtManager.service.js` | 區經理服務 |
+| `backend/src/services/district.service.js` | 區域管理服務 |
+| `backend/src/services/storeManagerToOperator.service.js` | 操作員綁定服務 |
+| `backend/src/services/store.service.js` | 店面服務 |
+| `backend/src/models/userToRole.model.js` | 使用者角色 Model |
+| `backend/src/models/storeManagerToOperator.model.js` | 操作員綁定 Model |
+| `backend/src/models/store.model.js` | 店面 Model |
+| `backend/src/models/district.model.js` | 區域 Model |
+| `backend/src/models/districtManagerToDistrict.model.js` | 區經理↔區域 Model |
+| `backend/src/models/districtToStoreManager.model.js` | 區域↔店長 Model |
+| `backend/src/controllers/manager/authPermission.api.controller.js` | 權限 API Controller |
+| `backend/src/controllers/manager/generalManager.api.controller.js` | 總經理 API Controller |
+| `backend/src/controllers/manager/districtManager.api.controller.js` | 區經理 API Controller |
+| `backend/src/controllers/manager/district.api.controller.js` | 區域 API Controller |
+| `backend/src/controllers/manager/storeManagerToOperator.api.controller.js` | 操作員 API Controller |
+| `backend/src/controllers/manager/store.api.controller.js` | 店面 API Controller |
+| `backend/src/controllers/manager/stock.api.controller.js` | 庫存 API Controller |
 
 ---
 

@@ -15,14 +15,14 @@ description: >
 
 本技能對應檔案：
 
-- 主畫面：[spine-client/src/components/manager/CreateEdit/CreateEditCustomer.jsx](../../../spine-client/src/components/manager/CreateEdit/CreateEditCustomer.jsx)
-- 計算工具：[spine-client/src/utils/calculateDefaultHeight.js](../../../spine-client/src/utils/calculateDefaultHeight.js)
-- 計算工具：[spine-client/src/utils/spineRecommendation.js](../../../spine-client/src/utils/spineRecommendation.js)
-- 比例尺換算：[spine-client/src/utils/scaleConversion.js](../../../spine-client/src/utils/scaleConversion.js)
+- 主畫面：[frontend/src/components/manager/CreateEdit/CreateEditCustomer.jsx](../../../frontend/src/components/manager/CreateEdit/CreateEditCustomer.jsx)
+- 計算工具：[frontend/src/utils/calculateDefaultHeight.js](../../../frontend/src/utils/calculateDefaultHeight.js)
+- 計算工具：[frontend/src/utils/spineRecommendation.js](../../../frontend/src/utils/spineRecommendation.js)
+- 比例尺換算：[frontend/src/utils/scaleConversion.js](../../../frontend/src/utils/scaleConversion.js)
 
 頁面入口：
-- 新增：[CustomerAddPage.jsx](../../../spine-client/src/pages.spine/manager/CustomerAddPage.jsx)
-- 編輯：[CustomerEditPage.jsx](../../../spine-client/src/pages.spine/manager/CustomerEditPage.jsx)
+- 新增：[CustomerAddPage.jsx](../../../frontend/src/pages.spine/manager/CustomerAddPage.jsx)
+- 編輯：[CustomerEditPage.jsx](../../../frontend/src/pages.spine/manager/CustomerEditPage.jsx)
 
 ---
 

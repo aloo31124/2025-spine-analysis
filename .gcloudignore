@@ -5,12 +5,12 @@
 **/node_modules/
 
 # Build 產出物 (前端會在 Cloud Build 內重新 build)
-spine-client/build/
-spine-client/.firebase/
+frontend/build/
+frontend/.firebase/
 
 # 後端不需要的檔案
-spine-server/logs/
-spine-server/.firebase/
+backend/logs/
+backend/.firebase/
 
 # Git
 .git/
