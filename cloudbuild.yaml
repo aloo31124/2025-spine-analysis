@@ -4,7 +4,7 @@
 # ====================================
 #
 # 使用方式:
-#   gcloud builds submit --config cloudbuild.yaml
+#   gcloud builds submit --config cloudbuild.yaml --project=spineanalysis
 # GCP:
 #  測試 專案id : spineanalysis1006test1 
 #  正式 專案id : spineanalysis 
@@ -27,7 +27,7 @@ steps:
       - 'build'
       - '-t'
       - 'gcr.io/${_GCP_PROJECT_ID}/${_SERVER_SERVICE}:latest'
-      - './spine-server'
+      - './backend'
     id: 'build-server'
 
   # Step 2: 推送後端 Image
@@ -81,7 +81,7 @@ steps:
         docker build \
           --build-arg REACT_APP_BASE_URL=$${SERVER_URL} \
           -t gcr.io/${_GCP_PROJECT_ID}/${_CLIENT_SERVICE}:latest \
-          ./spine-client
+          ./frontend
     id: 'build-client'
     waitFor: ['get-server-url']
 

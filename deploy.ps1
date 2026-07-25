@@ -35,7 +35,7 @@ gcloud services enable cloudbuild.googleapis.com run.googleapis.com containerreg
 
 # 建置後端 Docker Image
 Write-Host "[2/7] 建置後端 Docker Image..." -ForegroundColor Yellow
-gcloud builds submit ./spine-server `
+gcloud builds submit ./backend `
     --tag "gcr.io/$ProjectId/$ServerService`:latest" `
     --quiet
 
@@ -78,9 +78,9 @@ images:
   - 'gcr.io/$ProjectId/${ClientService}:latest'
 "@
 
-$TempFile = "spine-client\_cloudbuild_temp.yaml"
+$TempFile = "frontend\_cloudbuild_temp.yaml"
 $TempBuildConfig | Out-File -FilePath $TempFile -Encoding utf8
-gcloud builds submit ./spine-client --config $TempFile --quiet
+gcloud builds submit ./frontend --config $TempFile --quiet
 Remove-Item $TempFile -ErrorAction SilentlyContinue
 
 # 部署前端至 Cloud Run

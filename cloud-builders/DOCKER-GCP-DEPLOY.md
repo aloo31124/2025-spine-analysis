@@ -77,10 +77,10 @@ docker compose down
 ### 個別建置
 ```bash
 # 建置後端
-docker build -t spine-server ./spine-server
+docker build -t spine-server ./backend
 
 # 建置前端 (需指定後端 URL)
-docker build --build-arg REACT_APP_BASE_URL=http://localhost:8083/ -t spine-client ./spine-client
+docker build --build-arg REACT_APP_BASE_URL=http://localhost:8083/ -t spine-client ./frontend
 
 # 執行
 docker run -p 8083:8083 spine-server
@@ -161,10 +161,10 @@ gcloud builds triggers create github \
 ├── cloudbuild.yaml             # GCP Cloud Build CI/CD 配置
 ├── deploy.ps1                  # Windows 一鍵部署腳本
 ├── deploy.sh                   # Linux/Mac 一鍵部署腳本
-├── spine-server/
+├── backend/
 │   ├── Dockerfile              # 後端 Docker 配置
 │   └── .dockerignore           # Docker 建置排除
-└── spine-client/
+└── frontend/
     ├── Dockerfile              # 前端 Docker 配置 (Multi-stage)
     ├── nginx.conf              # Nginx SPA 路由配置
     └── .dockerignore           # Docker 建置排除
