@@ -7,6 +7,25 @@
 GitHub is the primary repository for this project. GitLab is a secondary mirror;
 do not use it as `origin`.
 
+### How the GitLab mirror stays in sync
+
+`origin` fetches from GitHub but is configured with **two push URLs**, so a
+single `git push` — including the VS Code sync button — updates GitHub and
+GitLab together:
+
+```text
+origin  https://github.com/aloo31124/2025-spine-analysis.git (fetch)
+origin  https://github.com/aloo31124/2025-spine-analysis.git (push)
+origin  https://gitlab.com/aloo31124/2025-spine-analysis.git (push)
+```
+
+Verify with `git remote -v`; if the GitLab push line is missing, plain pushes
+reach GitHub only and the mirror will silently fall behind. Re-run
+`.\scripts\git\Configure-DualRemote.ps1` to restore it.
+
+The push fan-out does not update the `gitlab/*` remote-tracking refs, so run
+`git fetch gitlab` before comparing the two remotes locally.
+
 ### Repair GitHub push configuration
 
 If `git push origin main` reports that `main` does not match any local refs,

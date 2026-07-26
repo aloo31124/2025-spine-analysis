@@ -76,6 +76,31 @@ else {
 
 Invoke-Git -Arguments @('config', 'remote.pushDefault', 'origin')
 
+# `origin` fetches from GitHub only, but pushes to BOTH remotes. Without this a
+# plain `git push` (or the VS Code sync button) never reaches GitLab, and the
+# mirror silently drifts behind until someone remembers to run the push script.
+$desiredPushUrls = @($GitHubUrl, $GitLabUrl)
+$currentPushUrls = @(& git config --get-all remote.origin.pushurl 2>$null | Where-Object { $_ } | ForEach-Object { $_.Trim() })
+
+$pushUrlsMatch = $currentPushUrls.Count -eq $desiredPushUrls.Count
+if ($pushUrlsMatch) {
+    for ($i = 0; $i -lt $desiredPushUrls.Count; $i++) {
+        if ($currentPushUrls[$i] -ne $desiredPushUrls[$i]) {
+            $pushUrlsMatch = $false
+        }
+    }
+}
+
+if (-not $pushUrlsMatch) {
+    if ($currentPushUrls.Count -gt 0) {
+        Invoke-Git -Arguments @('config', '--unset-all', 'remote.origin.pushurl')
+    }
+
+    foreach ($url in $desiredPushUrls) {
+        Invoke-Git -Arguments @('remote', 'set-url', '--add', '--push', 'origin', $url)
+    }
+}
+
 Invoke-Git -Arguments @('fetch', 'origin', '--prune')
 
 & git show-ref --verify --quiet refs/heads/main
@@ -97,3 +122,4 @@ Write-Host ''
 Write-Host 'Primary push remote: origin (GitHub)'
 Write-Host 'Secondary mirror:    gitlab (GitLab)'
 Write-Host 'Main upstream:       origin/main'
+Write-Host 'Push fan-out:        one `git push` updates GitHub and GitLab'

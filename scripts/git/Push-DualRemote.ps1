@@ -7,8 +7,14 @@ GitHub (`origin`) is pushed first and treated as the source of truth. The
 script explicitly pushes `main`, rather than depending on the checked-out
 branch, so the primary branch is always updated. GitLab (`gitlab`) is updated
 only after the GitHub push succeeds. The script does not force-push or delete
-remote refs. After pushing, it verifies that every local branch and tag exists
-at the same commit on both remotes.
+remote refs. After pushing, it verifies that every published branch and tag
+exists at the same commit on both remotes.
+
+Local-only scratch branches (see -ExcludeBranch) are never published. Those
+branches hold pre-rewrite history that was purged from `main`, so pushing them
+would restore the removed content on both remotes and can be rejected outright
+by GitHub secret scanning -- which used to abort the run before GitLab was
+mirrored at all.
 
 .EXAMPLE
 .\scripts\git\Push-DualRemote.ps1
@@ -17,7 +23,8 @@ at the same commit on both remotes.
 [CmdletBinding()]
 param(
     [string]$GitHubUrl = 'https://github.com/aloo31124/2025-spine-analysis.git',
-    [string]$GitLabUrl = 'https://gitlab.com/aloo31124/2025-spine-analysis.git'
+    [string]$GitLabUrl = 'https://gitlab.com/aloo31124/2025-spine-analysis.git',
+    [string[]]$ExcludeBranch = @('backup/*', 'backup-*', 'temp_delete')
 )
 
 Set-StrictMode -Version Latest
@@ -86,17 +93,35 @@ function Get-RefMap {
     return $map
 }
 
+function Get-PublishableBranch {
+    $branches = Get-GitOutput -Arguments @(
+        'for-each-ref',
+        '--format=%(refname:short)',
+        'refs/heads'
+    )
+
+    return @($branches | Where-Object {
+        $branch = $_
+        $branch -and -not ($ExcludeBranch | Where-Object { $branch -like $_ })
+    })
+}
+
 function Assert-RemoteMatchesLocal {
     param(
         [Parameter(Mandatory)]
-        [string]$Remote
+        [string]$Remote,
+
+        [Parameter(Mandatory)]
+        [AllowEmptyCollection()]
+        [string[]]$Branches
     )
 
-    $localLines = Get-GitOutput -Arguments @(
-        'for-each-ref',
-        '--format=%(objectname)%09%(refname)',
-        'refs/heads',
-        'refs/tags'
+    $localLines = Get-GitOutput -Arguments (
+        @(
+            'for-each-ref',
+            '--format=%(objectname)%09%(refname)',
+            'refs/tags'
+        ) + ($Branches | ForEach-Object { "refs/heads/$_" })
     )
     $remoteLines = Get-GitOutput -Arguments @('ls-remote', '--heads', '--tags', $Remote)
     $localRefs = Get-RefMap -Lines $localLines
@@ -127,18 +152,27 @@ if ($LASTEXITCODE -ne 0) {
     throw 'Local main does not exist. Run Configure-DualRemote.ps1 before pushing.'
 }
 
+$branches = Get-PublishableBranch
+if ($branches -notcontains 'main') {
+    throw 'Local main is excluded from publishing; check -ExcludeBranch.'
+}
+
+# main first, so the primary branch lands even if a feature branch is rejected.
+$refspecs = @('main:main') + @($branches | Where-Object { $_ -ne 'main' } | ForEach-Object { "${_}:${_}" })
+Write-Host "Publishing $($branches.Count) branch(es): $($branches -join ', ')"
+
 Write-Host 'Pushing main to GitHub (origin)...'
 Invoke-Git -Arguments @('push', 'origin', 'main:main')
 Write-Host 'Pushing remaining branches and tags to GitHub (origin)...'
-Invoke-Git -Arguments @('push', 'origin', '--all')
+Invoke-Git -Arguments (@('push', 'origin') + $refspecs)
 Invoke-Git -Arguments @('push', 'origin', '--tags')
-Assert-RemoteMatchesLocal -Remote 'origin'
+Assert-RemoteMatchesLocal -Remote 'origin' -Branches $branches
 
 Write-Host ''
-Write-Host 'Mirroring all branches and tags to GitLab (gitlab)...'
-Invoke-Git -Arguments @('push', 'gitlab', '--all')
+Write-Host 'Mirroring branches and tags to GitLab (gitlab)...'
+Invoke-Git -Arguments (@('push', 'gitlab') + $refspecs)
 Invoke-Git -Arguments @('push', 'gitlab', '--tags')
-Assert-RemoteMatchesLocal -Remote 'gitlab'
+Assert-RemoteMatchesLocal -Remote 'gitlab' -Branches $branches
 
 Write-Host ''
 Write-Host 'Dual-remote push completed successfully.'
