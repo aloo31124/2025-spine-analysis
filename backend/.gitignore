@@ -21,6 +21,11 @@
 # 那 4 個 key 檔早就已經被 git 追蹤了，所以不管 .gitignore 寫什麼，git 都會繼續管它們
 # 最近一次還是在 12b4b3d 更新 forestore key 這個 commit 被更新進去的。
 # 解法 git rm --cached "backend/src/firestroekey*.json"
+# ⚠️ 更嚴重的問題：4 把舊金鑰早就公開在 GitHub 上了
+# 收尾（確認無誤後可清掉備份）
+# git branch -D backup-pre-secret-cleanup-20260726 backup/pre-secret-cleanup-20260726
+# git update-ref -d refs/original/refs/heads/main
+
 .env
 .env.*
 !.env.example
