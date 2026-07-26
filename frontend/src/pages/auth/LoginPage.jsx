@@ -3,7 +3,6 @@ import { login } from '../../api/auth';
 import { useNavigate } from 'react-router-dom';
 import { FaEye, FaEyeSlash } from 'react-icons/fa'; // 引入眼睛圖標
 import Loading from '../../components/Loading';
-import styles from './LoginPage.module.css';
 
 function LoginPage() {
     const navigate = useNavigate();
@@ -80,51 +79,62 @@ function LoginPage() {
     };
 
     return (
-        <main className={styles.loginPage}>
+        <div className='Form'>
             {isLoading && <Loading text='登入中...' />}
-            <section className={styles.introPanel} aria-label="系統介紹">
-                <div className={styles.brandMark} aria-hidden="true"><span /></div>
-                <p className={styles.eyebrow}>SPINE ANALYSIS SYSTEM</p>
-                <h1>頸椎健康分析系統</h1>
-                <p className={styles.introCopy}>以清晰的量測與分析流程，協助您提供更精準的頸椎照護建議。</p>
-                <div className={styles.featureList}>
-                    <span>精準量測</span>
-                    <span>專業分析</span>
-                    <span>安心管理</span>
-                </div>
-            </section>
+            <h1>登入頁</h1>
+            <input type="text" 
+                placeholder='信箱'
+                ref={inputEMailRef} 
+            />
+            
+            <div className="password-input-wrapper">
+                <input 
+                    type={showPassword ? "text" : "password"} 
+                    placeholder='密碼'
+                    ref={inputPasswordRef}
+                    className="password-input" 
+                />
+                <button 
+                    type="button"
+                    className="password-toggle-btn"
+                    onClick={() => setShowPassword(!showPassword)}
+                >
+                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                </button>
+            </div>
+            <div className='btnBar'>
+                <button onClick={clickLogin} disabled={isLoading}>登入</button>
+                <button onClick={clickForgetPassword}>忘記密碼</button>
+            </div>
+            <button onClick={clickRegist}>註冊</button>
 
-            <section className={styles.loginPanel} aria-labelledby="login-title">
-                <div className={styles.loginCard}>
-                    <div className={styles.cardHeading}>
-                        <p>歡迎回來</p>
-                        <h2 id="login-title">登入您的帳戶</h2>
-                        <span>請輸入帳號與密碼，繼續使用系統服務。</span>
-                    </div>
-                    <form className={styles.loginForm} onSubmit={(event) => { event.preventDefault(); clickLogin(); }}>
-                        <label htmlFor="login-email">電子信箱</label>
-                        <input id="login-email" type="email" autoComplete="email" placeholder="name@example.com" ref={inputEMailRef} />
-
-                        <div className={styles.passwordLabelRow}>
-                            <label htmlFor="login-password">密碼</label>
-                            <button type="button" className={styles.forgotButton} onClick={clickForgetPassword}>忘記密碼？</button>
-                        </div>
-                        <div className={styles.passwordField}>
-                            <input id="login-password" type={showPassword ? "text" : "password"} autoComplete="current-password" placeholder="請輸入密碼" ref={inputPasswordRef} />
-                            <button type="button" className={styles.passwordToggle} onClick={togglePasswordVisibility} aria-label={showPassword ? '隱藏密碼' : '顯示密碼'}>
-                                {showPassword ? <FaEyeSlash /> : <FaEye />}
-                            </button>
-                        </div>
-                        <button className={styles.loginButton} type="submit" disabled={isLoading}>{isLoading ? '登入中...' : '登入系統'}</button>
-                    </form>
-                    <div className={styles.registerPrompt}>
-                        <span>還沒有帳戶嗎？</span>
-                        <button type="button" onClick={clickRegist}>立即註冊</button>
-                    </div>
-                </div>
-                <p className={styles.version}>系統版本更新於 2026 年 6 月 28 日</p>
-            </section>
-        </main>
+            {/** 更新版本 */}
+            <div style={{
+                position: 'fixed',
+                bottom: '10px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                fontSize: '12px',
+                color: '#999',
+                textAlign: 'center',
+                padding: '5px',
+                backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                borderRadius: '5px'
+            }}>
+                更新版本: 
+                <br />
+                June 28, 2026 at 8:29:31 AM GMT+8
+                <br />
+                git commit: 3a7e7f6 
+                <br />
+                fix: #4 [登入驗證] 修正登出後「請重新登入」重複跳出多次 3a7e7f6
+                <br />
+                update: #4 [客戶管理] 推薦枕頭彈窗上方顯示型號命名建議計算結果
+                <br />
+                update: #4 [全域] [上方搜尋bar] 可選客戶/醫學枕/床墊 並帶關鍵字導向對應列表頁顯示結果. 41d124f
+                <br />
+            </div>
+        </div>
     );
 }
 
